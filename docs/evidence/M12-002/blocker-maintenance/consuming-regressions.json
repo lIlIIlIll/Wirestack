@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "source_task": "M12-002",
+  "kind": "consuming-verifier-regressions",
+  "status": "PASS",
+  "task_status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "scope": [
+    "top-level binary verifier accepts the declared nm exit-one policy and rejects exit two",
+    "resumed capture replaces failed/timed-out post-relocation receipts while preserving the prior report and logs",
+    "deployment resolves capture-normalized consumer paths against actual temporary ELF byte identities"
+  ],
+  "full_current_suite_at_receipt": "NOT_RUN",
+  "runs": [
+    {
+      "log": "docs/evidence/M12-002/blocker-maintenance/platform-owner-after-consuming-fixes.log",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m12_002_source_sdk",
+        "tools.tests.test_m12_002_binary",
+        "tools.tests.test_m12_002_platform",
+        "tools.tests.test_m12_002_deployment",
+        "-v"
+      ],
+      "exit_code": 1,
+      "tests_run": 196,
+      "errors": 1,
+      "skipped": 1,
+      "failure": "new resume fixture omitted the compiler/CJPM SDK binding tree; binary/deployment consuming regressions passed",
+      "log_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b29ff63bc18174ae8ff05eb2a1d127f83914074d46d688e33a75f1c7656d7545"
+      }
+    },
+    {
+      "log": "docs/evidence/M12-002/blocker-maintenance/source-sdk-after-resume-fixture-fix.log",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m12_002_source_sdk",
+        "-v"
+      ],
+      "exit_code": 1,
+      "tests_run": 78,
+      "errors": 1,
+      "skipped": 1,
+      "failure": "corrected SDK fixture still omitted its native_cc identity binding",
+      "log_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ee8d6ed24d65aeb29e4adc91207c6a8e5a5b1acd15a46c0bf3305f4f5cdf7dd1"
+      }
+    },
+    {
+      "log": "docs/evidence/M12-002/blocker-maintenance/resume-consuming-path-after-binding-fix.log",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m12_002_source_sdk.ResumeCaptureTests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "tests_run": 1,
+      "errors": 0,
+      "skipped": 0,
+      "result": "actual Capture.run/record resume path passed after complete file-byte identity fixture bindings",
+      "log_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "646e7b4c97d4c543dbeccf4e4c3afead5781281cc648015dcd13bba12873716a"
+      }
+    }
+  ],
+  "boundary": "Precommit behavior maintenance only. Production verifier bytes were unchanged between these runs; only the resume fixture binding changed. No SDK/platform matrix was recaptured or qualified. Prior 194-test receipt remains for its own source revision.",
+  "sources": {
+    "tools/m12_002_source_sdk.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40ccc997b0ac61b094e6d921a5639bd5be8fab8fcda6083da5d25c2a60c57c72"
+    },
+    "tools/m12_002_binary.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "666fe63fb03d0e9a1887be294b8ae148db757da7fb4076d0878c68aa8389ed7f"
+    },
+    "tools/m12_002_platform.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "190ab88fadb07e2ed9c31b86ad8df566b9a6e892757d2d881809caf45dd0dc8a"
+    },
+    "tools/m12_002_glibc_namespace.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "27ebc875cfe6b2ea36aaca6c115370bf415d122748e9c2c8beb4527320506d31"
+    },
+    "tools/m12_002_deployment.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c8c514e215bc5bce1a15b0043bbc9a6290c08491d3a877c07b50c70c4130dd0"
+    },
+    "tools/tests/test_m12_002_source_sdk.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78a0443fd0a89d8a7b2bcf3f6481828a6b5e467ad35c8659beafa8a37de26c69"
+    },
+    "tools/tests/test_m12_002_binary.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1280e87d5cf90e32cafea8e6ba1146bef28b148d027a696413444219d2137b1a"
+    },
+    "tools/tests/test_m12_002_platform.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "82902893cffac3fdd8bbcc26ad0a5f023915639fafe4974b92cdba032d0e35f6"
+    },
+    "tools/tests/test_m12_002_deployment.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "85c33fb0f89ec9c64dc65115e6bfd31c9735efd77827239e60f24cbe9f9faa19"
+    }
+  }
+}
