@@ -330,6 +330,7 @@ public class Http2ConnectionPool <: Resource {
         var streamResourceLease = None<internal.HttpResourceLease>
         var streamLeaseTransferred = false
         var pendingClaimOutstanding = true
+        var pendingWaiterId: Int64 = 0
         synchronized(mutex) { pendingStreamClaims++ }
         try {
             streamResourceLease = match (resourceBudget) {
@@ -337,7 +338,14 @@ public class Http2ConnectionPool <: Resource {
                 case None => None<internal.HttpResourceLease>
             }
             while (true) {
-                match (decide(key, listener, endStream, poolContext, streamResourceLease)) {
+                // Transfer the scalar waiter owner before decide can throw.
+                let transferredWaiterId = pendingWaiterId
+                pendingWaiterId = 0
+                let (decision, remainingWaiterId) = decide(
+                    key, listener, endStream, poolContext, streamResourceLease, transferredWaiterId
+                )
+                pendingWaiterId = remainingWaiterId
+                match (decision) {
                     case Http2PoolDecision.Reuse(lease) =>
                         streamLeaseTransferred = true
                         pendingClaimOutstanding = false
@@ -439,6 +447,9 @@ public class Http2ConnectionPool <: Resource {
             if (poolStageOpen) { emitHttpStage(poolContext, false, code: Some(httpObservationError(error))) }
             throw error
         } finally {
+            if (pendingWaiterId != 0) {
+                synchronized(mutex) { removeHttp2WaiterLocked(pendingWaiterId, false) }
+            }
             if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }
             registration.unregister()
             if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }
@@ -661,9 +672,10 @@ public class Http2ConnectionPool <: Resource {
         listener: Http2GoAwayListener,
         endStream: Bool,
         context: OperationContext,
-        streamResourceLease: ?internal.HttpResourceLease
-    ): Http2PoolDecision {
-        var waiterId: Int64 = 0
+        streamResourceLease: ?internal.HttpResourceLease,
+        pendingWaiterId: Int64
+    ): (Http2PoolDecision, Int64) {
+        var waiterId = pendingWaiterId
         try {
             synchronized(mutex) {
                 while (true) {
@@ -674,7 +686,9 @@ public class Http2ConnectionPool <: Resource {
                     if (unusable >= 0) {
                         let removed = entries.remove(at: unusable)
                         changed.notifyAll()
-                        return Http2PoolDecision.Discard(removed)
+                        let remainingWaiterId = waiterId
+                        waiterId = 0
+                        return (Http2PoolDecision.Discard(removed), remainingWaiterId)
                     }
                     let next = admissionQueue.firstEligible({ candidate => canAcquireHttp2(candidate, now) })
                     let ownsTurn = match (next) {
@@ -682,10 +696,6 @@ public class Http2ConnectionPool <: Resource {
                         case None => waiterId == 0
                     }
                     if (ownsTurn) {
-                        if (waiterId != 0) {
-                            removeHttp2WaiterLocked(waiterId, true)
-                            waiterId = 0
-                        }
                         for (entry in entries) {
                             if (entry.key == key && !entry.yielding &&
                                 now - entry.createdAt < HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second &&
@@ -696,10 +706,14 @@ public class Http2ConnectionPool <: Resource {
                                     entry.observationContext = if (context.eventSink.isSome()) { Some(context) } else { None<OperationContext> }
                                     if (let Some(value) <- streamResourceLease) { value.activate() }
                                     pendingStreamClaims--
-                                    return Http2PoolDecision.Reuse(Http2PoolLease(
+                                    if (waiterId != 0) {
+                                        removeHttp2WaiterLocked(waiterId, true)
+                                        waiterId = 0
+                                    }
+                                    return (Http2PoolDecision.Reuse(Http2PoolLease(
                                         entry.id, entry.key, entry.connection, admission,
                                         streamResourceLease: streamResourceLease
-                                    ))
+                                    )), 0)
                                 } catch (_: Http2StreamLimitException) {
                                     // SETTINGS or GOAWAY may race the observed capacity.
                                 }
@@ -710,7 +724,11 @@ public class Http2ConnectionPool <: Resource {
                             countHttp2ForKey(key) < config.maximumConnectionsPerKey) {
                             let id = nextNetworkCorrelationId()
                             reservations.add(key)
-                            return Http2PoolDecision.Reserve(id)
+                            if (waiterId != 0) {
+                                removeHttp2WaiterLocked(waiterId, true)
+                                waiterId = 0
+                            }
+                            return (Http2PoolDecision.Reserve(id), 0)
                         }
                         // A full pool of healthy but starved connections for other keys
                         // has no owner left to trigger release or eviction. Reclaim one
@@ -723,7 +741,9 @@ public class Http2ConnectionPool <: Resource {
                             if (idle >= 0) {
                                 let removed = entries.remove(at: idle)
                                 changed.notifyAll()
-                                return Http2PoolDecision.Discard(removed)
+                                let remainingWaiterId = waiterId
+                                waiterId = 0
+                                return (Http2PoolDecision.Discard(removed), remainingWaiterId)
                             }
                         }
                     }
