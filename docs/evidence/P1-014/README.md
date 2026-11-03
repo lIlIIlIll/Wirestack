@@ -2,10 +2,11 @@
 
 ## Status
 
-P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
-digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33536032265` produced the retained
-Windows report for PR #151 source head `fc4b54a7` (merge revision `1f1d7be5`).
+Current qualification requires the current dependency closure, same-source
+Linux and Windows CRLF receipts, and a valid evidence seal. The retained
+reports below describe earlier acceptance, not this source overview. GitHub Actions
+run `33536032265` produced the historical Windows report for PR #151 source
+head `fc4b54a7` with merge revision `1f1d7be5`.
 
 ## Implemented boundary
 
@@ -58,7 +59,7 @@ Windows report for PR #151 source head `fc4b54a7` (merge revision `1f1d7be5`).
 The implementation does not depend on `.gitattributes -text`. Those existing
 entries remain unchanged because they belong to other tasks.
 
-## Local evidence
+## Retained historical local evidence
 
 | Evidence | Result |
 |---|---|
@@ -83,6 +84,12 @@ python3 tools/architecture_guard.py --root . --format json
 python3 tools/evidence_digest.py --root . inventory --output docs/evidence/P1-014/digest-inventory.json
 python3 tools/evidence_digest.py --root . crlf-report --expected-platform linux-x86_64-glibc --expected-revision 1a06e32c42fcce35e0ceee0db8959e01580ff5db --output docs/evidence/P1-014/linux-crlf.json
 ```
+
+The current task manifest runs the architecture guard and digest-callsite
+inventory directly. It retains plan validation, digest-boundary regressions
+and the canonical `scripts/check`. It does not invoke the repository-wide
+`scripts/check-fast`; that command evaluates unrelated task manifests and
+remains a separate strict global-readiness diagnostic.
 
 ## Unrun gates
 
