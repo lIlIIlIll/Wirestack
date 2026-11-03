@@ -2,11 +2,21 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
-desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl,
-Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+M0-016 remains **BLOCKED**. The 2026-10-22 advisory review supersedes all
+12 retained desktop result dispositions, so every desktop cell is BLOCKED
+pending requalification; the previous PASS/PARTIAL values are preserved as
+capture-time outcomes. AWS-LC 5.5.0 is not affected, while the pinned Mbed TLS
+4.2.0 and OpenSSL 3.6.4 versions are affected. Android, iOS, and
+HarmonyOS/OpenHarmony still lack native-device evidence; cross-compilation
+does not satisfy those cells.
+
+## Advisory review
+
+The source channels, complete reviewed advisory IDs, affected subsets, basis,
+and AWS-LC patched-tag ancestry are recorded in
+[`advisory-review-2026-10-22.json`](advisory-review-2026-10-22.json). Its
+provider and matrix digests bind the review to the recorded pins and retained
+results. No affected provider pin is promoted or silently changed.
 
 Schema v11 retains all prior native evidence plus the exact successful NASM
 identity for a Windows AWS-LC build. Its workflow fallback is pinned to
@@ -52,7 +62,11 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v11 desktop runs
+## Superseded schema-v11 desktop runs
+
+These runs were valid when captured. Their `PASS`/`PARTIAL` values below are
+historical outcomes; all 12 cells are now BLOCKED under the reviewed provider
+dispositions and must be requalified before promotion.
 
 [TLS Provider PoC run
 33455645644](https://github.com/lIlIIlIll/Wirestack/actions/runs/33455645644)
@@ -64,13 +78,13 @@ produced the Windows results. Both pull-request runs identify head
 revision `205c073c22aa283d84978522b70534fe5a16d808`; every retained result binds
 that exact execution revision.
 
-All 12 artifacts were downloaded and independently validated with:
+At capture, all 12 artifacts were downloaded and independently validated with:
 
     python3 tools/tls_provider_poc/validate.py \
       --result <artifact>/result.json \
       --expected-revision 205c073c22aa283d84978522b70534fe5a16d808
 
-| Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
+| Platform | Provider | Capture status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---|---:|---|
 | Linux glibc x86_64 | AWS-LC | PASS | 95b03d7f262b99823b78a583c6fcadf813d381026a04351965fae3c251a07a50 | 9781397892 | efb319660a58e8663015c4a6ea47d8634b87f59e2e3b6c0b07cfcb04edeca6b8 |
 | Linux glibc x86_64 | Mbed TLS | PARTIAL | 77539b980497de916f4018c85fe96da82fb4c3ceb33e3c2cbaa08e7730aeffe1 | 9781376045 | 458ca71e238585b0ea9666f381d1fc677ad86e803ebd61bd35271b4b1de9bbcd |
@@ -116,6 +130,9 @@ file. Missing files, path escape, digest drift, unsupported schema, stale
 execution revision, skipped diagnostics presented as PASS, or incomplete
 capabilities presented as PASS all fail validation.
 
+License payload hashes use the UTF-8/LF text digest domain only. A raw-byte
+hash, including a CRLF-only hash, is not an alternate accepted digest.
+
 ## Evidence rules
 
 - A retained incomplete native result is PARTIAL only when it satisfies schema
@@ -126,3 +143,28 @@ capabilities presented as PASS all fail validation.
 - Cross-compilation does not satisfy a native platform cell.
 - This PoC qualifies candidates. It selects AWS-LC only for the Linux delivery
   profile and does not claim production provider support on other platforms.
+
+## Current blocker maintenance
+
+The final isolated provider suite ran 79 tests successfully with no skips, errors or
+failures. Tests use a deep-copied synthetic spec and a fixed test clock; live
+CLI validation still uses the real clock. A real subprocess CLI smoke accepted
+a temporary valid license bundle, then rejected a same-length license-byte
+mutation with exit 1 and `provider license file digest mismatch`.
+
+The earlier 83-case log predates removal of wiring-only assertions and isolation
+of the blocked-cell corruption fixtures. It is retained as maintenance history,
+not as execution of the current test source.
+
+The real-clock matrix CLI exited 1 at retained license integrity. Eleven
+historical Windows AWS-LC license entries contain raw-byte CRLF hashes rather
+than normalized-text hashes; the strict validator rejects them. The
+[`diagnostic`](blocker-maintenance/historical-license-domain-diagnostic.json)
+records the mismatches and the regression report binds the actual failure log.
+No historical license receipt was rewritten or promoted.
+
+[`blocker-maintenance/regression.json`](blocker-maintenance/regression.json)
+binds the changed source and retained logs, including the initial fixture
+failures. This maintenance does not qualify missing native platforms or grant
+release security approval. The authentic advisory dispositions and provider
+pins are unchanged by the synthetic fixtures.
