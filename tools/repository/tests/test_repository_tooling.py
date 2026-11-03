@@ -286,6 +286,31 @@ class RepositoryToolingTests(unittest.TestCase):
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_repository_tasks(self.root, "TEST-001")
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        self.assertIn("BASE-001", caught.exception.detail)
+
+        repository_root = Path(__file__).resolve().parents[3]
+        script = repository_root / "tools/repository/repository_tooling.py"
+        receipt = self.root / "transitive-check.json"
+        completed = subprocess.run(
+            [
+                "python3", str(script), "--root", str(self.root),
+                "check", "task", "TEST-001", "--json", "--output", str(receipt),
+            ],
+            cwd=repository_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        self.assertEqual(2, completed.returncode, completed.stderr)
+        report = json.loads(receipt.read_text(encoding="utf-8"))
+        self.assertEqual("TEST-001", report["task_id"])
+        self.assertEqual("INVALID", report["status"])
+        self.assertEqual([], report["commands"])
+        self.assertEqual("DEPENDENCY_INCOMPLETE", report["issues"][0]["code"])
+        self.assertIn("BASE-001", report["issues"][0]["detail"])
 
     def test_selected_task_accepts_complete_dependency_without_manifest(self) -> None:
         self.write_planning({
@@ -483,6 +508,10 @@ class RepositoryToolingTests(unittest.TestCase):
             "BLOCKED-001": "BLOCKED",
         })
         selected = self.manifest("TEST-001", ["BASE-001"])
+        selected["required_evidence"] = [
+            "docs/evidence/TEST-001/evidence.json",
+            "docs/evidence/TEST-001/task-check.json",
+        ]
         selected["acceptance_commands"][0]["argv"] = [
             "python3", "-c", "print('selected-task-ran')"
         ]
@@ -499,22 +528,24 @@ class RepositoryToolingTests(unittest.TestCase):
 
         repository_root = Path(__file__).resolve().parents[3]
         script = repository_root / "tools/repository/repository_tooling.py"
-        receipt = self.root / "task-receipt.json"
-        completed = subprocess.run(
-            [
-                "python3", str(script), "--root", str(self.root),
-                "check", "task", "TEST-001", "--json", "--output", str(receipt),
-            ],
-            cwd=repository_root,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            timeout=30,
-            check=False,
-        )
 
+        def run_cli(*arguments: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                ["python3", str(script), "--root", str(self.root), *arguments],
+                cwd=repository_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+
+        task_report_path = self.root / "docs/evidence/TEST-001/task-check.json"
+        completed = run_cli(
+            "check", "task", "TEST-001", "--json", "--output", str(task_report_path)
+        )
         self.assertEqual(0, completed.returncode, completed.stderr)
-        report = json.loads(receipt.read_text(encoding="utf-8"))
+        report = json.loads(task_report_path.read_text(encoding="utf-8"))
         self.assertEqual("PASS", report["status"])
         self.assertEqual(["unit"], [command["id"] for command in report["commands"]])
         self.assertEqual("PASS", report["commands"][0]["status"])
@@ -522,6 +553,60 @@ class RepositoryToolingTests(unittest.TestCase):
         self.assertEqual(
             "selected-task-ran\n", stdout_path.read_text(encoding="utf-8")
         )
+        self.assertFalse((self.root / "unrelated-task-ran").exists())
+
+        evidence_path = self.root / "docs/evidence/TEST-001/evidence.json"
+        sealed = run_cli(
+            "seal-evidence", "TEST-001",
+            "--report", "docs/evidence/TEST-001/task-check.json",
+            "--revision", self.git("rev-parse", "HEAD").stdout.strip(),
+            "--output", str(evidence_path),
+        )
+        self.assertEqual(0, sealed.returncode, sealed.stderr)
+        self.assertIn("seal-evidence: PASS:", sealed.stdout)
+
+        selected_freshness_path = self.root / "selected-freshness.json"
+        selected_freshness = run_cli(
+            "verify-evidence", "--task", "TEST-001", "--json",
+            "--output", str(selected_freshness_path),
+        )
+        self.assertEqual(0, selected_freshness.returncode, selected_freshness.stderr)
+        selected_report = json.loads(
+            selected_freshness_path.read_text(encoding="utf-8")
+        )
+        self.assertEqual("PASS", selected_report["status"])
+        self.assertEqual("PASS", selected_report["tasks"][0]["status"])
+
+        for mode in ("fast", "full"):
+            with self.subTest(mode=mode):
+                global_path = self.root / f"global-{mode}.json"
+                global_check = run_cli(
+                    "check", mode, "--json", "--output", str(global_path)
+                )
+                self.assertEqual(2, global_check.returncode, global_check.stderr)
+                global_report = json.loads(global_path.read_text(encoding="utf-8"))
+                self.assertEqual("INVALID", global_report["status"])
+                self.assertIsNone(global_report["task_id"])
+                self.assertEqual([], global_report["commands"])
+                self.assertEqual(
+                    "DEPENDENCY_INCOMPLETE",
+                    global_report["issues"][0]["code"],
+                )
+                self.assertIn("BLOCKED-001", global_report["issues"][0]["detail"])
+
+        global_evidence_path = self.root / "global-evidence.json"
+        global_evidence = run_cli(
+            "verify-evidence", "--all", "--json",
+            "--output", str(global_evidence_path),
+        )
+        self.assertEqual(1, global_evidence.returncode, global_evidence.stderr)
+        global_report = json.loads(global_evidence_path.read_text(encoding="utf-8"))
+        self.assertEqual("FAIL", global_report["status"])
+        self.assertEqual([], global_report["tasks"])
+        self.assertEqual(
+            "DEPENDENCY_INCOMPLETE", global_report["issues"][0]["code"]
+        )
+        self.assertIn("BLOCKED-001", global_report["issues"][0]["detail"])
         self.assertFalse((self.root / "unrelated-task-ran").exists())
 
     def test_dependency_cycle_is_rejected(self) -> None:

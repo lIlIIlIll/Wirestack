@@ -81,7 +81,7 @@ change product networking behavior.
 | T006 | S009 | P011 | Injected atomic-write failure | No partial report replacement | Assert byte-for-byte preservation and later valid JSON | unit,fault-injection |
 | T007 | S010,S011 | P012,P013 | Current evidence, stale digest, missing/escaping report and source drift | PASS then STALE/FAIL | Assert drift category and nonzero exit | unit,regression |
 | T008 | S012 | P014 | SKIPPED acceptance disguised by PASS summary | FAIL | Assert successful acceptance requires every report PASS | unit,security |
-| T009 | S003,S006,S014 | P004,P006,P008,P018 | Public scripts against P1-012 with M10-004 → M10-003 incomplete | Task check passes; global validation, fast/full, and all-task evidence fail before execution | Assert task PASS and global DEPENDENCY_INCOMPLETE with no selected commands; current evidence remains BLOCKED | integration,regression |
+| T009 | S003,S006,S013,S014,S017 | P004,P006,P008,P012,P017,P018 | Public CLI with a COMPLETE selected closure and an unrelated BLOCKED dependency (the P1-012/M10-004 → M10-003 shape) | Selected check, source-bound seal, and selected freshness may PASS; global validation and fast/full remain INVALID, while all-task evidence remains FAIL | Assert CLI executes only the selected command, selected seal and verification PASS, global check receipts contain DEPENDENCY_INCOMPLETE with `commands: []`, all-task evidence has no task results, and a BLOCKED selected transitive dependency still rejects | integration,regression |
 | T010 | S001,S006,S008,S014 | P001,P008,P009,P015,P018 | `scripts/check-fast` and `scripts/check-full` with ready and incomplete dependency graphs | Ready graph excludes long commands; incomplete graph fails before selection; full delegates only after readiness passes | Assert no soak/profile command and zero command results on dependency failure | integration |
 | T011 | S013 | P006,P017 | Temporary manifests with unrelated and transitive incomplete dependencies | Selected task passes only when its full dependency closure is COMPLETE | Assert unrelated BLOCKED dependency does not reject selected task; transitive BLOCKED dependency is rejected | unit,regression |
 | T012 | S014 | P006,P017,P018 | Temporary manifests with a blocked unrelated dependency | `validate-tasks`, fast/full, and all-task evidence reject; selected-task checks retain closure scope | Assert global invalidity and zero commands, plus selected-closure behavior | unit,integration,regression |
@@ -92,10 +92,23 @@ change product networking behavior.
 
 ## Evidence boundary
 
-The checked-in task report covers only P1-012's selected task commands on the
-native Linux glibc host. Global readiness is recorded separately; the active
-evidence index is BLOCKED and is not a PASS seal. A digest change or source
-drift invalidates any future PASS seal.
+P1-012's task check and source-bound evidence seal are evaluated against its
+complete transitive dependency closure. They may PASS while global readiness
+remains INVALID because an unrelated task has an incomplete dependency.
+Repository-wide `validate-tasks`, fast/full checks, and `verify-evidence --all`
+remain strict and fail closed before running acceptance commands or selecting
+evidence. The retained task report covers only P1-012's selected commands on
+the native Linux glibc host. The active evidence index currently records
+BLOCKED and is not a PASS seal; that captured status does not make an unrelated
+global blocker part of P1-012's task closure. A digest change or source drift
+invalidates any future PASS seal.
+
+The current infrastructure manifest has no runtime or historical-release
+dependency edge. The retained M7-024 completion is provenance only. Selected
+closure regressions still reject an incomplete declared transitive prerequisite,
+including one reached through a COMPLETE plan-only row. No traversal exception,
+new validator mode or historical task-status promotion is introduced.
+
 The one-hour SSE profile, 24-hour soak, and all other explicitly long gates are
 outside this task and must remain unexecuted.
 
