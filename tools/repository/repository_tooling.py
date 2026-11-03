@@ -48,6 +48,12 @@ EVIDENCE_KEYS = {"schema_version", "source_task", "platform", "toolchain",
                  "reports", "source_sha256"}
 REPORT_KEYS = {"path", "sha256", "source_task", "acceptance_status"}
 TASK_ID_RE = re.compile(r"^[A-Z][A-Z0-9]*-\d{3}$")
+PLANNING_ID_RE = re.compile(r"^\|\s*([A-Z][A-Z0-9]*-\d{3})\s*\|", re.MULTILINE)
+PLANNING_DEPENDENCY_HEADERS = {"依赖", "开始依赖"}
+PLANNING_RANGE_RE = re.compile(
+    r"^([A-Z][A-Z0-9]*)-(\d{3})\.\.(?:([A-Z][A-Z0-9]*)-)?(\d{3})$"
+)
+PLANNING_MILESTONE_RANGE_RE = re.compile(r"^M(\d+)\.\.M(\d+)$")
 
 
 class ContractError(ValueError):
@@ -201,7 +207,123 @@ def load_task(path: Path, root: Path) -> dict[str, Any]:
 
 
 def planning_ids(path: Path) -> set[str]:
-    return set(re.findall(r"^\|\s*([A-Z][A-Z0-9]*-\d{3})\s*\|", path.read_text(encoding="utf-8"), re.MULTILINE))
+    return set(PLANNING_ID_RE.findall(path.read_text(encoding="utf-8")))
+
+
+def _expand_planning_dependency(cell: str, known: set[str]) -> list[str]:
+    expanded: list[str] = []
+    for token in re.split(r"[；;]", cell, maxsplit=1)[0].split(","):
+        value = token.strip().strip("`")
+        if not value or value in {"—", "-"} or value.startswith("UP-"):
+            continue
+        if TASK_ID_RE.fullmatch(value) is not None:
+            # An exact ID is the only reference that can be satisfied by a
+            # manifest-less leaf. Keep it that way: a task that is not a
+            # backlog row is dangling, not a leaf with no prerequisites.
+            if value not in known:
+                raise ContractError(
+                    "DEPENDENCY_MISSING",
+                    f"planning dependency has no backlog row: {value}",
+                )
+            expanded.append(value)
+            continue
+        ranged = PLANNING_RANGE_RE.fullmatch(value)
+        if ranged is not None:
+            prefix, start, endpoint_prefix, end = ranged.groups()
+            if endpoint_prefix is not None and endpoint_prefix != prefix:
+                raise ContractError(
+                    "DEPENDENCY_INVALID",
+                    f"planning dependency range crosses prefixes: {value}",
+                )
+            first, last = int(start), int(end)
+            if first > last:
+                raise ContractError(
+                    "DEPENDENCY_INVALID",
+                    f"planning dependency range descends: {value}",
+                )
+            members = [f"{prefix}-{number:03d}" for number in range(first, last + 1)]
+            absent = [member for member in members if member not in known]
+            if absent:
+                raise ContractError(
+                    "DEPENDENCY_MISSING",
+                    f"planning dependency range member has no backlog row: {absent[0]}",
+                )
+            expanded.extend(members)
+            continue
+        milestone = PLANNING_MILESTONE_RANGE_RE.fullmatch(value)
+        if milestone is not None:
+            first, last = (int(group) for group in milestone.groups())
+            if first > last:
+                raise ContractError(
+                    "DEPENDENCY_INVALID",
+                    f"planning dependency range descends: {value}",
+                )
+            expanded.extend(sorted(
+                task_id for task_id in known
+                if task_id.startswith("M")
+                and first <= int(task_id[1:task_id.index("-")]) <= last
+            ))
+            continue
+        raise ContractError(
+            "DEPENDENCY_INVALID",
+            f"unreadable planning dependency token: {value}",
+        )
+    return list(dict.fromkeys(expanded))
+
+
+def _dependency_cycle(members: Sequence[str],
+                      dependencies: Callable[[str], Sequence[str]]) -> list[str] | None:
+    """Return one dependency cycle inside `members`, or None.
+
+    The walk is iterative and restricted to the supplied closure, so it stays
+    bounded even when the graph contains a cycle through a manifest-less row.
+    """
+    scope = set(members)
+    state: dict[str, int] = {}
+    for root in members:
+        if state.get(root):
+            continue
+        state[root] = 1
+        path = [root]
+        stack = [(root, iter(dependencies(root)))]
+        while stack:
+            node, pending = stack[-1]
+            dependency = next(pending, None)
+            if dependency is None:
+                state[node] = 2
+                stack.pop()
+                path.pop()
+                continue
+            if dependency not in scope:
+                continue
+            marker = state.get(dependency)
+            if marker == 1:
+                return path[path.index(dependency):] + [dependency]
+            if marker is None:
+                state[dependency] = 1
+                path.append(dependency)
+                stack.append((dependency, iter(dependencies(dependency))))
+    return None
+
+
+def planning_dependencies(path: Path) -> dict[str, str]:
+    """Read raw dependency cells for backlog rows without task manifests."""
+    declared: dict[str, str] = {}
+    column: int | None = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            column = None
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if cells[0] == "ID":
+            column = next((index for index, header in enumerate(cells)
+                           if header in PLANNING_DEPENDENCY_HEADERS), None)
+            continue
+        if column is None or column >= len(cells) or TASK_ID_RE.fullmatch(cells[0]) is None:
+            continue
+        declared[cells[0]] = cells[column]
+    return declared
 
 
 def status_map(path: Path) -> dict[str, str]:
@@ -222,11 +344,13 @@ def load_tasks(root: Path) -> dict[str, dict[str, Any]]:
     return tasks
 
 
-def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[str, dict[str, Any]]:
+def validate_repository_tasks(root: Path, requested: str | None = None,
+                              *, narrow_dependencies: bool = True) -> dict[str, dict[str, Any]]:
     tasks = load_tasks(root)
     if requested is not None and requested not in tasks:
         raise ContractError("TASK_MISSING", f"task manifest is missing: {requested}")
-    backlog = planning_ids(root / "docs/planning/implementation-backlog.md")
+    backlog_path = root / "docs/planning/implementation-backlog.md"
+    backlog = planning_ids(backlog_path)
     statuses = status_map(root / "docs/planning/status.md")
     for task_id, task in tasks.items():
         if task_id not in backlog or task_id not in statuses:
@@ -234,8 +358,6 @@ def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[
         for dependency in task["dependencies"]:
             if dependency not in backlog or dependency not in statuses:
                 raise ContractError("DEPENDENCY_MISSING", f"{task_id} dependency is absent: {dependency}")
-            if statuses[dependency] != "COMPLETE":
-                raise ContractError("DEPENDENCY_INCOMPLETE", f"{task_id} dependency is not COMPLETE: {dependency}")
     visiting: list[str] = []
     visited: set[str] = set()
 
@@ -253,6 +375,60 @@ def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[
 
     for task_id in sorted(tasks):
         visit(task_id)
+
+    # A COMPLETE dependency without a manifest used to end the walk, so its own
+    # declared prerequisites were never status-checked. Continue through the
+    # backlog row instead. `docs/planning/status.md` does not enumerate every
+    # planning row; a row it does record still gates, and one it omits is
+    # traversed without being asserted COMPLETE. Manifest rows keep their
+    # manifest dependencies; plan-only rows use their backlog dependency cell.
+    if requested is not None and narrow_dependencies:
+        planned = planning_dependencies(backlog_path)
+        expanded: dict[str, list[str]] = {}
+
+        def declared_dependencies(task_id: str) -> list[str]:
+            if task_id in tasks:
+                return tasks[task_id]["dependencies"]
+            if task_id not in expanded:
+                cell = planned.get(task_id)
+                expanded[task_id] = (
+                    [] if cell is None else _expand_planning_dependency(cell, backlog)
+                )
+            return expanded[task_id]
+
+        scope: list[str] = [requested]
+        seen: set[str] = {requested}
+        index = 0
+        while index < len(scope):
+            for dependency in declared_dependencies(scope[index]):
+                if dependency not in seen:
+                    seen.add(dependency)
+                    scope.append(dependency)
+            index += 1
+        # Readiness is evaluated first so a graph that is both incomplete and
+        # cyclic keeps reporting the same DEPENDENCY_INCOMPLETE edge as before.
+        # Cycle detection then covers the mixed graph for every selected closure
+        # whose recorded statuses are otherwise clean.
+        for task_id in scope:
+            for dependency in declared_dependencies(task_id):
+                status = statuses.get(dependency)
+                if status is not None and status != "COMPLETE":
+                    raise ContractError(
+                        "DEPENDENCY_INCOMPLETE",
+                        f"{task_id} dependency is not COMPLETE: {dependency}",
+                    )
+        cycle = _dependency_cycle(scope, declared_dependencies)
+        if cycle is not None:
+            raise ContractError("DEPENDENCY_CYCLE", " -> ".join(cycle))
+    else:
+        for task_id in sorted(tasks):
+            for dependency in tasks[task_id]["dependencies"]:
+                if statuses[dependency] != "COMPLETE":
+                    raise ContractError(
+                        "DEPENDENCY_INCOMPLETE",
+                        f"{task_id} dependency is not COMPLETE: {dependency}",
+                    )
+
     return tasks
 
 
@@ -463,11 +639,13 @@ def run_command(root: Path, command: Mapping[str, Any], artifact_dir: Path) -> d
 
 
 def check(root: Path, mode: str, task_id: str | None = None) -> dict[str, Any]:
+    narrow = mode in {"task", "long"}
+    scope = task_id if narrow else None
     try:
-        tasks = validate_repository_tasks(root, task_id)
+        tasks = validate_repository_tasks(root, task_id, narrow_dependencies=narrow)
     except ContractError as error:
         return {"schema_version": 1, "kind": "repository-check", "mode": mode,
-                "task_id": task_id, "status": "INVALID",
+                "task_id": scope, "status": "INVALID",
                 "issues": [{"code": error.code, "detail": error.detail}], "commands": []}
     if mode == "full":
         selected = [{"id": "scripts-check", "argv": ["scripts/check"],
@@ -475,17 +653,17 @@ def check(root: Path, mode: str, task_id: str | None = None) -> dict[str, Any]:
     elif mode == "fast":
         selected = [command for task in tasks.values() for command in task["acceptance_commands"] if command["gate"] == "fast"]
     else:
-        assert task_id is not None
+        assert scope is not None
         gate = "long" if mode == "long" else "task"
-        selected = [command for command in tasks[task_id]["acceptance_commands"] if command["gate"] == gate]
+        selected = [command for command in tasks[scope]["acceptance_commands"] if command["gate"] == gate]
     if not selected:
         return {"schema_version": 1, "kind": "repository-check", "mode": mode,
-                "task_id": task_id, "status": "SKIPPED", "issues": [], "commands": []}
-    artifact_dir = root / "build/repository-tooling" / (task_id or mode)
+                "task_id": scope, "status": "SKIPPED", "issues": [], "commands": []}
+    artifact_dir = root / "build/repository-tooling" / (scope or mode)
     results = [run_command(root, command, artifact_dir) for command in selected]
     status = "PASS" if all(result["status"] == "PASS" for result in results) else "FAIL"
     return {"schema_version": 1, "kind": "repository-check", "mode": mode,
-            "task_id": task_id, "status": status, "issues": [], "commands": results}
+            "task_id": scope, "status": status, "issues": [], "commands": results}
 
 
 def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str, Any]:

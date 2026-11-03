@@ -1,0 +1,177 @@
+{
+  "command": "python3 tools/repository/repository_tooling.py --root . check task <TASK-ID> --json",
+  "descendants_with_an_earlier_blocker": [
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "M11-001 dependency is not COMPLETE: M10-003",
+      "recorded_status": "BLOCKED",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M11-001"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "M11-002 dependency is not COMPLETE: M10-003",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M11-002"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "M10-004 dependency is not COMPLETE: M10-003",
+      "recorded_status": "BLOCKED",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M11-004"
+    }
+  ],
+  "interpretation": "P1-012 remains BLOCKED because its own manifest requires the repository-wide validate-tasks and full gates, which are INVALID on the M10-004 -> M10-003 edge, and its evidence index records ACCEPTANCE_NOT_PASS. Dependency completeness is transitive, so every task whose closure contains P1-012 is rejected before its commands run. Correcting those dependent status rows is a separate decision and is not done in this branch, which owns P1-012 only.",
+  "kind": "dependency-scope-transitive-impact",
+  "p1_012_own_selected_check": {
+    "commands_executed": 2,
+    "exit_code": 0,
+    "status": "PASS"
+  },
+  "revision_binding": "Generated from the working tree that this branch commits. Re-run the recorded command against `git show <revision>:<path>` inputs to reproduce; no fixed SHA is recorded because this file is committed together with the revision it describes.",
+  "schema_version": 1,
+  "selected_task_rejected_by_p1_012_chain": [
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "P1-013"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "P1-014"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "P1-015"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "P1-016"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M9-001"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M9-002"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M9-003"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M10-005"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "COMPLETE",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M11-003"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "BLOCKED",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M12-001"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "IN_PROGRESS",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M12-002"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "BLOCKED",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M12-003"
+    },
+    {
+      "commands_executed": 0,
+      "issue_code": "DEPENDENCY_INCOMPLETE",
+      "issue_detail": "P1-013 dependency is not COMPLETE: P1-012",
+      "recorded_status": "BLOCKED",
+      "selected_check_exit_code": 2,
+      "selected_check_status": "INVALID",
+      "task_id": "M12-004"
+    }
+  ],
+  "summary": {
+    "recorded_complete_but_now_rejected": [
+      "M10-005",
+      "M11-003",
+      "M9-001",
+      "M9-002",
+      "M9-003",
+      "P1-013",
+      "P1-014",
+      "P1-015",
+      "P1-016"
+    ],
+    "rejected_by_other_first_edge": 3,
+    "rejected_by_p1_012_chain": 13,
+    "tasks_with_p1_012_in_closure": 16
+  },
+  "task_id": "P1-012"
+}

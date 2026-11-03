@@ -71,8 +71,9 @@ public func writeHttp1Request(
     targetForm!: Http1RequestTargetForm = Http1RequestTargetForm.Origin
 ): Http1RequestCommitEvidence {
     let writer = Http1RequestWriter(request, limits: limits, trailer: trailer, targetForm: targetForm)
-    writer.writeHead(transport, context: context)
-    writer.writeBody(transport, context: context)
+    let writeContext = context.forStage(OperationTimeoutStage.RequestWrite)
+    writer.writeHead(transport, context: writeContext)
+    writer.writeBody(transport, context: writeContext)
     writer.evidence
 }
 

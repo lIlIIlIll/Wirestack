@@ -1,0 +1,14 @@
+{
+  "commands": [],
+  "issues": [
+    {
+      "code": "TASK_MISSING",
+      "detail": "task manifest is missing: BOGUS-999"
+    }
+  ],
+  "kind": "repository-check",
+  "mode": "fast",
+  "schema_version": 1,
+  "status": "INVALID",
+  "task_id": null
+}

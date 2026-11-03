@@ -1,0 +1,12 @@
+{
+  "issues": [
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "M10-004 dependency is not COMPLETE: M10-003"
+    }
+  ],
+  "kind": "evidence-freshness",
+  "schema_version": 1,
+  "status": "FAIL",
+  "tasks": []
+}

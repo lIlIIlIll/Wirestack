@@ -62,6 +62,8 @@ class HttpFacadeTest {
             ).getOrThrow()
             pushed = Some(pushedResponse)
             @Expect(pushedResponse.request.url.requestTarget, "/stalled-asset")
+            let pushContext = pushedResponse.response.operationContext.getOrThrow()
+            @Expect(!pushContext.isCancellationRequested())
             handler.stalled.waitUntilReadStarts()
             parentResponse.close()
             parent = None<HttpResponse>
@@ -73,6 +75,7 @@ class HttpFacadeTest {
             sibling = Some(siblingResponse)
             let stalledRead = spawn { publicBodyReadWasCancelled(pushedResponse.response.body) }
             @Expect(requestCancellation.cancel())
+            @Expect(pushContext.isCancellationRequested())
             @Expect(stalledRead.get(3 * Duration.second))
             @Expect(pushedResponse.isClosed())
             @Expect(readPublicBody(siblingResponse.body), "ok")

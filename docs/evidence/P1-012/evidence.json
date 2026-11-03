@@ -1,48 +1,16 @@
 {
-  "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T04:04:27.712961Z",
+  "acceptance_status": "BLOCKED",
+  "generated_at_utc": "2026-10-20T12:19:45.471139Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
     "machine": "x86_64",
     "system": "Linux"
   },
-  "reports": [
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/P1-012/task-check.json",
-      "sha256": "640c9da77772a5a404420c2f0a47a234dfec59bfd2c03f278aca1a2c8cf91c14",
-      "source_task": "P1-012"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/P1-012/full-check.json",
-      "sha256": "e64646c56975c392fa4c334165da3a3dfaea140ba212db5780531be48d8e5196",
-      "source_task": "P1-012"
-    }
-  ],
-  "revision": "23667a7e8166b8ede7049594196c0bcf7a186c98",
-  "schema_version": 1,
-  "source_sha256": {
-    ".gitignore": "4036c86470dc094cdbd56bac65872984ca2c246a4b0f809937532625ab79c21d",
-    "docs/evidence/P1-012/test-plan.md": "87dafb6a81764558a8d9f67b0230b75bd65f0dd292d11479dddd89b1e169892d",
-    "docs/planning/implementation-backlog.md": "890492f5572d9f5399b23f6d073a6067b59addeab7e04f83604e06a2ad293025",
-    "docs/planning/status.md": "307366b33140508b184f72010fe17b7c7df0017f0898a04c50749d800e0761ae",
-    "scripts/check-fast": "88e67a1ee04914d2e6eed9caa664d01787b047f0d65d23d36e95ce80514e198f",
-    "scripts/check-full": "2bed1d814b2f92842733afd3045d2b6a1d0fbd1538801a12b31fa7fc10203787",
-    "scripts/check-long": "58e3649c54d4fc26d14959ecd91b2a6c9b02ed19030ff1ad169491e7be60d69a",
-    "scripts/check-task": "774b29125246ea21e847536e0534679aa3065dc80cfa81e014b6862358676648",
-    "scripts/repo-doctor": "cad8b0af8adcde07298ad012cc58ef6751d72306e96d7fb532bec32361318e14",
-    "scripts/verify-evidence": "ba773c1761dfd5d7f12faa54c5d180182e9dd76bb0629dc2ff255bb33b9c1b95",
-    "tools/repository/repository_tooling.py": "6df2e851944b8a12889082d5ea7c5bbc6b041563c42b86a80cde3ed540525ba9",
-    "tools/repository/tests/test_repository_tooling.py": "8f8938c59defed4547eb0f962bd64dab2a5fc4205a4a1b1c8fbededf80566ea5",
-    "tools/tasks/P1-012.json": "13d7d9e18acb902021fb3bf9d88064b25db92741f418941bfee65bd9dc5aacde",
-    "tools/tasks/schema-v1.json": "9dfa31e025e7f879bbd1c837c8cc9a7f034cceead8bb4986b902a12e447857eb",
-    "tools/tests/test_m7_linux_task_graph.py": "eb8e645e797003333138c997c9af95b08c777990b743ff43722cd3bff4541bb3"
-  },
+  "schema_version": 2,
   "source_task": "P1-012",
   "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-    "cjpm": "Cangjie Project Manager: 1.1.3"
+    "cjc": null,
+    "cjpm": null
   }
 }

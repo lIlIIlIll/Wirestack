@@ -212,7 +212,7 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     internal func wrap(response: HttpResponse): HttpResponse {
         let pushes = match (response.pushes) {
             case Some(value) =>
-                Some<HttpPushSource>(HttpCancellationPushSource(value, retainLifetime()))
+                Some<HttpPushSource>(HttpCancellationPushSource(value, retainLifetime(), context))
             case None => None<HttpPushSource>
         }
         if (response.body.isFullyConsumed()) {
@@ -376,15 +376,17 @@ private class HttpRequestCancellationLifetime <: Resource {
 private class HttpCancellationPushSource <: HttpPushSource {
     private let delegate: HttpPushSource
     private let lifetime: Resource
+    private let operationContext: OperationContext
     private let mutex = Mutex()
     private var activeReceivers: Int64 = 0
     private var activeBodies: Int64 = 0
     private var sourceFinished = false
     private var lifetimeReleased = false
 
-    init(delegate: HttpPushSource, lifetime: Resource) {
+    init(delegate: HttpPushSource, lifetime: Resource, operationContext: OperationContext) {
         this.delegate = delegate
         this.lifetime = lifetime
+        this.operationContext = operationContext
         if (delegate.isClosed()) { finishSource() }
     }
 
@@ -422,7 +424,7 @@ private class HttpCancellationPushSource <: HttpPushSource {
                         version: response.version,
                         headers: response.headers,
                         pushes: response.pushes,
-                        operationContext: response.operationContext
+                        operationContext: Some(operationContext)
                     )
                 ))
             case None =>

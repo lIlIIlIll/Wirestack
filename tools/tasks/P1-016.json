@@ -52,6 +52,7 @@
     "docs/evidence/P1-016/README.md",
     "docs/evidence/P1-016/test-plan.md",
     "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
     "docs/product/prd.md",
     "tools/repository/repository_tooling.py",
     "tools/tasks/P1-016.json",

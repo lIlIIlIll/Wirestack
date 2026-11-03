@@ -1,0 +1,11 @@
+{
+  "counts": {
+    "paths": 19,
+    "scenarios": 18,
+    "tests": 16
+  },
+  "issues": [],
+  "kind": "test-plan-validation",
+  "schema_version": 1,
+  "status": "PASS"
+}

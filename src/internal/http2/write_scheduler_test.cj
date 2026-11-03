@@ -3,9 +3,11 @@ package wirestack.internal.http2
 import std.collection.*
 import std.sync.*
 import std.unittest.*
+import std.time.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
 import wirestack.internal as internal
+import wirestack as api
 
 @Test
 class Http2WriteSchedulerTest {
@@ -35,6 +37,31 @@ class Http2WriteSchedulerTest {
         @Expect(scheduler.maximumPendingWrites, 3)
         @Expect(scheduler.maximumPendingBytes, 37u64)
     }
+
+    @TestCase
+    func completedTicketWaitRejectsAnExpiredContext(): Unit {
+        let scheduler = Http2WriteScheduler(RecordingSchedulerTransport())
+        let ticket = scheduler.enqueue(schedulerPing(7u8))
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+        @Expect(isWriteTestWritten(ticket.state))
+
+        let clock = TicketWaitReviewClock(MonoTime.now())
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.millisecond, clock: clock))
+        )
+        clock.advance(2 * Duration.millisecond)
+        let error = @AssertThrows[api.NetworkException](ticket.wait(context: context))
+        match (error.category) {
+            case NetworkErrorCategory.DeadlineExceeded => ()
+            case _ => @Fail("expired ticket context did not report a deadline error")
+        }
+        match (error.code) {
+            case NetworkErrorCode.TimedOut => ()
+            case _ => @Fail("expired ticket context did not report a timeout code")
+        }
+    }
+
 
     @TestCase
     func controlBurstIsBoundedAndDataStreamsRotateFairly(): Unit {
@@ -461,6 +488,15 @@ class Http2WriteSchedulerTest {
         @Expect(isSchedulerTestClosed(scheduler.run()))
     }
 }
+
+private class TicketWaitReviewClock <: MonotonicClock {
+    private var current: MonoTime
+
+    init(start: MonoTime) { current = start }
+    public func now(): MonoTime { current }
+    func advance(duration: Duration): Unit { current = current + duration }
+}
+
 private func schedulerResourceBudget(
     maximumManagedBufferBytes: UInt64,
     reservedControlBufferBytes: UInt64

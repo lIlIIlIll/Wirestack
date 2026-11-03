@@ -1,0 +1,47 @@
+{
+  "acceptance_not_claimed": true,
+  "base_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+  "blocker": {
+    "code": "DEPENDENCY_INCOMPLETE",
+    "dependency": "M10-003",
+    "dependency_status": "BLOCKED",
+    "detail": "M10-004 dependency is not COMPLETE: M10-003"
+  },
+  "kind": "M10-004-dependency-readiness",
+  "manifest_dependencies": [
+    "M10-003"
+  ],
+  "notes": [
+    "No M10-004 implementation or acceptance command was executed to produce this report.",
+    "M10-003 remains BLOCKED with its own source-bound evidence drift; this report does not qualify M10-003.",
+    "Issue #176 stays open."
+  ],
+  "observed": [
+    {
+      "command": "scripts/check-task M10-004 --json --output docs/evidence/M10-004/dependency-status-check.json",
+      "detail": "M10-004 dependency is not COMPLETE: M10-003",
+      "exit_code": 2,
+      "report": "docs/evidence/M10-004/dependency-status-check.json",
+      "status": "INVALID"
+    },
+    {
+      "command": "python3 tools/repository/repository_tooling.py --root . validate-tasks --json --output docs/evidence/M10-004/dependency-status-validate-tasks.json",
+      "detail": "M10-004 dependency is not COMPLETE: M10-003",
+      "exit_code": 2,
+      "report": "docs/evidence/M10-004/dependency-status-validate-tasks.json",
+      "status": "INVALID"
+    }
+  ],
+  "retained_acceptance_record": {
+    "acceptance_status": "PASS",
+    "candidate_committed": false,
+    "interpretation": "Retained historical acceptance record. It was produced with an uncommitted candidate and a failing repository gate, and no source-bound seal exists, so it is not current qualification and cannot justify COMPLETE while M10-003 is BLOCKED.",
+    "path": "docs/evidence/M10-004/verification.json",
+    "repository_gate_status": "FAIL",
+    "revision": null,
+    "status": "COMPLETE"
+  },
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "task_id": "M10-004"
+}
