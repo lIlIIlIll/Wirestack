@@ -1,0 +1,61 @@
+test_current_core_accepts_filtered_substitution_cases (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_accepts_filtered_substitution_cases) ... ERROR
+test_current_core_rejects_nonpassing_or_duplicated_substitution_cases (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rejects_nonpassing_or_duplicated_substitution_cases) ... ok
+test_current_core_fixture_uses_stable_synthetic_linux_platform (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_fixture_uses_stable_synthetic_linux_platform) ... FAIL
+test_capture_normalized_consumer_paths_roundtrip_with_actual_hashes (tools.tests.test_m12_002_deployment.BinaryInputSelectionTests.test_capture_normalized_consumer_paths_roundtrip_with_actual_hashes) ... ERROR
+
+======================================================================
+ERROR: test_current_core_accepts_filtered_substitution_cases (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_accepts_filtered_substitution_cases)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 832, in test_current_core_accepts_filtered_substitution_cases
+    adoption.validate_current_core(root, report, sdk_archive),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 844, in validate_current_core
+    _validate_substitution_log(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        _current_core_command_text(logs, "provider-substitution"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        _current_core_command_text(logs, "provider-substitution", "stderr"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 770, in _validate_substitution_log
+    raise AdoptionError(
+    ...<2 lines>...
+    )
+tools.m3_031_desktop_tls_adoption.AdoptionError: all three provider-substitution cases must execute and PASS with zero skips or failures
+
+======================================================================
+ERROR: test_capture_normalized_consumer_paths_roundtrip_with_actual_hashes (tools.tests.test_m12_002_deployment.BinaryInputSelectionTests.test_capture_normalized_consumer_paths_roundtrip_with_actual_hashes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m12_002_deployment.py", line 251, in test_capture_normalized_consumer_paths_roundtrip_with_actual_hashes
+    binary_verifier.verify_consumers(report, selected, replacements)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_binary.py", line 572, in verify_consumers
+    raise ValueError('installed consumer differs from its capture: ' + profile + '/' + app)
+ValueError: installed consumer differs from its capture: stable-native/service
+
+======================================================================
+FAIL: test_current_core_fixture_uses_stable_synthetic_linux_platform (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_fixture_uses_stable_synthetic_linux_platform)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 883, in test_current_core_fixture_uses_stable_synthetic_linux_platform
+    report, binding = current_core_fixture(root, sdk_archive)
+                      ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 306, in current_core_fixture
+    target = adoption.linux_release.platform_identity()
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+AssertionError: fixture must not inspect host platform
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.542s
+
+FAILED (failures=1, errors=2)
