@@ -1,0 +1,163 @@
+test_aggregate_rejects_fabricated_current_core_pass (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_aggregate_rejects_fabricated_current_core_pass) ... FAIL
+test_atomic_report_replacement_preserves_old_file_on_failure (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_atomic_report_replacement_preserves_old_file_on_failure) ... ok
+test_core_audit_keeps_historical_diagnostic_but_rejects_stale_native_evidence (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_core_audit_keeps_historical_diagnostic_but_rejects_stale_native_evidence) ... ERROR
+test_current_core_accepts_filtered_substitution_cases (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_accepts_filtered_substitution_cases) ... ok
+test_current_core_fixture_uses_stable_synthetic_linux_platform (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_fixture_uses_stable_synthetic_linux_platform) ... ERROR
+test_current_core_rechecks_header_archive_symbols_and_bytes (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rechecks_header_archive_symbols_and_bytes) ... FAIL
+test_current_core_rejects_boolean_architecture_guard_schema (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rejects_boolean_architecture_guard_schema) ... ok
+test_current_core_rejects_invalid_installed_consumer_evidence (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rejects_invalid_installed_consumer_evidence) ... FAIL
+test_current_core_rejects_nonpassing_or_duplicated_substitution_cases (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rejects_nonpassing_or_duplicated_substitution_cases) ... ok
+test_current_core_rejects_source_sdk_and_log_drift (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rejects_source_sdk_and_log_drift) ... ok
+test_current_core_requires_complete_report_and_command_receipts (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_requires_complete_report_and_command_receipts) ... ERROR
+test_dependency_evidence_json_preserves_exact_artifact_bytes (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_dependency_evidence_json_preserves_exact_artifact_bytes) ... ok
+test_desktop_acceptance_column_cannot_be_weakened (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_desktop_acceptance_column_cannot_be_weakened) ... ok
+test_direct_current_desktop_proof_does_not_require_global_m2_status (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_direct_current_desktop_proof_does_not_require_global_m2_status) ... ok
+test_direct_current_desktop_proof_rejects_source_log_report_and_missing_drift (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_direct_current_desktop_proof_rejects_source_log_report_and_missing_drift) ... ok
+test_exact_native_desktop_results_pass (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_exact_native_desktop_results_pass) ... ok
+test_failed_poc_wrong_runner_and_source_identity_are_rejected (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_failed_poc_wrong_runner_and_source_identity_are_rejected) ... ok
+test_historical_verifier_preserves_integrity_checks_without_qualification (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_historical_verifier_preserves_integrity_checks_without_qualification) ... ok
+test_hosted_receipt_binds_all_sources_artifacts_and_results (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_hosted_receipt_binds_all_sources_artifacts_and_results) ... ok
+test_missing_core_declaration_fails_closed (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_missing_core_declaration_fails_closed) ... ok
+test_partial_skipped_and_unknown_schema_never_pass (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_partial_skipped_and_unknown_schema_never_pass) ... ok
+test_provider_license_bundle_is_retained_and_digest_bound (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_provider_license_bundle_is_retained_and_digest_bound) ... ok
+test_provider_manifest_cannot_move_the_approved_pin (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_provider_manifest_cannot_move_the_approved_pin) ... ok
+test_repository_text_digest_is_checkout_line_ending_stable (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_repository_text_digest_is_checkout_line_ending_stable) ... ok
+test_same_length_license_byte_mutation_fails (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_same_length_license_byte_mutation_fails) ... ok
+test_stale_revision_is_rejected (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_stale_revision_is_rejected) ... ok
+test_validate_provider_honors_selected_root (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_validate_provider_honors_selected_root) ... ok
+test_wrong_platform_and_provider_are_rejected (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_wrong_platform_and_provider_are_rejected) ... ok
+
+======================================================================
+ERROR: test_core_audit_keeps_historical_diagnostic_but_rejects_stale_native_evidence (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_core_audit_keeps_historical_diagnostic_but_rejects_stale_native_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 1138, in test_core_audit_keeps_historical_diagnostic_but_rejects_stale_native_evidence
+    report, adoption.validate_current_core(root, report, sdk_archive)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 882, in validate_current_core
+    _validate_substitution_log(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        _current_core_command_text(logs, "provider-substitution"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        _current_core_command_text(logs, "provider-substitution", "stderr"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 808, in _validate_substitution_log
+    raise AdoptionError(
+    ...<2 lines>...
+    )
+tools.m3_031_desktop_tls_adoption.AdoptionError: all three selected provider-substitution cases must execute exactly once and PASS with zero errors or failures
+
+======================================================================
+ERROR: test_current_core_fixture_uses_stable_synthetic_linux_platform (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_fixture_uses_stable_synthetic_linux_platform)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 904, in test_current_core_fixture_uses_stable_synthetic_linux_platform
+    adoption.validate_current_core(root, report, sdk_archive),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 882, in validate_current_core
+    _validate_substitution_log(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        _current_core_command_text(logs, "provider-substitution"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        _current_core_command_text(logs, "provider-substitution", "stderr"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 808, in _validate_substitution_log
+    raise AdoptionError(
+    ...<2 lines>...
+    )
+tools.m3_031_desktop_tls_adoption.AdoptionError: all three selected provider-substitution cases must execute exactly once and PASS with zero errors or failures
+
+======================================================================
+ERROR: test_current_core_requires_complete_report_and_command_receipts (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_requires_complete_report_and_command_receipts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 913, in test_current_core_requires_complete_report_and_command_receipts
+    adoption.validate_current_core(root, report, sdk_archive),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 882, in validate_current_core
+    _validate_substitution_log(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        _current_core_command_text(logs, "provider-substitution"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        _current_core_command_text(logs, "provider-substitution", "stderr"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<repo>/tools/m3_031_desktop_tls_adoption.py", line 808, in _validate_substitution_log
+    raise AdoptionError(
+    ...<2 lines>...
+    )
+tools.m3_031_desktop_tls_adoption.AdoptionError: all three selected provider-substitution cases must execute exactly once and PASS with zero errors or failures
+
+======================================================================
+FAIL: test_aggregate_rejects_fabricated_current_core_pass (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_aggregate_rejects_fabricated_current_core_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 1170, in test_aggregate_rejects_fabricated_current_core_pass
+    self.assert_code(
+    ~~~~~~~~~~~~~~~~^
+        "CORE_REQUIREMENT",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+        ),
+        ^^
+    )
+    ^
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 779, in assert_code
+    self.assertEqual(code, caught.exception.code)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'CORE_REQUIREMENT' != 'CURRENT_CORE_SUBSTITUTION'
+- CORE_REQUIREMENT
++ CURRENT_CORE_SUBSTITUTION
+
+
+======================================================================
+FAIL: test_current_core_rechecks_header_archive_symbols_and_bytes (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rechecks_header_archive_symbols_and_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 1051, in test_current_core_rechecks_header_archive_symbols_and_bytes
+    self.assert_code(
+    ~~~~~~~~~~~~~~~~^
+        "CURRENT_CORE_ABI",
+        ^^^^^^^^^^^^^^^^^^^
+        lambda: adoption.validate_current_core(root, report, sdk_archive),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 779, in assert_code
+    self.assertEqual(code, caught.exception.code)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'CURRENT_CORE_ABI' != 'CURRENT_CORE_SUBSTITUTION'
+- CURRENT_CORE_ABI
++ CURRENT_CORE_SUBSTITUTION
+
+
+======================================================================
+FAIL: test_current_core_rejects_invalid_installed_consumer_evidence (tools.tests.test_m3_031_desktop_tls_adoption.M3031DesktopTlsAdoptionTests.test_current_core_rejects_invalid_installed_consumer_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 1086, in test_current_core_rejects_invalid_installed_consumer_evidence
+    self.assert_code(
+    ~~~~~~~~~~~~~~~~^
+        "CURRENT_CORE_CONSUMER",
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+        lambda: adoption.validate_current_core(root, report, sdk_archive),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<repo>/tools/tests/test_m3_031_desktop_tls_adoption.py", line 779, in assert_code
+    self.assertEqual(code, caught.exception.code)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'CURRENT_CORE_CONSUMER' != 'CURRENT_CORE_SUBSTITUTION'
+- CURRENT_CORE_CONSUMER
++ CURRENT_CORE_SUBSTITUTION
+
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.599s
+
+FAILED (failures=3, errors=3)
