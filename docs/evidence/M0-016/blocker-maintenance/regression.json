@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "source_task": "M0-016",
+  "kind": "blocker-maintenance-regression",
+  "status": "PASS",
+  "task_status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "source_state": "owner working files before integrated source freeze",
+  "sources": {
+    "tools/tls_provider_poc/validate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "856099f0e6745ad1d1fc233684a47bc79f5f66d2d1bb2fab21c3efa17c5b34c8"
+    },
+    "tools/tls_provider_poc/providers.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e"
+    },
+    "tools/tests/test_tls_provider_poc.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "12b9349f4d0bd38f28a864e5547009bbf2e06dd99f96297d25b59fd51dd98c30"
+    }
+  },
+  "result": {
+    "tests_run": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cli_valid_exit": 0,
+    "cli_same_length_mutation_exit": 1
+  },
+  "logs": [
+    {
+      "path": "docs/evidence/M0-016/blocker-maintenance/provider-owner.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ac5c084e6bd0646980a0d93ce43addc761823a92cc423372134b4de4f855f26b"
+      }
+    },
+    {
+      "path": "docs/evidence/M0-016/blocker-maintenance/provider-owner-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f274fe3715cca523c84d60b79d6d16ab5f048e2b5fe497ace2aa1f32155cd4b6"
+      }
+    },
+    {
+      "path": "docs/evidence/M0-016/blocker-maintenance/license-cli-smoke.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f5dca57801a89fb333dc5490ad43323bc803276cd4f955f88b7bca34b02318a3"
+      }
+    },
+    {
+      "path": "docs/evidence/M0-016/blocker-maintenance/provider-live-matrix-integrity.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b6a1f57357d8ac9b5fd60fa2d1802241f046acb2d32524ff3fe5c18a141b5898"
+      }
+    },
+    {
+      "path": "docs/evidence/M0-016/blocker-maintenance/provider-owner-after-review.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ffec166520c28a23f293a94807f26a67029d74bd3afb9e42e88cf0b0301712a7"
+      }
+    }
+  ],
+  "previous_fixture_suite": {
+    "tests_run": 83,
+    "test_source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "60eae8330a0624a7002ec60c59360bc3ae99153cf6abe1bbb9b0c31dbc890da6"
+    },
+    "log": "docs/evidence/M0-016/blocker-maintenance/provider-owner-after.log"
+  },
+  "historical_matrix_integrity": {
+    "status": "FAIL",
+    "exit_code": 1,
+    "diagnostic": {
+      "path": "docs/evidence/M0-016/blocker-maintenance/historical-license-domain-diagnostic.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c3a78ff7e29a57d94cd161ff958109b690b9ba37fa9174b691362bc9d9e1b279"
+      }
+    },
+    "retained_reports_changed": false
+  },
+  "boundary": "Behavioral fixture and verifier maintenance only. No historical report was requalified and no missing native platform, full SDK/VM matrix, security approval or release qualification is claimed."
+}
