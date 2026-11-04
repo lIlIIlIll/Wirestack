@@ -116,7 +116,7 @@ milestone.
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M3-031 | COMPLETE | [current Core qualification](../evidence/M3-031/current-core/qualification.json), [native hosted receipt](../evidence/M3-031/hosted-run.json), [desktop matrix](../evidence/M3-031/desktop-provider-matrix.json), [task check](../evidence/M3-031/task-check.json), [scope](../evidence/M3-031/README.md) | Frozen integrated source `6c5eb96`: all four current Linux Core commands, all five selected task commands, both 18-capability native AWS-LC 5.5.0 PoCs, and direct STS 1.2.0 Windows/macOS resolver receipts pass. Historical M3-030 integrity is STALE (`STALE_SOURCE`), diagnostic only. Global six-platform/mobile conditions and release qualification remain excluded. |
+| M3-031 | COMPLETE | [current Core qualification](../evidence/M3-031/current-core/qualification.json), [native hosted receipt](../evidence/M3-031/hosted-run.json), [desktop matrix](../evidence/M3-031/desktop-provider-matrix.json), [task check](../evidence/M3-031/task-check.json), [scope](../evidence/M3-031/README.md) | Frozen integrated source `59e0fcf`: all four current Linux Core commands, all five selected task commands, both 18-capability native AWS-LC 5.5.0 PoCs, and direct STS 1.2.0 Windows/macOS resolver receipts pass at the same exact source. Historical M3-030 integrity is STALE (`STALE_SOURCE`), diagnostic only. Global six-platform/mobile conditions and release qualification remain excluded. |
 
 ## Future upstream enhancements
 
