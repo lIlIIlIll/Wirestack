@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-012",
+  "kind": "actual-cli-selected-versus-global-fixture",
+  "status": "PASS",
+  "scope": "Minimal repository fixture only; no native, release or repository-wide qualification",
+  "tool_source_sha256": "1b6624ebf4baf825d422f35e9a56e2da463559c46c650b02f334bf9217401642",
+  "fixture_statuses": {
+    "TEST-001": "COMPLETE",
+    "OTHER-001": "BLOCKED",
+    "BASE-001": "BLOCKED"
+  },
+  "fixture_dependencies": {
+    "TEST-001": [],
+    "OTHER-001": [
+      "BASE-001"
+    ],
+    "BASE-001": []
+  },
+  "selected": {
+    "argv": [
+      "python3",
+      "tools/repository/repository_tooling.py",
+      "--root",
+      "<fixture>",
+      "check",
+      "task",
+      "TEST-001",
+      "--json"
+    ],
+    "exit_code": 0,
+    "report": {
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "print('fixture-selected-command-executed')"
+          ],
+          "duration_ms": 32.679,
+          "error_code": null,
+          "exit_code": 0,
+          "finished_at_utc": "2026-11-04T04:58:51.874757Z",
+          "id": "fixture-command",
+          "started_at_utc": "2026-11-04T04:58:51.842051Z",
+          "status": "PASS",
+          "stderr_excerpt": "",
+          "stderr_path": "build/repository-tooling/TEST-001/fixture-command.stderr.log",
+          "stderr_truncated": false,
+          "stdout_excerpt": "fixture-selected-command-executed\n",
+          "stdout_path": "build/repository-tooling/TEST-001/fixture-command.stdout.log",
+          "stdout_truncated": false,
+          "timed_out": false
+        }
+      ],
+      "issues": [],
+      "kind": "repository-check",
+      "mode": "task",
+      "schema_version": 1,
+      "status": "PASS",
+      "task_id": "TEST-001"
+    },
+    "stderr": ""
+  },
+  "global": {
+    "argv": [
+      "python3",
+      "tools/repository/repository_tooling.py",
+      "--root",
+      "<fixture>",
+      "validate-tasks",
+      "--json"
+    ],
+    "exit_code": 2,
+    "report": {
+      "issues": [
+        {
+          "code": "DEPENDENCY_INCOMPLETE",
+          "detail": "OTHER-001 dependency is not COMPLETE: BASE-001"
+        }
+      ],
+      "kind": "task-contract-validation",
+      "schema_version": 1,
+      "status": "INVALID",
+      "task_ids": []
+    },
+    "stderr": ""
+  }
+}

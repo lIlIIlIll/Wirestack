@@ -13,7 +13,7 @@ dependency. Global `validate-tasks`, `check-fast`, `check-full`, and
 `verify-evidence --all` continue to reject an incomplete repository-wide graph.
 
 The current selected `scripts/check-task P1-012` run passed both acceptance
-commands: the 19-path/18-scenario/16-test plan and all repository-tooling
+commands: the 20-path/19-scenario/17-test plan and all 52 repository-tooling
 regressions. Its [task receipt](task-check.json) is separate from the
 repository-wide diagnostic. The current source seal must verify before this
 completion record is published. Unrelated BLOCKED tasks remain unchanged.
