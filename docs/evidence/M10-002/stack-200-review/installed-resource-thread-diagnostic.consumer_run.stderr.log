@@ -1,0 +1,9 @@
+An exception has occurred:
+HttpException: HTTP stream reset
+	 at wirestack.http::wrapHttpError(std.core::Exception)(<scratch>/installation/wirestack-0.1.0/src/http/error.cj:145)
+	 at wirestack.http::wrapHttpBodyError(std.core::Exception)(<scratch>/installation/wirestack-0.1.0/src/http/error.cj:161)
+	 at wirestack.http::HttpCancellationBodyStream::read(std.core::Array<...>)(<scratch>/installation/wirestack-0.1.0/src/http/cancellation.cj:538)
+	 at wirestack::ResponseBody::read(std.core::Array<...>)(<scratch>/installation/wirestack-0.1.0/src/http_message.cj:182)
+	 at wirestack_m10_005_observation::Handler::handle(wirestack.http::HttpServerRequest, wirestack::OperationContext)(<scratch>/consumer/src/main.cj:47)
+	 at wirestack.http::PublicHttp2Handler::handle(wirestack.internal.http2::Http2ServerRequest, wirestack::OperationContext)(<scratch>/installation/wirestack-0.1.0/src/http/server.cj:709)
+	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<scratch>/installation/wirestack-0.1.0/src/internal/http2/server_mapping.cj:215)
