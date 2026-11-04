@@ -62,6 +62,26 @@ resolver interface conformances, fields and enum cases, not just capability
 defaults. Old-consumer source execution, old binaries and cross-SDK behavior
 remain NOT_RUN; no universal source or ABI compatibility is claimed.
 
+## Additional current local proof
+
+The independent foundational runner and remaining unchanged manifest commands
+also ran at the same integrated code source. These are local diagnostics, not
+a selected-task PASS.
+
+| Current command or surface | Actual result |
+|---|---|
+| Foundational native runner | All 7 scenarios PASS in 89.241 seconds; original M9-001 receipt identity retained. |
+| Canonical repository check | PASS in 513.653 seconds, within the original 1,800-second deadline. |
+| Native HTML gate | All 41 commands PASS in 353.659 seconds, within the original 900-second deadline; seven layers and complete symbol/parameter coverage. |
+| Real Chromium surface | Search for `HttpClient`, click the real result and observe the rendered `wirestack.http.HttpClient` page; zero browser errors and actual screenshots. |
+
+Complete command projections are under
+[`remaining-local-commands`](maintenance/remaining-local-commands/report.json).
+The [browser receipt](maintenance/current-html-proof/browser-smoke.json) links
+the visual evidence and records the observer's initial unmatched encoded-URL
+wait separately. The page was reached without replaying the click.
+The current prerequisite and source-seal barrier still prevents task promotion.
+
 ## Execution order
 
 Use the qualified STS archive and trusted native cjdoc recorded by the current
