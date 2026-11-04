@@ -1,9 +1,9 @@
 {
-  "expected_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "expected_revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
   "failures": [],
   "report_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "c67b17ca4b3d8a62e35e867610d7b5b0a87bc6cfcb418ade987ffd5719902aa3"
+    "sha256": "16656fa586da74f0785261e501e4f9d5b6ba87366a8f15c8d16962a3a39b878a"
   },
   "schema_version": 2,
   "source_inventory_digest": {
