@@ -1,0 +1,16 @@
+{
+  "issues": [],
+  "kind": "evidence-freshness",
+  "schema_version": 1,
+  "status": "PASS",
+  "tasks": [
+    {
+      "issues": [],
+      "report_count": 13,
+      "source_count": 299,
+      "stale_paths": [],
+      "status": "PASS",
+      "task_id": "M9-001"
+    }
+  ]
+}
