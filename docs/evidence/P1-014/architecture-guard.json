@@ -1,7 +1,7 @@
 {
   "kind": "architecture-guard",
   "ok": true,
-  "root": "<repo-root>",
+  "root": "<repo>",
   "schema_version": 1,
   "status": "PASS",
   "violation_count": 0,

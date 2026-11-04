@@ -1,0 +1,1 @@
+{"counts": {"paths": 13, "scenarios": 7, "tests": 11}, "issues": [], "kind": "test-plan-validation", "schema_version": 1, "status": "PASS"}
