@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-013",
+  "kind": "single-renderer-timing-reduction",
+  "status": "PASS",
+  "scope": "One unchanged native renderer diagnostic; not a full documentation or canonical gate",
+  "argv": [
+    "<cjdoc>",
+    "render",
+    "--input",
+    "docs/api/generated/docs.json",
+    "--format",
+    "api-surface",
+    "--locale",
+    "zh-CN",
+    "--output",
+    "<diagnostic-output>"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "wall_seconds": 81.465,
+  "heap_override_introduced": false,
+  "binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "5c26d3a7a7d39be07abbfd6563818aaecfd56559f3c7050c364c588a5196d1fb"
+  },
+  "input_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "c0b3f311e670e8c983e280b1b312ab0b1d2c22df9cee6a44f188bbeb9272348c"
+  },
+  "api_output_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "2be7d625542db7ae87a6ce94551092a69b7b84e9e3de5e09322391dbd7781b9e"
+  },
+  "api_output_matches_current_combined_artifact": true
+}

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -107,6 +109,104 @@ class M7033DocsTests(unittest.TestCase):
                     docs.atomic_json(path, {"status": "PASS"})
             self.assertEqual('{"status":"OLD"}\n', path.read_text(encoding="utf-8"))
             self.assertFalse(list(path.parent.glob(".*.tmp")))
+
+    @staticmethod
+    def _generate_fixture_layer(cjdoc, project, output, timeout, package, commands) -> None:
+        artifacts = docs._artifact_paths(output)
+        values = {
+            "docs": {
+                "schemaVersion": docs.DOC_IR_SCHEMA,
+                "generator": {"name": "cjdoc", "version": docs.EXPECTED_CJDOC_VERSION},
+                "status": "complete",
+                "diagnostics": [],
+                "declarations": [{"id": package}],
+            },
+            "api": {
+                "schemaVersion": docs.API_SCHEMA,
+                "audience": "external",
+                "project": package,
+                "declarations": [{"id": package}],
+                "exposures": [],
+            },
+            "coverage": {
+                "schemaVersion": docs.COVERAGE_SCHEMA,
+                "audience": "external",
+                "symbols": {"total": 1, "documented": 1, "percent": 100},
+                "parameters": {"total": 0, "documented": 0, "percent": 100},
+            },
+        }
+        for kind, value in values.items():
+            artifacts[kind].parent.mkdir(parents=True, exist_ok=True)
+            artifacts[kind].write_text(json.dumps(value), encoding="utf-8")
+        artifacts["markdown"].parent.mkdir(parents=True, exist_ok=True)
+        artifacts["markdown"].write_text(f"# {package}\n", encoding="utf-8")
+
+    def test_public_views_overlap_without_exceeding_three_native_commands(self) -> None:
+        first_wave = threading.Barrier(3, timeout=3)
+        lock = threading.Lock()
+        observed = {"active": 0, "peak": 0, "entered": 0}
+
+        def check(cjdoc, project, timeout):
+            with lock:
+                observed["active"] += 1
+                observed["peak"] = max(observed["peak"], observed["active"])
+                observed["entered"] += 1
+                join_first_wave = observed["entered"] <= 3
+            try:
+                if join_first_wave:
+                    first_wave.wait()
+                return {"status": "PASS", "returncode": 0}
+            finally:
+                with lock:
+                    observed["active"] -= 1
+
+        with tempfile.TemporaryDirectory(prefix="wirestack-docs-concurrency-") as directory:
+            root = Path(directory)
+            source = root / "src/package.cj"
+            source.parent.mkdir()
+            source.write_text("package wirestack\n", encoding="utf-8")
+            with mock.patch.object(docs, "resolve_cjdoc", return_value=("cjdoc", "0.7.2")), \
+                    mock.patch.object(docs, "public_source_paths", return_value=[source]), \
+                    mock.patch.object(docs, "_copy_public_view"), \
+                    mock.patch.object(docs, "_check", side_effect=check), \
+                    mock.patch.object(docs, "_generate_layer", side_effect=self._generate_fixture_layer):
+                report = docs.build_report(root)
+        self.assertEqual("PASS", report["status"], report["issues"])
+        self.assertEqual(3, observed["peak"])
+        self.assertEqual(0, observed["active"])
+
+    def test_failed_view_cannot_publish_successful_sibling_artifacts(self) -> None:
+        sibling_staged = threading.Event()
+
+        def generate(cjdoc, project, output, timeout, package, commands):
+            self._generate_fixture_layer(cjdoc, project, output, timeout, package, commands)
+            if package == "wirestack":
+                sibling_staged.set()
+
+        def check(cjdoc, project, timeout):
+            if project.parent.name == "combined":
+                self.assertTrue(sibling_staged.wait(3), "a successful sibling must already be staged")
+                return {"status": "FAIL", "returncode": 1}
+            return {"status": "PASS", "returncode": 0}
+
+        with tempfile.TemporaryDirectory(prefix="wirestack-docs-publication-") as directory:
+            root = Path(directory)
+            source = root / "src/package.cj"
+            source.parent.mkdir()
+            source.write_text("package wirestack\n", encoding="utf-8")
+            published = root / "docs/api/generated/docs.json"
+            published.parent.mkdir(parents=True)
+            published.write_bytes(b"previous qualified artifacts\n")
+            with mock.patch.object(docs, "resolve_cjdoc", return_value=("cjdoc", "0.7.2")), \
+                    mock.patch.object(docs, "public_source_paths", return_value=[source]), \
+                    mock.patch.object(docs, "_copy_public_view"), \
+                    mock.patch.object(docs, "_check", side_effect=check), \
+                    mock.patch.object(docs, "_generate_layer", side_effect=generate):
+                report = docs.build_report(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual("CJDOC_CHECK", report["issues"][0]["code"])
+            self.assertEqual(b"previous qualified artifacts\n", published.read_bytes())
+            self.assertFalse((published.parent / "api-surface.json").exists())
 
 
 if __name__ == "__main__":
