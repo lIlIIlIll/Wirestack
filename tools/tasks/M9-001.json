@@ -17,6 +17,8 @@
     "docs/guides/network-foundation-linux.md",
     "docs/references/linux-network-capabilities.json",
     "docs/evidence/M9-001",
+    "docs/evidence/M9-003/m9-001-current-map.json",
+    "docs/evidence/M9-003/m9-001-current-map",
     "examples/linux/m9_001",
     "tools/check_network_capabilities.py",
     "tools/m9_001_native_capabilities.py",
@@ -73,6 +75,21 @@
       "timeout_seconds": 900
     },
     {
+      "id": "installed-current-map-capabilities",
+      "argv": [
+        "python3",
+        "tools/m9_003_native_udp.py",
+        "--offline",
+        "--report",
+        "docs/evidence/M9-003/m9-001-current-map.json",
+        "--output-dir",
+        "docs/evidence/M9-003/m9-001-current-map"
+      ],
+      "gate": "long",
+      "long_running": true,
+      "timeout_seconds": 1800
+    },
+    {
       "id": "capability-correspondence",
       "argv": [
         "python3",
@@ -80,7 +97,7 @@
         "--check",
         "--require-native",
         "--native-report",
-        "docs/evidence/M9-001/native-capabilities.json",
+        "docs/evidence/M9-003/m9-001-current-map.json",
         "--report",
         "docs/evidence/M9-001/capabilities.json",
         "--api-report",
@@ -115,6 +132,8 @@
   ],
   "required_evidence": [
     "docs/evidence/M9-001/native-capabilities.json",
+    "docs/evidence/M9-003/m9-001-current-map.json",
+    "docs/evidence/M9-001/current-map-task-check.json",
     "docs/evidence/M9-001/capabilities.json",
     "docs/evidence/M9-001/api-inventory.json",
     "docs/evidence/M9-001/api-compatibility.json",
@@ -238,6 +257,8 @@
     "examples/linux/m8_003/main.cj",
     "examples/linux/m8_004/native_dns.cj",
     "examples/linux/m9_001/native_capabilities.cj",
+    "examples/linux/m9_002/socket_options.cj",
+    "examples/linux/m9_003/udp_lifecycle.cj",
     "native/http_files/wirestack_http_files.c",
     "native/http_files/wirestack_http_files.h",
     "native/resolver/linux/wirestack_resolver.c",
@@ -411,6 +432,7 @@
     "tools/m8_004_native_dns.py",
     "tools/m8_005_native_http.py",
     "tools/m9_001_native_capabilities.py",
+    "tools/m9_003_native_udp.py",
     "tools/release_smoke/main.cj",
     "tools/repository/repository_tooling.py",
     "tools/tasks/M9-001.json",
@@ -421,7 +443,7 @@
     "tools/tls_provider/selection.json",
     "tools/tls_provider/selection.py"
   ],
-  "long_running_gate": false,
+  "long_running_gate": true,
   "timeout_seconds": 5400,
   "revision_bound_reports": [
     "docs/evidence/M9-001/publication.json"
