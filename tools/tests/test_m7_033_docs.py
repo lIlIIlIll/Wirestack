@@ -175,6 +175,36 @@ class M7033DocsTests(unittest.TestCase):
         self.assertEqual(3, observed["peak"])
         self.assertEqual(0, observed["active"])
 
+    def test_html_rendering_can_progress_while_an_unrelated_view_is_pending(self) -> None:
+        html_started = threading.Event()
+
+        def generate(cjdoc, project, output, timeout, package, commands):
+            if package == "wirestack":
+                self.assertTrue(html_started.wait(3), "HTML waited for an unrelated view")
+            self._generate_fixture_layer(cjdoc, project, output, timeout, package, commands)
+
+        def render(cjdoc, project, doc_ir, output, timeout, fmt):
+            artifacts = docs._artifact_paths(output)
+            artifacts["html"].parent.mkdir(parents=True)
+            artifacts["html"].write_text("<html>qualified view</html>\n", encoding="utf-8")
+            artifacts["search"].write_text("const searchIndex = [];\n", encoding="utf-8")
+            html_started.set()
+            return {"status": "PASS", "returncode": 0}
+
+        with tempfile.TemporaryDirectory(prefix="wirestack-docs-html-progress-") as directory:
+            root = Path(directory)
+            source = root / "src/package.cj"
+            source.parent.mkdir()
+            source.write_text("package wirestack\n", encoding="utf-8")
+            with mock.patch.object(docs, "resolve_cjdoc", return_value=("cjdoc", "0.7.2")), \
+                    mock.patch.object(docs, "public_source_paths", return_value=[source]), \
+                    mock.patch.object(docs, "_copy_public_view"), \
+                    mock.patch.object(docs, "_check", return_value={"status": "PASS", "returncode": 0}), \
+                    mock.patch.object(docs, "_generate_layer", side_effect=generate), \
+                    mock.patch.object(docs, "_render", side_effect=render):
+                report = docs.build_report(root, include_html=True)
+        self.assertEqual("PASS", report["status"], report["issues"])
+
     def test_failed_view_cannot_publish_successful_sibling_artifacts(self) -> None:
         sibling_staged = threading.Event()
 

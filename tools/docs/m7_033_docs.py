@@ -386,7 +386,8 @@ def _source_inventory(root: Path, files: Iterable[Path]) -> dict[str, str]:
 
 def _build_public_view(root: Path, cjdoc: str, staging: Path, package: str,
                        files: Sequence[Path], timeout: int,
-                       commands: list[dict[str, Any]]) -> dict[str, Any]:
+                       commands: list[dict[str, Any]], *,
+                       include_html: bool) -> dict[str, Any]:
     project = staging / package.replace(".", "-") / "project"
     output = staging / package.replace(".", "-") / "output"
     _copy_public_view(root, project, files)
@@ -395,7 +396,27 @@ def _build_public_view(root: Path, cjdoc: str, staging: Path, package: str,
     if check_command["status"] != "PASS":
         raise DocsError("CJDOC_CHECK", f"{package} strict check returned {check_command['returncode']}")
     _generate_layer(cjdoc, project, output, timeout, package, commands)
-    return _validate_layer(output, package)
+    layer = _validate_layer(output, package)
+    if include_html:
+        # The combined view owns HTML work; unrelated views need not finish first.
+        html_output = staging / "combined" / "html-output"
+        command = _render(cjdoc, project, _artifact_paths(output)["docs"],
+                          html_output, timeout, "html")
+        commands.append({"package": package, "kind": "render-html", **command})
+        if command["status"] != "PASS":
+            raise DocsError("CJDOC_RENDER", "combined HTML rendering returned a non-zero status")
+        paths = _artifact_paths(html_output)
+        for key in ("html", "search"):
+            if not paths[key].is_file():
+                raise DocsError("HTML_MISSING", f"missing HTML artifact: {key}")
+        layer["htmlSha256"] = _text_digest(paths["html"])
+        layer["searchSha256"] = _text_digest(paths["search"])
+        layer["htmlPages"] = sorted(
+            str(path.relative_to(html_output / "html"))
+            for path in (html_output / "html").rglob("*.html")
+            if path.name != "index.html"
+        )
+    return layer
 
 
 def build_report(root: Path = ROOT, *, include_html: bool = False,
@@ -434,13 +455,15 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
             view_commands: dict[str, list[dict[str, Any]]] = {package: [] for package, _ in views}
             # The fixed public-package manifest bounds queued work; each view
             # owns its project, output directory and command records.
+            # Start the combined view and its HTML critical path before smaller views.
             with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_VIEWS) as executor:
                 futures = {
                     package: executor.submit(
                         _build_public_view, root, cjdoc, staging, package,
                         package_files, timeout, view_commands[package],
+                        include_html=include_html and package == "combined",
                     )
-                    for package, package_files in views
+                    for package, package_files in (views[-1], *views[:-1])
                 }
             # Join every worker before inspecting failures or publishing.
             # Receipts retain manifest order, not thread-completion order.
@@ -449,28 +472,8 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
             for package in ("wirestack", *PUBLIC_PACKAGE_FILES):
                 report["layers"].append(futures[package].result())
 
-            combined_project = staging / "combined" / "project"
             combined_output = staging / "combined" / "output"
             combined = futures["combined"].result()
-            if include_html:
-                # Keep HTML rendering out of the process retaining the other serialized formats.
-                html_output = staging / "combined" / "html-output"
-                command = _render(cjdoc, combined_project, _artifact_paths(combined_output)["docs"],
-                                  html_output, timeout, "html")
-                report["commands"].append({"package": "combined", "kind": "render-html", **command})
-                if command["status"] != "PASS":
-                    raise DocsError("CJDOC_RENDER", "combined HTML rendering returned a non-zero status")
-                paths = _artifact_paths(html_output)
-                for key in ("html", "search"):
-                    if not paths[key].is_file():
-                        raise DocsError("HTML_MISSING", f"missing HTML artifact: {key}")
-                combined["htmlSha256"] = _text_digest(paths["html"])
-                combined["searchSha256"] = _text_digest(paths["search"])
-                combined["htmlPages"] = sorted(
-                    str(path.relative_to(html_output / "html"))
-                    for path in (html_output / "html").rglob("*.html")
-                    if path.name != "index.html"
-                )
             report["combined"] = combined
 
             generated = root / "docs/api/generated"
@@ -484,6 +487,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
                 shutil.rmtree(markdown)
             shutil.copytree(combined_output / "markdown", markdown)
             if include_html:
+                html_output = staging / "combined" / "html-output"
                 html = root / "target/doc/html"
                 if html.exists():
                     shutil.rmtree(html)

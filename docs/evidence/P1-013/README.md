@@ -38,10 +38,21 @@ coverage, the 65,536-entry cache bound, default heap profile and existing task
 limits remain unchanged. Receipts retain manifest order and artifacts publish
 only after every worker has joined and every view has passed.
 
-The bounded-overlap regression and a required-view failure after sibling
-staging exercise concurrency and all-or-nothing publication. They do not
-establish native timing: current qualification still requires actual canonical
-and HTML execution within their original limits.
+The first three-view native HTML run at source
+`e0cc7f4ea89af6386b078d8f164c40673b425642` still timed out after 900.006
+seconds. Its [retained failure](maintenance/bounded-parallel-first-native-timeout.json)
+records staging timestamps and the post-timeout process check. It is not
+acceptance. The combined view's Markdown artifact appeared at 766.505 seconds;
+HTML output staging appeared at 877.644 seconds.
+
+The scheduling correction starts the combined view first and renders HTML in
+that same bounded worker. Unrelated views no longer delay HTML, but every view
+must still pass before publication. The progress regression failed before this
+correction; all 13 documentation tests passed afterward, including the
+three-worker cap and failed-view publication protection.
+
+These regressions do not establish native timing. Current qualification still
+requires actual canonical and HTML execution within their original limits.
 
 ## Release boundary
 
