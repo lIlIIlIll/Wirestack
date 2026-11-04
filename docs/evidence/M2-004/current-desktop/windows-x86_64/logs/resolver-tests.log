@@ -1,132 +1,140 @@
-sourceLease): Http1ClientConnection {
-
-   |         ^^^^^^^^^^^^^ unused variable
-
-   | 
-
-   # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-
-
-warning[0m: unreachable block in 'if' expression
-
-   ==> <workspace>\src\internal\http1\server_connection.cj:166:23:
+                        ^^^^^^^^^^ deprecated
 
     | 
 
-166 |         try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }
-
-    |                       ^^^^^^^^^^^^^ unreachable block in 'if' expression
-
-    | 
-
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
 
 
-warning[0m: unused variable:'resourceLease'
+warning[0m: class 'UnixSocket' is deprecated.
 
-   ==> <workspace>\src\internal\http1\proxy_client_pipeline.cj:238:9:
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:156:43:
 
     | 
 
-238 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+156 |                     acceptedSocket = None<UnixSocket>
 
-    |         ^^^^^^^^^^^^^ unused variable
-
-    | 
-
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-
-
-warning[0m: unused variable:'resourceLease'
-
-   ==> <workspace>\src\internal\http1\proxy_client_pipeline.cj:279:9:
+    |                                           ^^^^^^^^^^ deprecated
 
     | 
 
-279 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
-
-    |         ^^^^^^^^^^^^^ unused variable
-
-    | 
-
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
 
 
-warning[0m: unreachable block in 'if' expression
+warning[0m: class 'UnixSocket' is deprecated.
 
-   ==> <workspace>\src\internal\http1\http2_connection_pool.cj:453:42:
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:162:43:
 
     | 
 
-453 |             if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }
+162 |                     acceptedSocket = None<UnixSocket>
 
-    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
-
-    | 
-
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-
-
-warning[0m: unreachable block in 'if' expression
-
-   ==> <workspace>\src\internal\http1\http2_connection_pool.cj:455:42:
+    |                                           ^^^^^^^^^^ deprecated
 
     | 
 
-455 |             if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }
-
-    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
-
-    | 
-
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
 
 
-warning[0m: unreachable block in 'if' expression
+warning[0m: class 'UnixSocket' is deprecated.
 
-   ==> <workspace>\src\internal\http1\http2_connection_pool.cj:765:32:
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:168:43:
 
     | 
 
-765 |               if (waiterId != 0) {
+168 |                     acceptedSocket = None<UnixSocket>
 
-    |  ________________________________^
-
-766 | |                 synchronized(mutex) { removeHttp2WaiterLocked(waiterId, false) }
-
-767 | |             }
-
-    | |_____________^ unreachable block in 'if' expression
+    |                                           ^^^^^^^^^^ deprecated
 
     | 
 
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
 
 
-warning[0m: unused variable:'resourceLease'
+warning[0m: class 'UnixSocket' is deprecated.
 
-   ==> <workspace>\src\internal\http1\tls_client_pipeline.cj:869:9:
-
-    | 
-
-869 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
-
-    |         ^^^^^^^^^^^^^ unused variable
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:174:43:
 
     | 
 
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+174 |                     acceptedSocket = None<UnixSocket>
+
+    |                                           ^^^^^^^^^^ deprecated
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
 
 
-8 warnings generated, 8 warnings printed.
+warning[0m: class 'UnixSocket' is deprecated.
+
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:207:43:
+
+    | 
+
+207 |                     acceptedSocket = None<UnixSocket>
+
+    |                                           ^^^^^^^^^^ deprecated
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+
+
+warning[0m: class 'UnixSocket' is deprecated.
+
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:222:23:
+
+    | 
+
+222 |         var pending: ?UnixSocket = None<UnixSocket>
+
+    |                       ^^^^^^^^^^ deprecated
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+
+
+warning[0m: class 'UnixSocket' is deprecated.
+
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:222:41:
+
+    | 
+
+222 |         var pending: ?UnixSocket = None<UnixSocket>
+
+    |                                         ^^^^^^^^^^ deprecated
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+
+
+warning[0m: class 'UnixSocket' is deprecated.
+
+   ==> <workspace>\src\internal\transport_stdnet\unix_listener.cj:229:39:
+
+    | 
+
+229 |                 acceptedSocket = None<UnixSocket>
+
+    |                                       ^^^^^^^^^^ deprecated
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+
+
+23 warnings generated, 23 warnings printed.
 
 warning[0m: unreachable block in 'if' expression
 
@@ -969,22 +977,22 @@ note[0m: unused expression
 18 warnings generated, 18 warnings printed.
 
 --------------------------------------------------------------------------------------------------
-TP: wirestack.internal.resolver, time elapsed: 60077800 ns, RESULT:
-    TCS: M2004WindowsSystemResolverTest, time elapsed: 56448700 ns, RESULT:
-    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (11859600 ns)
-    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (381000 ns)
-    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (261700 ns)
-    [ PASSED ] CASE: fixtureMapsWinsockFailuresAndUnknownCodes (1056500 ns)
-    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (40686000 ns)
-    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (210500 ns)
+TP: wirestack.internal.resolver, time elapsed: 127019700 ns, RESULT:
+    TCS: M2004WindowsSystemResolverTest, time elapsed: 122859700 ns, RESULT:
+    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (10736500 ns)
+    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (337300 ns)
+    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (29775900 ns)
+    [ PASSED ] CASE: fixtureMapsWinsockFailuresAndUnknownCodes (16107700 ns)
+    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (62961300 ns)
+    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (258300 ns)
 Summary: TOTAL: 34
     PASSED: 6, SKIPPED: 28, ERROR: 0
     FAILED: 0
 --------------------------------------------------------------------------------------------------
-Project tests finished, time elapsed: 75724900 ns, RESULT:
-TP: wirestack.*, time elapsed: 75587400 ns, RESULT:
+Project tests finished, time elapsed: 143571000 ns, RESULT:
+TP: wirestack.*, time elapsed: 143442400 ns, RESULT:
     PASSED:
-    TP: wirestack.internal.resolver, time elapsed: 60077800 ns
+    TP: wirestack.internal.resolver, time elapsed: 127019700 ns
 Summary: TOTAL: 34
     PASSED: 6, SKIPPED: 28, ERROR: 0
     FAILED: 0
