@@ -1,0 +1,15 @@
+{
+  "expected_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "failures": [],
+  "report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "c67b17ca4b3d8a62e35e867610d7b5b0a87bc6cfcb418ade987ffd5719902aa3"
+  },
+  "schema_version": 2,
+  "source_inventory_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "c8cdadb2aabd5d63acf442359adcb01d751d45ff297fb1575f406431cdf3898f"
+  },
+  "status": "PASS",
+  "task_id": "M2-004"
+}
