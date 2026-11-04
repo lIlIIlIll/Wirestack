@@ -52,15 +52,19 @@ must still pass before publication. The progress regression failed before this
 correction; all 13 documentation tests passed afterward, including the
 three-worker cap and failed-view publication protection.
 
-The corrected [native HTML run](maintenance/combined-first-native/qualification.json)
+The earlier corrected [native HTML run](maintenance/combined-first-native/qualification.json)
 at `59e0fcf458f73ff1a395b378d1e1914685ea379a` passed all 41 commands in
 542.662 seconds, within the unchanged 900-second limit. All seven layer records
 and combined serialized artifacts match the earlier serial output. Coverage
 remains 100% for 1,873 symbols and 950 parameters. Actual browser search and
 navigation to `HttpClient` passed with visual evidence and no browser errors.
 
-The full canonical task also passed. Its unchanged 1,800-second canonical
-command completed in 803.463 seconds. All 98 focused regressions passed;
+That maintenance proof predates the later M9 manifest integration. It is not
+reused as current M9 HTML or release acceptance.
+
+The full canonical task passed again at current source
+`1631837216989f7eac6986b24b0b9a2c61d0bd20`. Its unchanged 1,800-second
+canonical command completed in 746.197 seconds. All 98 focused regressions passed;
 the native suite passed 1,090 cases with 28 explicit skips and no failures or
 errors. Canonical documentation passed all 40 commands with the same complete
 symbol and parameter coverage. Complete stdout/stderr projections replace only
