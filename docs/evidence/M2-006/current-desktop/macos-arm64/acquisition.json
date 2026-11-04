@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "task_id": "M2-006",
+  "kind": "parent-recovered-native-acquisition",
+  "status": "PASS",
+  "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+  "run_id": 41779286737,
+  "job_id": 126406872633,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41779286737",
+  "artifact_id": 13299130390,
+  "zip_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "668fa648aadde64c1ca92f70c5a5248132154ac8e68ef16ad5719ae988829fe1"
+  },
+  "members_byte_matched": 7,
+  "log_hashes_matched": 5,
+  "source_files_matched": 69,
+  "selected_cases_passed": 8,
+  "filtered_skipped": 26,
+  "sdk": {
+    "archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "de88d6ba2185c94979e0ab2fe8ac1d81535dfdff3fcb51fbba71e4b99d851f97"
+    },
+    "archive_name": "cangjie-sdk-mac-aarch64-1.2.0.tar.gz",
+    "channel": "STS",
+    "cjc": {
+      "relative_path": "bin/cjc",
+      "target": "aarch64-apple-darwin",
+      "version": "1.2.0",
+      "version_output": "Cangjie Compiler: 1.2.0 (cjnative)\nTarget: aarch64-apple-darwin"
+    },
+    "cjpm": {
+      "relative_path": "tools/bin/cjpm",
+      "version": "1.2.0",
+      "version_output": "Cangjie Project Manager: 1.2.0"
+    },
+    "matched_archive_files": 283,
+    "platform": {
+      "machine": "arm64",
+      "native_target": "aarch64-apple-darwin",
+      "system": "Darwin"
+    },
+    "version": "1.2.0"
+  },
+  "collector_failure": "Agent model transport ECONNRESET after native qualification and artifact acquisition completed; recovered existing run without redispatch",
+  "full_task_status": "BLOCKED",
+  "mobile": "NOT_RUN",
+  "report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e9db18ebe6b4b199b87146fa9d0f02bf29b64cc3a1b2714ff3abe4bac2ecc29d"
+  },
+  "validation_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4"
+  },
+  "scope": "Current desktop ARM64 resolver qualification only; full Apple/mobile task remains blocked"
+}
