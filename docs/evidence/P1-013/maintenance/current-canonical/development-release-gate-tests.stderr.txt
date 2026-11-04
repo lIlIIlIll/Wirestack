@@ -99,6 +99,6 @@ test_unknown_doc_ir_schema_is_rejected (tools.tests.test_m7_033_docs.M7033DocsTe
 test_version_mismatch_is_blocked_without_parsing_exception_text (tools.tests.test_m7_033_docs.M7033DocsTests.test_version_mismatch_is_blocked_without_parsing_exception_text) ... ok
 
 ----------------------------------------------------------------------
-Ran 98 tests in 2.297s
+Ran 98 tests in 1.858s
 
 OK

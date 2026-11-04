@@ -3,8 +3,8 @@
   "task_id": "P1-013",
   "kind": "current-native-canonical-task",
   "status": "PASS",
-  "tested_source_revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
-  "metadata_source_revision": "dac8e9f93431358cb4bc87036d46e9870f25604d",
+  "tested_source_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "metadata_source_revision": "a4cb2dbdad7c5240e270e80b14e041081857ce71",
   "sdk": "official qualified STS 1.1.3",
   "command": [
     "scripts/check-task",
@@ -19,21 +19,21 @@
       "status": "PASS",
       "exit_code": 0,
       "timed_out": false,
-      "duration_ms": 113.921
+      "duration_ms": 113.93
     },
     {
       "id": "development-release-gate-tests",
       "status": "PASS",
       "exit_code": 0,
       "timed_out": false,
-      "duration_ms": 2780.224
+      "duration_ms": 2165.693
     },
     {
       "id": "canonical-repository-check",
       "status": "PASS",
       "exit_code": 0,
       "timed_out": false,
-      "duration_ms": 803462.789
+      "duration_ms": 746197.41
     }
   ],
   "native_cases": {
@@ -72,11 +72,11 @@
       "public_path": "docs/evidence/P1-013/task-check.json",
       "raw_byte_digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "41130bed0eb13b7e3121dabf0f692cd46d031e9e4c98ff02392a60c96b99fd4d"
+        "sha256": "24816faf5d282c801a5ab88e317c9ac15a5b3398b11079a060045b7433d37e98"
       },
       "public_text_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "21d66733d497f04180f62cc7dfe5dcfcf6580c970bd3a02841065b1eaa0b1d47"
+        "sha256": "ac2661ea4b0ae25984d247e36c34fe04a55e4349c8e920d6ddc7ef69163c8665"
       },
       "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
     },
@@ -85,11 +85,11 @@
       "public_path": "docs/evidence/P1-013/maintenance/current-canonical/docs-report.json",
       "raw_byte_digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "da35ad8e28ceb52ffd7d8efe355615f1a413a291d8617630f5b38058d2313b70"
+        "sha256": "bdaf9724979e0ea5b20e73a3d7aa4f4a122c6ff70278a3e3ffdfc82ccddb9572"
       },
       "public_text_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "da35ad8e28ceb52ffd7d8efe355615f1a413a291d8617630f5b38058d2313b70"
+        "sha256": "bdaf9724979e0ea5b20e73a3d7aa4f4a122c6ff70278a3e3ffdfc82ccddb9572"
       },
       "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
     },
@@ -137,11 +137,11 @@
       "public_path": "docs/evidence/P1-013/maintenance/current-canonical/development-release-gate-tests.stderr.txt",
       "raw_byte_digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "d3f44fb90d954ec8dffb12a26c5701a87febfe97657750055afd29b92421196b"
+        "sha256": "61fdab37b19fcb5c625a37226b7f376612a6a5effe727f7113aece2217303c55"
       },
       "public_text_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7fec5cfdf4010ff0e240e9db40df1e17436002d8ed09ce3368dc5f104828f66c"
+        "sha256": "037e843a9f14b737d69c6ab4723696870eadccb97679bcd209b263887ed37516"
       },
       "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
     },
@@ -150,11 +150,11 @@
       "public_path": "docs/evidence/P1-013/maintenance/current-canonical/canonical-repository-check.stdout.txt",
       "raw_byte_digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "4fee16933a22757a695cc9b9dd8d4166015c6d8f1880221678fd07638ca5fb93"
+        "sha256": "ba5113ada7e3a88dc2eb7c33dadbbc57e14c5aa674874c16906260bf2547fd36"
       },
       "public_text_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "4fee16933a22757a695cc9b9dd8d4166015c6d8f1880221678fd07638ca5fb93"
+        "sha256": "ba5113ada7e3a88dc2eb7c33dadbbc57e14c5aa674874c16906260bf2547fd36"
       },
       "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
     },
@@ -163,11 +163,11 @@
       "public_path": "docs/evidence/P1-013/maintenance/current-canonical/canonical-repository-check.stderr.txt",
       "raw_byte_digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "ced4539166e3ce478ceea110288aa44c92f29e3c7b9cfbb5c4a3b8cd03e495e5"
+        "sha256": "34f13df24f7b2d0545349e295621bd31ff12f27078a4b8b71f6fd53e9495e49e"
       },
       "public_text_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "63499cb278f257c9797757ba4740682192abd8fdec03ac7c130f6043231da588"
+        "sha256": "a01ceadb7e3d7f5737b90eb35f0e335ef2523c40b4e2fc5613a81582e262757b"
       },
       "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
     }
