@@ -1,16 +1,117 @@
 {
-  "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-10-20T12:19:45.471139Z",
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-11-04T06:32:57.608209Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
     "machine": "x86_64",
     "system": "Linux"
   },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-012/test-plan-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "23b3ef79435b15f3684edcdac0fffa03b82df15ab12e4c93c9cfcbc06d394826"
+      },
+      "source_task": "P1-012"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-012/task-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "433e85cf8a44cf44d5e39290566d2db85f890781ed13c9394592a913729b0798"
+      },
+      "source_task": "P1-012"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-012/selected-global-cli-smoke.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "60fce8676be0265a940ca0b653fb6a4c122212601f76869706decf49bd7e19a2"
+      },
+      "source_task": "P1-012"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-012/timeout-descendant-cleanup.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0dcb268afe77f260dc4ae89b9ccc41353af44a47e7709f0bca7e95a102e3e421"
+      },
+      "source_task": "P1-012"
+    }
+  ],
+  "revision": "dac8e9f93431358cb4bc87036d46e9870f25604d",
   "schema_version": 2,
+  "source_sha256": {
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49c61ce3c136094b24008eb4a2608561f42a101c17cff0dbe884c2f6d4c6ce9c"
+    },
+    "docs/evidence/P1-012/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cea3c3db8135ace27327711970ecf35bba83d6170a6da1f65da97a5df3805d90"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5ff33fea10eec850f3948059c7db069255dadc00f091b9ddc54a8091d306c672"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ebe2a547db2af0abfab7bd5a2bb13eaecdc840013f22848f5a4c8b43a82d6225"
+    },
+    "scripts/check-fast": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "88e67a1ee04914d2e6eed9caa664d01787b047f0d65d23d36e95ce80514e198f"
+    },
+    "scripts/check-full": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2bed1d814b2f92842733afd3045d2b6a1d0fbd1538801a12b31fa7fc10203787"
+    },
+    "scripts/check-long": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "58e3649c54d4fc26d14959ecd91b2a6c9b02ed19030ff1ad169491e7be60d69a"
+    },
+    "scripts/check-task": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "774b29125246ea21e847536e0534679aa3065dc80cfa81e014b6862358676648"
+    },
+    "scripts/repo-doctor": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cad8b0af8adcde07298ad012cc58ef6751d72306e96d7fb532bec32361318e14"
+    },
+    "scripts/verify-evidence": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ba773c1761dfd5d7f12faa54c5d180182e9dd76bb0629dc2ff255bb33b9c1b95"
+    },
+    "tools/repository/repository_tooling.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b6624ebf4baf825d422f35e9a56e2da463559c46c650b02f334bf9217401642"
+    },
+    "tools/repository/tests/test_repository_tooling.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d9cc4436b86000bc9e2ea87417ea11ee9eb6fa5b2b325cd7066f535094a278ae"
+    },
+    "tools/tasks/P1-012.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1843c3862559d20e03ef01a1620cc00bd9fcf5767510b4b2d9310287839bd208"
+    },
+    "tools/tasks/schema-v1.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9dfa31e025e7f879bbd1c837c8cc9a7f034cceead8bb4986b902a12e447857eb"
+    },
+    "tools/tests/test_m7_linux_task_graph.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "deaed3a8ddb41a90d3dd8306be0b41617027ec8740faede9d2b961c40ec0ea86"
+    }
+  },
   "source_task": "P1-012",
   "toolchain": {
-    "cjc": null,
-    "cjpm": null
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
   }
 }
