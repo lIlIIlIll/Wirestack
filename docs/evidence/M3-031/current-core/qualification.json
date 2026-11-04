@@ -7,11 +7,11 @@
         "--offline",
         "--json"
       ],
-      "duration_ms": 414.169,
+      "duration_ms": 666.2,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-04T05:17:47.332976Z",
+      "finished_at_utc": "2026-11-04T08:06:29.578937Z",
       "id": "provider-build",
-      "started_at_utc": "2026-11-04T05:17:46.918813Z",
+      "started_at_utc": "2026-11-04T08:06:28.912736Z",
       "status": "PASS",
       "timed_out": false
     },
@@ -24,11 +24,11 @@
         "--format",
         "json"
       ],
-      "duration_ms": 10273.859,
+      "duration_ms": 15737.555,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-04T05:17:57.608428Z",
+      "finished_at_utc": "2026-11-04T08:06:45.317726Z",
       "id": "architecture-guard",
-      "started_at_utc": "2026-11-04T05:17:47.334575Z",
+      "started_at_utc": "2026-11-04T08:06:29.580178Z",
       "status": "PASS",
       "timed_out": false
     },
@@ -44,11 +44,11 @@
         "--no-color",
         "src/internal/tls_engine"
       ],
-      "duration_ms": 24388.058,
+      "duration_ms": 34337.107,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-04T05:18:21.997670Z",
+      "finished_at_utc": "2026-11-04T08:07:19.656541Z",
       "id": "provider-substitution",
-      "started_at_utc": "2026-11-04T05:17:57.609674Z",
+      "started_at_utc": "2026-11-04T08:06:45.319435Z",
       "status": "PASS",
       "timed_out": false
     },
@@ -62,11 +62,11 @@
         "dist/m3-031-current-core",
         "--offline"
       ],
-      "duration_ms": 25118.21,
+      "duration_ms": 35058.678,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-04T05:18:47.118085Z",
+      "finished_at_utc": "2026-11-04T08:07:54.716978Z",
       "id": "installed-consumer",
-      "started_at_utc": "2026-11-04T05:18:21.999875Z",
+      "started_at_utc": "2026-11-04T08:07:19.658294Z",
       "status": "PASS",
       "timed_out": false
     }
@@ -2774,7 +2774,7 @@
     },
     "tools/tasks/M9-001.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "14a01b89a32946c40294298fd7771a97506486685931f6c1e0509fadb6cfc737"
+      "sha256": "2aa23f961702bd96fc262e73b7ea7be8c1da1d8f957585ff0d2246c3148ce78f"
     },
     "tools/tasks/M9-002.json": {
       "domain": "text-utf8-lf-v1",
@@ -3104,7 +3104,7 @@
     "qualification": {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "af141d7fd7440dfe0cecf21045c62befe6891ec2c85341d96044052412ba516a"
+        "sha256": "705d3ff2cc68126fed0201bfa1d74017d2777c84afa7a58bff8ee2eac2abd75c"
       },
       "path": "dist/m3-031-current-core/qualification.json"
     }
@@ -3116,63 +3116,63 @@
         "domain": "text-utf8-lf-v1",
         "sha256": "2fe53588140e46a64d8da4ba937ae4dd7460cc385dd014de0d2e823585b2d972"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-build.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/provider-build.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-build.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/provider-build.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "16c2c74c0eb589466c4403afda58a413af1d83feb4f1a3da912bde7512aff5bb"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/architecture-guard.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/architecture-guard.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/architecture-guard.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/architecture-guard.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "23d5f42d8d55bc3654dab9b7424395f864323da562363c8dec5ec9c75d0f0a2a"
+        "sha256": "54cfcf8ccb2237cecd743b20874e2b2eccdc71d9a2bf5ed340de3fc636f051a0"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-substitution.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/provider-substitution.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "f6f380c88e6461990ed2e89296bbec30b1788158132743c4efba7457686f44dc"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-substitution.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/provider-substitution.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e6e203eb77e56f82af1e69234932a9862676fd033400d2c6ad54b902ae275863"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/installed-consumer.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/installed-consumer.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/installed-consumer.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/installed-consumer.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "90b50ec5651426ab83bdbf17f6207d3c6e5228d8e0569501833e0a6aa6fa0a63"
+        "sha256": "dc37146ff3647a3f57c007ad4cdef6879dcf7bbf57ac4d12155f8884772dba4e"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/installed-consumer.qualification.log"
+      "path": "docs/evidence/M3-031/current-core/runs/174faad528cd4ac7b843e790032971df/commands/installed-consumer.qualification.log"
     }
   ],
   "native_archive": {
@@ -3968,7 +3968,7 @@
     "qualification": "NOT_QUALIFIED",
     "signing": "NOT_AUTHORIZED"
   },
-  "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
   "schema_version": 1,
   "sdk": {
     "archive": {
