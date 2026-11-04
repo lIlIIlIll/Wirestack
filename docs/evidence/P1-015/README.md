@@ -4,7 +4,7 @@
 
 ## 范围与历史记录
 
-- P1-013 当前代码验收已通过。P1-014 五个命令和早期同 SHA 双平台回执已通过，但当前 metadata 仍需新的 Windows exact-revision 回执；GitHub 服务端拒绝更新 owner ref，不能以旧回执提升本任务。
+- P1-013 当前代码验收已通过。P1-014 五个命令、实际同 SHA Linux/Windows 回执和严格 source seal 均已通过；GitHub owner ref 发布已恢复。共享完成状态在最终冻结树重新资格，不改写旧回执 revision。
 - 不改写 M7/M8 历史报告、摘要、签名或审查结论。历史记录不再作为当前开发验收的前置。
 - M7-028 审查包和 M7-024 性能验证器的开发回归使用临时输入，执行摘要篡改、缺失、采样不足和源码漂移负例。生产 release validator 和历史 campaign manifest 均未修改。
 - 删除只检查 CLI 引导源码写法的测试，改为在 checkout 外实际执行新 CLI 的回归测试。
@@ -53,11 +53,11 @@ python3 tools/development_baseline.py verify
 
 正式发布仍必须取得所选发布候选自身的完整资格。开发 PASS 不能作为 release validator 的输入替代品。
 
-## 本轮实际执行，任务尚未提升
+## 本轮实际执行：开发任务 COMPLETE
 
-当前源码完整 capture 和后续独立 `verify` 均 exit 0。报告仍是开发
-profile，不是 task readiness 或 release 资格；P1-014 当前 metadata 屏障
-未完成时，P1-015 保持 BLOCKED。
+当前源码完整 capture、独立 `verify` 和实际 selected task 的三个命令均
+exit 0。selected task 在 P1-014 实际 metadata 资格通过后执行；不是将早期
+`INVALID` 结果改写成 PASS。此前 dependency-blocked 报告保留在 maintenance。
 
 | 本轮检查 | 实际结果 |
 |---|---|
@@ -69,7 +69,11 @@ profile，不是 task readiness 或 release 资格；P1-014 当前 metadata 屏�
 | 完整日志与字节复验 | 12 份完整脱敏日志；`verify` exit 0，生产、执行、SDK、日志与制品绑定通过 |
 
 当前 [baseline.json](baseline.json) 是以上实测 capture；
-[verification.json](verification.json) 明确记录 task 的 BLOCKED 边界。
+[verification.json](verification.json) 和 [task-check.json](task-check.json)
+记录开发任务 PASS。三项 selected 命令分别完成 plan、gate separation 和
+当前基线字节验证，不替代以上四个实际 capture gate。
+三项命令的六份完整 stdout/stderr 及文本摘要见
+[selected task 完整日志](maintenance/current-selected/qualification.json)。
 安装制品保持本地私有，不声称 payload 隐私发布资格。正式 release
 `NOT_QUALIFIED`；独立审查和 86,400 秒 soak `NOT_RUN`，签名
 `NOT_AUTHORIZED`。本 preflight 不关闭 M10-002 默认 runtime task-count
