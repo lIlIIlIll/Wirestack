@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-11-04T06:56:39.002650Z",
+  "generated_at_utc": "2026-11-04T09:29:49.614356Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -22,7 +22,7 @@
       "path": "docs/evidence/P1-012/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "433e85cf8a44cf44d5e39290566d2db85f890781ed13c9394592a913729b0798"
+        "sha256": "b65689d3ba074bff6a24ae3051d8438146cba3a835a8d6a97249032b709b8c36"
       },
       "source_task": "P1-012"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/P1-012/selected-global-cli-smoke.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "60fce8676be0265a940ca0b653fb6a4c122212601f76869706decf49bd7e19a2"
+        "sha256": "134590d8af7562134159204ecb50774a16bc1366aa3ea29a04a545a3342a5f92"
       },
       "source_task": "P1-012"
     },
@@ -45,7 +45,7 @@
       "source_task": "P1-012"
     }
   ],
-  "revision": "718db35a9700fe32190eb364812fcc1188d22571",
+  "revision": "b78d8d278214bd981572ac82581b185489bab40c",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -62,7 +62,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "08869fa4543c006e5b898b0e94416f67d078c759ae899f88296ac5e4e3033897"
+      "sha256": "18532b5b9ae9cccfcb5b62c78cb506148b1851fb75d0e453cfc92299945e34fa"
     },
     "scripts/check-fast": {
       "domain": "text-utf8-lf-v1",
