@@ -1,0 +1,34 @@
+package default_runtime_worker_repro
+
+import std.env.getStdOut
+import std.time.*
+
+foreign func getpid(): Int32
+foreign func usleep(microseconds: UInt32): Int32
+
+func mark(name: String): Unit {
+    println("MARK ${name}")
+    getStdOut().flush()
+}
+
+main(): Int64 {
+    println("PID ${unsafe { getpid() }}")
+    getStdOut().flush()
+    sleep(Duration.second)
+    mark("baseline")
+    sleep(Duration.second)
+    let first = spawn { unsafe { usleep(250000u32) } }
+    let second = spawn { unsafe { usleep(250000u32) } }
+    let third = spawn { unsafe { usleep(250000u32) } }
+    let fourth = spawn { unsafe { usleep(250000u32) } }
+    let _ = first.get(5 * Duration.second)
+    let _ = second.get(5 * Duration.second)
+    let _ = third.get(5 * Duration.second)
+    let _ = fourth.get(5 * Duration.second)
+    sleep(Duration.second)
+    mark("after_join")
+    sleep(6 * Duration.second)
+    mark("after_idle")
+    sleep(Duration.second)
+    0
+}
