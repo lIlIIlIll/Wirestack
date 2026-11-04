@@ -2,35 +2,3365 @@
   "schema_version": 1,
   "source_task": "M9-001",
   "status": "PASS",
-  "scope": "Compatibility classification, not binary execution qualification",
+  "scope": "Completed factual integrated-tree inventory comparison and risk classification only; not M9 task acceptance or old-consumer, old-binary, cross-SDK or formal compatibility qualification. This whole-tree delta is not attributed solely to manifest maintenance.",
+  "tested_source_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
   "baseline": "docs/api/baselines/wirestack-linux-pre1-m8-007.json",
   "current_inventory": "docs/evidence/M9-001/api-inventory.json",
   "inventory_comparison": {
-    "added_declarations": [],
+    "tested_source_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+    "baseline": "docs/api/baselines/wirestack-linux-pre1-m8-007.json",
+    "baseline_declarations": 324,
+    "current_declarations": 363,
+    "added_declarations": [
+      "wirestack.NetworkConnectionPoolSnapshot",
+      "wirestack.NetworkEventBuffer",
+      "wirestack.NetworkEventBufferSnapshot",
+      "wirestack.NetworkEventStatistics",
+      "wirestack.NetworkTimeoutReason",
+      "wirestack.OperationTimeoutPolicy",
+      "wirestack.OperationTimeoutStage",
+      "wirestack.ResolverResourceOwner",
+      "wirestack.ResolverResourceSnapshot",
+      "wirestack.gzip.GzipBodyStream",
+      "wirestack.gzip.GzipClient",
+      "wirestack.gzip.GzipErrorCode",
+      "wirestack.gzip.GzipException",
+      "wirestack.gzip.GzipLimits",
+      "wirestack.gzip.GzipResponse",
+      "wirestack.http.HttpClientConfigurationSnapshot",
+      "wirestack.http.HttpClientObservationSnapshot",
+      "wirestack.http.HttpConfigurationRotation",
+      "wirestack.http.HttpResourceLimits",
+      "wirestack.http.HttpResourceOwnerSnapshot",
+      "wirestack.http.HttpResourceSnapshot",
+      "wirestack.http.HttpServerObservationSnapshot",
+      "wirestack.http.WebSocketUrl",
+      "wirestack.net.SocketOptionName",
+      "wirestack.nextNetworkCorrelationId",
+      "wirestack.observability.BoundedNetworkEventSink",
+      "wirestack.observability.NetworkEventExporter",
+      "wirestack.observability.NetworkEventSinkConfig",
+      "wirestack.observability.NetworkEventSinkSnapshot",
+      "wirestack.sse.SseDecodeResult",
+      "wirestack.sse.SseDecoder",
+      "wirestack.sse.SseEncoder",
+      "wirestack.sse.SseErrorCode",
+      "wirestack.sse.SseEvent",
+      "wirestack.sse.SseException",
+      "wirestack.sse.SseLimits",
+      "wirestack.sse.SseSession",
+      "wirestack.sse.SseSessionPolicy",
+      "wirestack.sse.SseWriter"
+    ],
     "removed_declarations": [],
-    "changed_declarations": ["wirestack.net.SocketCapabilities"],
-    "changed_members": ["SocketCapabilities.init defaults: broadcast true -> false; multicast true -> false"],
-    "field_names_types_and_order": "UNCHANGED",
-    "method_parameter_types_and_return_types": "UNCHANGED",
-    "enum_cases": "UNCHANGED"
+    "changed_declarations": [
+      "wirestack.HttpResponse",
+      "wirestack.NetworkEvent",
+      "wirestack.NetworkEventKind",
+      "wirestack.NetworkEventOutcome",
+      "wirestack.OperationContext",
+      "wirestack.http.HttpCancellationHandles",
+      "wirestack.http.HttpClient",
+      "wirestack.http.HttpClientBuilder",
+      "wirestack.http.HttpServer",
+      "wirestack.http.HttpServerBuilder",
+      "wirestack.http.SystemResolver",
+      "wirestack.http.WebSocketConnection",
+      "wirestack.http.WebSocketErrorCode",
+      "wirestack.net.DnsClient",
+      "wirestack.net.Resolver",
+      "wirestack.net.SocketCapabilities",
+      "wirestack.net.SocketOption",
+      "wirestack.net.TcpListener",
+      "wirestack.net.TcpStream",
+      "wirestack.net.UdpSocket"
+    ],
+    "changed_declaration_records": [
+      {
+        "name": "wirestack.HttpResponse",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource> )"
+            },
+            {
+              "kind": "let",
+              "name": "body",
+              "signature": "public let body: ResponseBody"
+            },
+            {
+              "kind": "let",
+              "name": "headers",
+              "signature": "public let headers: HttpHeaders"
+            },
+            {
+              "kind": "let",
+              "name": "pushes",
+              "signature": "public let pushes: ?HttpPushSource"
+            },
+            {
+              "kind": "let",
+              "name": "reason",
+              "signature": "public let reason: String"
+            },
+            {
+              "kind": "let",
+              "name": "status",
+              "signature": "public let status: Int64"
+            },
+            {
+              "kind": "let",
+              "name": "version",
+              "signature": "public let version: HttpVersion"
+            }
+          ],
+          "name": "HttpResponse",
+          "package": "wirestack",
+          "signature": "public class HttpResponse <: Resource"
+        },
+        "current": {
+          "package": "wirestack",
+          "kind": "class",
+          "name": "HttpResponse",
+          "signature": "public class HttpResponse <: Resource",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource>, operationContext!: ?OperationContext = None<OperationContext> )"
+            },
+            {
+              "kind": "let",
+              "name": "body",
+              "signature": "public let body: ResponseBody"
+            },
+            {
+              "kind": "let",
+              "name": "headers",
+              "signature": "public let headers: HttpHeaders"
+            },
+            {
+              "kind": "let",
+              "name": "operationContext",
+              "signature": "public let operationContext: ?OperationContext"
+            },
+            {
+              "kind": "let",
+              "name": "pushes",
+              "signature": "public let pushes: ?HttpPushSource"
+            },
+            {
+              "kind": "let",
+              "name": "reason",
+              "signature": "public let reason: String"
+            },
+            {
+              "kind": "let",
+              "name": "status",
+              "signature": "public let status: Int64"
+            },
+            {
+              "kind": "let",
+              "name": "version",
+              "signature": "public let version: HttpVersion"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.NetworkEvent",
+        "baseline": {
+          "kind": "struct",
+          "members": [
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64> )"
+            },
+            {
+              "kind": "let",
+              "name": "connectionId",
+              "signature": "public let connectionId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "errorCode",
+              "signature": "public let errorCode: ?NetworkErrorCode"
+            },
+            {
+              "kind": "let",
+              "name": "kind",
+              "signature": "public let kind: NetworkEventKind"
+            },
+            {
+              "kind": "let",
+              "name": "outcome",
+              "signature": "public let outcome: NetworkEventOutcome"
+            },
+            {
+              "kind": "let",
+              "name": "phase",
+              "signature": "public let phase: ?NetworkPhase"
+            },
+            {
+              "kind": "let",
+              "name": "trace",
+              "signature": "public let trace: ?NetworkTraceContext"
+            }
+          ],
+          "name": "NetworkEvent",
+          "package": "wirestack",
+          "signature": "public struct NetworkEvent"
+        },
+        "current": {
+          "package": "wirestack",
+          "kind": "struct",
+          "name": "NetworkEvent",
+          "signature": "public struct NetworkEvent",
+          "members": [
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init(kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64>, requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, connectionAttemptIndex!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, timeoutReason!: ?NetworkTimeoutReason = None<NetworkTimeoutReason>, timeoutStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, occurredAt!: ?MonoTime = None<MonoTime> )"
+            },
+            {
+              "kind": "let",
+              "name": "attemptId",
+              "signature": "public let attemptId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "connectionAttemptIndex",
+              "signature": "public let connectionAttemptIndex: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "connectionId",
+              "signature": "public let connectionId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "errorCode",
+              "signature": "public let errorCode: ?NetworkErrorCode"
+            },
+            {
+              "kind": "let",
+              "name": "kind",
+              "signature": "public let kind: NetworkEventKind"
+            },
+            {
+              "kind": "let",
+              "name": "occurredAt",
+              "signature": "public let occurredAt: ?MonoTime"
+            },
+            {
+              "kind": "let",
+              "name": "outcome",
+              "signature": "public let outcome: NetworkEventOutcome"
+            },
+            {
+              "kind": "let",
+              "name": "phase",
+              "signature": "public let phase: ?NetworkPhase"
+            },
+            {
+              "kind": "let",
+              "name": "requestId",
+              "signature": "public let requestId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "stage",
+              "signature": "public let stage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "streamId",
+              "signature": "public let streamId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutReason",
+              "signature": "public let timeoutReason: ?NetworkTimeoutReason"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutStage",
+              "signature": "public let timeoutStage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "trace",
+              "signature": "public let trace: ?NetworkTraceContext"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.NetworkEventKind",
+        "baseline": {
+          "kind": "enum",
+          "members": [
+            {
+              "kind": "case",
+              "name": "ConnectAttemptCompleted",
+              "signature": "| ConnectAttemptCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectAttemptStarted",
+              "signature": "| ConnectAttemptStarted"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectionClosed",
+              "signature": "| ConnectionClosed"
+            },
+            {
+              "kind": "case",
+              "name": "DnsCompleted",
+              "signature": "| DnsCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "DnsStarted",
+              "signature": "| DnsStarted"
+            },
+            {
+              "kind": "case",
+              "name": "Http2StreamClosed",
+              "signature": "| Http2StreamClosed"
+            },
+            {
+              "kind": "case",
+              "name": "Http2StreamOpened",
+              "signature": "| Http2StreamOpened"
+            },
+            {
+              "kind": "case",
+              "name": "HttpConnectionAcquired",
+              "signature": "| HttpConnectionAcquired"
+            },
+            {
+              "kind": "case",
+              "name": "HttpConnectionReleased",
+              "signature": "| HttpConnectionReleased"
+            },
+            {
+              "kind": "case",
+              "name": "ProxyTunnelEstablished",
+              "signature": "| ProxyTunnelEstablished"
+            },
+            {
+              "kind": "case",
+              "name": "TcpConnected",
+              "signature": "| TcpConnected"
+            },
+            {
+              "kind": "case",
+              "name": "TlsHandshakeCompleted",
+              "signature": "| TlsHandshakeCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "TlsHandshakeStarted",
+              "signature": "| TlsHandshakeStarted"
+            }
+          ],
+          "name": "NetworkEventKind",
+          "package": "wirestack",
+          "signature": "public enum NetworkEventKind"
+        },
+        "current": {
+          "package": "wirestack",
+          "kind": "enum",
+          "name": "NetworkEventKind",
+          "signature": "public enum NetworkEventKind",
+          "members": [
+            {
+              "kind": "case",
+              "name": "AttemptCompleted",
+              "signature": "| AttemptCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "AttemptStarted",
+              "signature": "| AttemptStarted"
+            },
+            {
+              "kind": "case",
+              "name": "BodyCompleted",
+              "signature": "| BodyCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "BodyStarted",
+              "signature": "| BodyStarted"
+            },
+            {
+              "kind": "case",
+              "name": "ConfigurationRotated",
+              "signature": "| ConfigurationRotated"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectAttemptCompleted",
+              "signature": "| ConnectAttemptCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectAttemptStarted",
+              "signature": "| ConnectAttemptStarted"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectionClosed",
+              "signature": "| ConnectionClosed"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectionDraining",
+              "signature": "| ConnectionDraining"
+            },
+            {
+              "kind": "case",
+              "name": "DnsCompleted",
+              "signature": "| DnsCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "DnsStarted",
+              "signature": "| DnsStarted"
+            },
+            {
+              "kind": "case",
+              "name": "Http2StreamClosed",
+              "signature": "| Http2StreamClosed"
+            },
+            {
+              "kind": "case",
+              "name": "Http2StreamOpened",
+              "signature": "| Http2StreamOpened"
+            },
+            {
+              "kind": "case",
+              "name": "HttpConnectionAcquired",
+              "signature": "| HttpConnectionAcquired"
+            },
+            {
+              "kind": "case",
+              "name": "HttpConnectionReleased",
+              "signature": "| HttpConnectionReleased"
+            },
+            {
+              "kind": "case",
+              "name": "LocalBackpressureCompleted",
+              "signature": "| LocalBackpressureCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "LocalBackpressureStarted",
+              "signature": "| LocalBackpressureStarted"
+            },
+            {
+              "kind": "case",
+              "name": "ProxyTunnelEstablished",
+              "signature": "| ProxyTunnelEstablished"
+            },
+            {
+              "kind": "case",
+              "name": "RequestCompleted",
+              "signature": "| RequestCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "RequestStarted",
+              "signature": "| RequestStarted"
+            },
+            {
+              "kind": "case",
+              "name": "StageCompleted",
+              "signature": "| StageCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "StageStarted",
+              "signature": "| StageStarted"
+            },
+            {
+              "kind": "case",
+              "name": "TcpConnected",
+              "signature": "| TcpConnected"
+            },
+            {
+              "kind": "case",
+              "name": "TlsHandshakeCompleted",
+              "signature": "| TlsHandshakeCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "TlsHandshakeStarted",
+              "signature": "| TlsHandshakeStarted"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.NetworkEventOutcome",
+        "baseline": {
+          "kind": "enum",
+          "members": [
+            {
+              "kind": "case",
+              "name": "Discarded",
+              "signature": "| Discarded"
+            },
+            {
+              "kind": "case",
+              "name": "Failed",
+              "signature": "| Failed"
+            },
+            {
+              "kind": "case",
+              "name": "Released",
+              "signature": "| Released"
+            },
+            {
+              "kind": "case",
+              "name": "Reused",
+              "signature": "| Reused"
+            },
+            {
+              "kind": "case",
+              "name": "Started",
+              "signature": "| Started"
+            },
+            {
+              "kind": "case",
+              "name": "Succeeded",
+              "signature": "| Succeeded"
+            }
+          ],
+          "name": "NetworkEventOutcome",
+          "package": "wirestack",
+          "signature": "public enum NetworkEventOutcome"
+        },
+        "current": {
+          "package": "wirestack",
+          "kind": "enum",
+          "name": "NetworkEventOutcome",
+          "signature": "public enum NetworkEventOutcome",
+          "members": [
+            {
+              "kind": "case",
+              "name": "Discarded",
+              "signature": "| Discarded"
+            },
+            {
+              "kind": "case",
+              "name": "Failed",
+              "signature": "| Failed"
+            },
+            {
+              "kind": "case",
+              "name": "NotExecuted",
+              "signature": "| NotExecuted"
+            },
+            {
+              "kind": "case",
+              "name": "Released",
+              "signature": "| Released"
+            },
+            {
+              "kind": "case",
+              "name": "Reused",
+              "signature": "| Reused"
+            },
+            {
+              "kind": "case",
+              "name": "Started",
+              "signature": "| Started"
+            },
+            {
+              "kind": "case",
+              "name": "Succeeded",
+              "signature": "| Succeeded"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.OperationContext",
+        "baseline": {
+          "kind": "struct",
+          "members": [
+            {
+              "kind": "func",
+              "name": "background",
+              "signature": "public static func background(): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "isCancellationRequested",
+              "signature": "public func isCancellationRequested(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "isDeadlineExceeded",
+              "signature": "public func isDeadlineExceeded(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "shortenDeadline",
+              "signature": "public func shortenDeadline(duration: Duration): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withCancellation",
+              "signature": "public func withCancellation(token: CancellationToken): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withEarlierDeadline",
+              "signature": "public func withEarlierDeadline(candidate: Deadline): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withEventSink",
+              "signature": "public func withEventSink(value: ?NetworkEventSink): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withTrace",
+              "signature": "public func withTrace(value: ?NetworkTraceContext): OperationContext"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink> )"
+            },
+            {
+              "kind": "let",
+              "name": "cancellation",
+              "signature": "public let cancellation: CancellationToken"
+            },
+            {
+              "kind": "let",
+              "name": "deadline",
+              "signature": "public let deadline: ?Deadline"
+            },
+            {
+              "kind": "let",
+              "name": "eventSink",
+              "signature": "public let eventSink: ?NetworkEventSink"
+            },
+            {
+              "kind": "let",
+              "name": "trace",
+              "signature": "public let trace: ?NetworkTraceContext"
+            }
+          ],
+          "name": "OperationContext",
+          "package": "wirestack",
+          "signature": "public struct OperationContext"
+        },
+        "current": {
+          "package": "wirestack",
+          "kind": "struct",
+          "name": "OperationContext",
+          "signature": "public struct OperationContext",
+          "members": [
+            {
+              "kind": "func",
+              "name": "background",
+              "signature": "public static func background(): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "forStage",
+              "signature": "public func forStage(stage: OperationTimeoutStage): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "isCancellationRequested",
+              "signature": "public func isCancellationRequested(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "isDeadlineExceeded",
+              "signature": "public func isDeadlineExceeded(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "shortenDeadline",
+              "signature": "public func shortenDeadline(duration: Duration): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withCancellation",
+              "signature": "public func withCancellation(token: CancellationToken): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withEarlierDeadline",
+              "signature": "public func withEarlierDeadline(candidate: Deadline): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withEventCorrelation",
+              "signature": "public func withEventCorrelation(requestId!: ?Int64, attemptId!: ?Int64, connectionId!: ?Int64, streamId!: ?Int64): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withEventSink",
+              "signature": "public func withEventSink(value: ?NetworkEventSink): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withTimeoutPolicy",
+              "signature": "public func withTimeoutPolicy(value: OperationTimeoutPolicy): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withTrace",
+              "signature": "public func withTrace(value: ?NetworkTraceContext): OperationContext"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink>, timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy(), requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, connectionId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, deadlineStage!: ?OperationTimeoutStage = None<OperationTimeoutStage> )"
+            },
+            {
+              "kind": "let",
+              "name": "attemptId",
+              "signature": "public let attemptId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "cancellation",
+              "signature": "public let cancellation: CancellationToken"
+            },
+            {
+              "kind": "let",
+              "name": "connectionId",
+              "signature": "public let connectionId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "deadline",
+              "signature": "public let deadline: ?Deadline"
+            },
+            {
+              "kind": "let",
+              "name": "deadlineStage",
+              "signature": "public let deadlineStage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "eventSink",
+              "signature": "public let eventSink: ?NetworkEventSink"
+            },
+            {
+              "kind": "let",
+              "name": "requestId",
+              "signature": "public let requestId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "stage",
+              "signature": "public let stage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "streamId",
+              "signature": "public let streamId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutPolicy",
+              "signature": "public let timeoutPolicy: OperationTimeoutPolicy"
+            },
+            {
+              "kind": "let",
+              "name": "trace",
+              "signature": "public let trace: ?NetworkTraceContext"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.HttpCancellationHandles",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( request!: ?HttpRequestCancellationHandle = None<HttpRequestCancellationHandle>, connection!: ?HttpConnectionCancellationHandle = None<HttpConnectionCancellationHandle>, stream!: ?HttpStreamCancellationHandle = None<HttpStreamCancellationHandle> )"
+            },
+            {
+              "kind": "let",
+              "name": "connection",
+              "signature": "public let connection: ?HttpConnectionCancellationHandle"
+            },
+            {
+              "kind": "let",
+              "name": "request",
+              "signature": "public let request: ?HttpRequestCancellationHandle"
+            },
+            {
+              "kind": "let",
+              "name": "stream",
+              "signature": "public let stream: ?HttpStreamCancellationHandle"
+            }
+          ],
+          "name": "HttpCancellationHandles",
+          "package": "wirestack.http",
+          "signature": "public class HttpCancellationHandles"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "HttpCancellationHandles",
+          "signature": "public class HttpCancellationHandles",
+          "members": [
+            {
+              "kind": "func",
+              "name": "retainCancellation",
+              "signature": "public func retainCancellation(callback: () -> Unit): Resource"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( request!: ?HttpRequestCancellationHandle = None<HttpRequestCancellationHandle>, connection!: ?HttpConnectionCancellationHandle = None<HttpConnectionCancellationHandle>, stream!: ?HttpStreamCancellationHandle = None<HttpStreamCancellationHandle> )"
+            },
+            {
+              "kind": "let",
+              "name": "connection",
+              "signature": "public let connection: ?HttpConnectionCancellationHandle"
+            },
+            {
+              "kind": "let",
+              "name": "request",
+              "signature": "public let request: ?HttpRequestCancellationHandle"
+            },
+            {
+              "kind": "let",
+              "name": "stream",
+              "signature": "public let stream: ?HttpStreamCancellationHandle"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.HttpClient",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "builder",
+              "signature": "public static func builder(): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connectWebSocket",
+              "signature": "public func connectWebSocket( url: HttpUrl, protocols!: Array<String> = [], headers!: HttpHeaders = HttpHeaders(), webSocketLimits!: WebSocketLimits = WebSocketLimits(), context!: OperationContext = OperationContext.background() ): WebSocketConnectResult"
+            },
+            {
+              "kind": "func",
+              "name": "default",
+              "signature": "public static func default(): HttpClient"
+            },
+            {
+              "kind": "func",
+              "name": "get",
+              "signature": "public func get(url: String, context!: OperationContext = OperationContext.background()): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "getControlled",
+              "signature": "public func getControlled( url: String, cancellation: HttpCancellationHandles, context!: OperationContext = OperationContext.background() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "send",
+              "signature": "public func send(request: HttpRequest, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "sendControlled",
+              "signature": "public func sendControlled( request: HttpRequest, cancellation: HttpCancellationHandles, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "upgrade",
+              "signature": "public func upgrade(request: HttpRequest, protocol!: ?String = None<String>, context!: OperationContext = OperationContext.background()): HttpUpgradeResult"
+            }
+          ],
+          "name": "HttpClient",
+          "package": "wirestack.http",
+          "signature": "public class HttpClient <: Resource"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "HttpClient",
+          "signature": "public class HttpClient <: Resource",
+          "members": [
+            {
+              "kind": "func",
+              "name": "builder",
+              "signature": "public static func builder(): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "configurationSnapshot",
+              "signature": "public func configurationSnapshot(): HttpClientConfigurationSnapshot"
+            },
+            {
+              "kind": "func",
+              "name": "configuredLimits",
+              "signature": "public func configuredLimits(): HttpLimits"
+            },
+            {
+              "kind": "func",
+              "name": "connectWebSocket",
+              "signature": "public func connectWebSocket( url: WebSocketUrl, protocols!: Array<String> = [], headers!: HttpHeaders = HttpHeaders(), webSocketLimits!: WebSocketLimits = WebSocketLimits(), context!: OperationContext = OperationContext.background() ): WebSocketConnectResult"
+            },
+            {
+              "kind": "func",
+              "name": "contextForRequest",
+              "signature": "public func contextForRequest(context!: OperationContext = OperationContext.background()): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "default",
+              "signature": "public static func default(): HttpClient"
+            },
+            {
+              "kind": "func",
+              "name": "get",
+              "signature": "public func get(url: String, context!: OperationContext = OperationContext.background()): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "getControlled",
+              "signature": "public func getControlled( url: String, cancellation: HttpCancellationHandles, context!: OperationContext = OperationContext.background() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "observationSnapshot",
+              "signature": "public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpClientObservationSnapshot"
+            },
+            {
+              "kind": "func",
+              "name": "reserveResponseBuffer",
+              "signature": "public func reserveResponseBuffer(url: HttpUrl, bytes: UInt64, context!: OperationContext = OperationContext.background()): Resource"
+            },
+            {
+              "kind": "func",
+              "name": "resourceSnapshot",
+              "signature": "public func resourceSnapshot(): HttpResourceSnapshot"
+            },
+            {
+              "kind": "func",
+              "name": "rotateProxyResolver",
+              "signature": "public func rotateProxyResolver(value: Resolver, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+            },
+            {
+              "kind": "func",
+              "name": "rotateResolver",
+              "signature": "public func rotateResolver(value: Resolver, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+            },
+            {
+              "kind": "func",
+              "name": "rotateTls",
+              "signature": "public func rotateTls(value: HttpClientTlsConfig, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+            },
+            {
+              "kind": "func",
+              "name": "send",
+              "signature": "public func send(request: HttpRequest, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "sendControlled",
+              "signature": "public func sendControlled( request: HttpRequest, cancellation: HttpCancellationHandles, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "sendOnce",
+              "signature": "public func sendOnce(request: HttpRequest, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+            },
+            {
+              "kind": "func",
+              "name": "upgrade",
+              "signature": "public func upgrade(request: HttpRequest, protocol!: ?String = None<String>, context!: OperationContext = OperationContext.background()): HttpUpgradeResult"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.HttpClientBuilder",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "build",
+              "signature": "public func build(): HttpClient"
+            },
+            {
+              "kind": "func",
+              "name": "connector",
+              "signature": "public func connector(value: HttpConnector): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "cookieJar",
+              "signature": "public func cookieJar(value: CookieJar): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "http2Push",
+              "signature": "public func http2Push(value: Http2PushConfig): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "limits",
+              "signature": "public func limits(value: HttpLimits): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "poolHook",
+              "signature": "public func poolHook(value: HttpConnectionPoolHook): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "proxy",
+              "signature": "public func proxy(value: HttpProxyConfig): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "redirectPolicy",
+              "signature": "public func redirectPolicy(value: HttpRedirectPolicy): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "requestTimeout",
+              "signature": "public func requestTimeout(value: Duration): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "resolver",
+              "signature": "public func resolver(value: Resolver): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "retryPolicy",
+              "signature": "public func retryPolicy(value: HttpRetryPolicy): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "tls",
+              "signature": "public func tls(value: HttpClientTlsConfig): HttpClientBuilder"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init()"
+            }
+          ],
+          "name": "HttpClientBuilder",
+          "package": "wirestack.http",
+          "signature": "public class HttpClientBuilder"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "HttpClientBuilder",
+          "signature": "public class HttpClientBuilder",
+          "members": [
+            {
+              "kind": "func",
+              "name": "build",
+              "signature": "public func build(): HttpClient"
+            },
+            {
+              "kind": "func",
+              "name": "connector",
+              "signature": "public func connector(value: HttpConnector): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "cookieJar",
+              "signature": "public func cookieJar(value: CookieJar): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "http2Push",
+              "signature": "public func http2Push(value: Http2PushConfig): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "limits",
+              "signature": "public func limits(value: HttpLimits): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "poolHook",
+              "signature": "public func poolHook(value: HttpConnectionPoolHook): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "proxy",
+              "signature": "public func proxy(value: HttpProxyConfig): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "redirectPolicy",
+              "signature": "public func redirectPolicy(value: HttpRedirectPolicy): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "requestTimeout",
+              "signature": "public func requestTimeout(value: Duration): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "resolver",
+              "signature": "public func resolver(value: Resolver): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "resourceLimits",
+              "signature": "public func resourceLimits(value: HttpResourceLimits): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "retryPolicy",
+              "signature": "public func retryPolicy(value: HttpRetryPolicy): HttpClientBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "tls",
+              "signature": "public func tls(value: HttpClientTlsConfig): HttpClientBuilder"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init()"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.HttpServer",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "builder",
+              "signature": "public static func builder(): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "serve",
+              "signature": "public func serve(context!: OperationContext = OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "shutdown",
+              "signature": "public func shutdown(context!: OperationContext = OperationContext.background()): HttpServerShutdownResult"
+            },
+            {
+              "kind": "let",
+              "name": "localEndpoint",
+              "signature": "public let localEndpoint: SocketEndpoint"
+            }
+          ],
+          "name": "HttpServer",
+          "package": "wirestack.http",
+          "signature": "public class HttpServer <: Resource"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "HttpServer",
+          "signature": "public class HttpServer <: Resource",
+          "members": [
+            {
+              "kind": "func",
+              "name": "builder",
+              "signature": "public static func builder(): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "observationSnapshot",
+              "signature": "public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpServerObservationSnapshot"
+            },
+            {
+              "kind": "func",
+              "name": "resourceSnapshot",
+              "signature": "public func resourceSnapshot(): HttpResourceSnapshot"
+            },
+            {
+              "kind": "func",
+              "name": "rotateTls",
+              "signature": "public func rotateTls(value: HttpServerTlsConfig, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+            },
+            {
+              "kind": "func",
+              "name": "serve",
+              "signature": "public func serve(context!: OperationContext = OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "shutdown",
+              "signature": "public func shutdown(context!: OperationContext = OperationContext.background()): HttpServerShutdownResult"
+            },
+            {
+              "kind": "func",
+              "name": "tlsGeneration",
+              "signature": "public func tlsGeneration(): UInt64"
+            },
+            {
+              "kind": "let",
+              "name": "localEndpoint",
+              "signature": "public let localEndpoint: SocketEndpoint"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.HttpServerBuilder",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "build",
+              "signature": "public func build(): HttpServer"
+            },
+            {
+              "kind": "func",
+              "name": "connectionLimit",
+              "signature": "public func connectionLimit(value: Int64): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "handler",
+              "signature": "public func handler(value: HttpServerHandler): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "http2StreamLimit",
+              "signature": "public func http2StreamLimit(value: UInt32): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "limits",
+              "signature": "public func limits(value: HttpLimits): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "listen",
+              "signature": "public func listen(value: SocketEndpoint): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "listenBacklog",
+              "signature": "public func listenBacklog(value: Int64): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "requestsPerConnectionLimit",
+              "signature": "public func requestsPerConnectionLimit(value: Int64): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "serviceHook",
+              "signature": "public func serviceHook(value: HttpServiceHook): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "tls",
+              "signature": "public func tls(value: HttpServerTlsConfig): HttpServerBuilder"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init()"
+            }
+          ],
+          "name": "HttpServerBuilder",
+          "package": "wirestack.http",
+          "signature": "public class HttpServerBuilder"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "HttpServerBuilder",
+          "signature": "public class HttpServerBuilder",
+          "members": [
+            {
+              "kind": "func",
+              "name": "build",
+              "signature": "public func build(): HttpServer"
+            },
+            {
+              "kind": "func",
+              "name": "connectionLimit",
+              "signature": "public func connectionLimit(value: Int64): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "handler",
+              "signature": "public func handler(value: HttpServerHandler): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "http2StreamLimit",
+              "signature": "public func http2StreamLimit(value: UInt32): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "limits",
+              "signature": "public func limits(value: HttpLimits): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "listen",
+              "signature": "public func listen(value: SocketEndpoint): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "listenBacklog",
+              "signature": "public func listenBacklog(value: Int64): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "requestsPerConnectionLimit",
+              "signature": "public func requestsPerConnectionLimit(value: Int64): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "resourceLimits",
+              "signature": "public func resourceLimits(value: HttpResourceLimits): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "serviceHook",
+              "signature": "public func serviceHook(value: HttpServiceHook): HttpServerBuilder"
+            },
+            {
+              "kind": "func",
+              "name": "tls",
+              "signature": "public func tls(value: HttpServerTlsConfig): HttpServerBuilder"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init()"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.SystemResolver",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve( host: HostName, options!: ResolveOptions = ResolveOptions(), context!: OperationContext = OperationContext.background() ): ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve( host: HostName, service: ?String, options: ResolveOptions, context: OperationContext ): ResolveResult"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init(workerCount!: Int64 = 4, queueCapacity!: Int64 = 64)"
+            }
+          ],
+          "name": "SystemResolver",
+          "package": "wirestack.http",
+          "signature": "public class SystemResolver <: Resolver & Resource"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "SystemResolver",
+          "signature": "public class SystemResolver <: Resolver & Resource & api.ResolverResourceOwner",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve( host: HostName, options!: ResolveOptions = ResolveOptions(), context!: OperationContext = OperationContext.background() ): ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve( host: HostName, service: ?String, options: ResolveOptions, context: OperationContext ): ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolverResourceSnapshot",
+              "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init(workerCount!: Int64 = 4, queueCapacity!: Int64 = 64)"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.WebSocketConnection",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close( code: UInt16, reason: String, context!: OperationContext = OperationContext.background() ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "receive",
+              "signature": "public func receive( context!: OperationContext = OperationContext.background() ): WebSocketFrame"
+            },
+            {
+              "kind": "func",
+              "name": "send",
+              "signature": "public func send( frame: WebSocketFrame, context!: OperationContext = OperationContext.background() ): Unit"
+            },
+            {
+              "kind": "let",
+              "name": "limits",
+              "signature": "public let limits: WebSocketLimits"
+            },
+            {
+              "kind": "let",
+              "name": "role",
+              "signature": "public let role: WebSocketRole"
+            },
+            {
+              "kind": "let",
+              "name": "subProtocol",
+              "signature": "public let subProtocol: ?String"
+            }
+          ],
+          "name": "WebSocketConnection",
+          "package": "wirestack.http",
+          "signature": "public class WebSocketConnection <: Resource"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "class",
+          "name": "WebSocketConnection",
+          "signature": "public class WebSocketConnection <: Resource",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(code: UInt16, reason: String, context!: OperationContext = OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "receive",
+              "signature": "public func receive(context!: OperationContext = OperationContext.background()): WebSocketFrame"
+            },
+            {
+              "kind": "func",
+              "name": "send",
+              "signature": "public func send(frame: WebSocketFrame, context!: OperationContext = OperationContext.background()): Unit"
+            },
+            {
+              "kind": "let",
+              "name": "limits",
+              "signature": "public let limits: WebSocketLimits"
+            },
+            {
+              "kind": "let",
+              "name": "role",
+              "signature": "public let role: WebSocketRole"
+            },
+            {
+              "kind": "let",
+              "name": "subProtocol",
+              "signature": "public let subProtocol: ?String"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.http.WebSocketErrorCode",
+        "baseline": {
+          "kind": "enum",
+          "members": [
+            {
+              "kind": "case",
+              "name": "Closed",
+              "signature": "| Closed"
+            },
+            {
+              "kind": "case",
+              "name": "ContextStopped",
+              "signature": "| ContextStopped"
+            },
+            {
+              "kind": "case",
+              "name": "CryptoFailure",
+              "signature": "| CryptoFailure"
+            },
+            {
+              "kind": "case",
+              "name": "InvalidFrame",
+              "signature": "| InvalidFrame"
+            },
+            {
+              "kind": "case",
+              "name": "InvalidPayload",
+              "signature": "| InvalidPayload"
+            },
+            {
+              "kind": "case",
+              "name": "MessageTooLarge",
+              "signature": "| MessageTooLarge"
+            },
+            {
+              "kind": "case",
+              "name": "ProtocolViolation",
+              "signature": "| ProtocolViolation"
+            },
+            {
+              "kind": "case",
+              "name": "TransportFailure",
+              "signature": "| TransportFailure"
+            }
+          ],
+          "name": "WebSocketErrorCode",
+          "package": "wirestack.http",
+          "signature": "public enum WebSocketErrorCode"
+        },
+        "current": {
+          "package": "wirestack.http",
+          "kind": "enum",
+          "name": "WebSocketErrorCode",
+          "signature": "public enum WebSocketErrorCode",
+          "members": [
+            {
+              "kind": "case",
+              "name": "CapacityExceeded",
+              "signature": "| CapacityExceeded"
+            },
+            {
+              "kind": "case",
+              "name": "Closed",
+              "signature": "| Closed"
+            },
+            {
+              "kind": "case",
+              "name": "ContextStopped",
+              "signature": "| ContextStopped"
+            },
+            {
+              "kind": "case",
+              "name": "CryptoFailure",
+              "signature": "| CryptoFailure"
+            },
+            {
+              "kind": "case",
+              "name": "InvalidFrame",
+              "signature": "| InvalidFrame"
+            },
+            {
+              "kind": "case",
+              "name": "InvalidPayload",
+              "signature": "| InvalidPayload"
+            },
+            {
+              "kind": "case",
+              "name": "MessageTooLarge",
+              "signature": "| MessageTooLarge"
+            },
+            {
+              "kind": "case",
+              "name": "ProtocolViolation",
+              "signature": "| ProtocolViolation"
+            },
+            {
+              "kind": "case",
+              "name": "TransportFailure",
+              "signature": "| TransportFailure"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.DnsClient",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "lookup",
+              "signature": "public func lookup( host: api.HostName, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background() ): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "query",
+              "signature": "public func query( name: String, recordType: DnsRecordType, context!: api.OperationContext = api.OperationContext.background() ): DnsMessageSummary"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( config!: DnsResolverConfig = DnsResolverConfig.fromSystem(), workerCount!: Int64 = 4, queueCapacity!: Int64 = 64 )"
+            },
+            {
+              "kind": "let",
+              "name": "config",
+              "signature": "public let config: DnsResolverConfig"
+            }
+          ],
+          "name": "DnsClient",
+          "package": "wirestack.net",
+          "signature": "public class DnsClient <: Resource"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "class",
+          "name": "DnsClient",
+          "signature": "public class DnsClient <: Resource & api.ResolverResourceOwner",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "lookup",
+              "signature": "public func lookup( host: api.HostName, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background() ): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "query",
+              "signature": "public func query( name: String, recordType: DnsRecordType, context!: api.OperationContext = api.OperationContext.background() ): DnsMessageSummary"
+            },
+            {
+              "kind": "func",
+              "name": "resolverResourceSnapshot",
+              "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( config!: DnsResolverConfig = DnsResolverConfig.fromSystem(), workerCount!: Int64 = 4, queueCapacity!: Int64 = 64 )"
+            },
+            {
+              "kind": "let",
+              "name": "config",
+              "signature": "public let config: DnsResolverConfig"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.Resolver",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connect",
+              "signature": "public func connect(host: api.HostName, port: UInt16, options!: api.ResolveOptions = api.ResolveOptions(), attemptDelay!: Duration = 250 * Duration.millisecond, context!: api.OperationContext = api.OperationContext.background()): api.DuplexTransport"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve(host: api.HostName, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background()): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve(host: api.HostName, service: ?String, options: api.ResolveOptions, context: api.OperationContext): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve(name: String, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background()): api.ResolveResult"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init(config!: DnsResolverConfig = DnsResolverConfig.fromSystem(), dns!: ?DnsClient = None<DnsClient>)"
+            },
+            {
+              "kind": "let",
+              "name": "config",
+              "signature": "public let config: DnsResolverConfig"
+            }
+          ],
+          "name": "Resolver",
+          "package": "wirestack.net",
+          "signature": "public class Resolver <: api.Resolver & Resource"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "class",
+          "name": "Resolver",
+          "signature": "public class Resolver <: api.Resolver & Resource & api.ResolverResourceOwner",
+          "members": [
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connect",
+              "signature": "public func connect(host: api.HostName, port: UInt16, options!: api.ResolveOptions = api.ResolveOptions(), attemptDelay!: Duration = 250 * Duration.millisecond, context!: api.OperationContext = api.OperationContext.background()): api.DuplexTransport"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve(host: api.HostName, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background()): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve(host: api.HostName, service: ?String, options: api.ResolveOptions, context: api.OperationContext): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolve",
+              "signature": "public func resolve(name: String, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background()): api.ResolveResult"
+            },
+            {
+              "kind": "func",
+              "name": "resolverResourceSnapshot",
+              "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+            },
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init(config!: DnsResolverConfig = DnsResolverConfig.fromSystem(), dns!: ?DnsClient = None<DnsClient>)"
+            },
+            {
+              "kind": "let",
+              "name": "config",
+              "signature": "public let config: DnsResolverConfig"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.SocketCapabilities",
+        "baseline": {
+          "kind": "struct",
+          "members": [
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = true, multicast!: Bool = true, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false, connectedDatagramSend!: Bool = false )"
+            },
+            {
+              "kind": "let",
+              "name": "ancillaryData",
+              "signature": "public let ancillaryData: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "broadcast",
+              "signature": "public let broadcast: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "closeOnExec",
+              "signature": "public let closeOnExec: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "connectedDatagramSend",
+              "signature": "public let connectedDatagramSend: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "halfClose",
+              "signature": "public let halfClose: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "multicast",
+              "signature": "public let multicast: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "nonBlocking",
+              "signature": "public let nonBlocking: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "raw",
+              "signature": "public let raw: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "zeroLengthDatagramSend",
+              "signature": "public let zeroLengthDatagramSend: Bool"
+            }
+          ],
+          "name": "SocketCapabilities",
+          "package": "wirestack.net",
+          "signature": "public struct SocketCapabilities"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "struct",
+          "name": "SocketCapabilities",
+          "signature": "public struct SocketCapabilities",
+          "members": [
+            {
+              "kind": "init",
+              "name": "init",
+              "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = false, multicast!: Bool = false, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false, connectedDatagramSend!: Bool = false )"
+            },
+            {
+              "kind": "let",
+              "name": "ancillaryData",
+              "signature": "public let ancillaryData: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "broadcast",
+              "signature": "public let broadcast: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "closeOnExec",
+              "signature": "public let closeOnExec: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "connectedDatagramSend",
+              "signature": "public let connectedDatagramSend: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "halfClose",
+              "signature": "public let halfClose: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "multicast",
+              "signature": "public let multicast: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "nonBlocking",
+              "signature": "public let nonBlocking: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "raw",
+              "signature": "public let raw: Bool"
+            },
+            {
+              "kind": "let",
+              "name": "zeroLengthDatagramSend",
+              "signature": "public let zeroLengthDatagramSend: Bool"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.SocketOption",
+        "baseline": {
+          "kind": "enum",
+          "members": [
+            {
+              "kind": "case",
+              "name": "Broadcast",
+              "signature": "| Broadcast(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "KeepAlive",
+              "signature": "| KeepAlive(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "MulticastTtl",
+              "signature": "| MulticastTtl(UInt8)"
+            },
+            {
+              "kind": "case",
+              "name": "NoDelay",
+              "signature": "| NoDelay(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "ReceiveBuffer",
+              "signature": "| ReceiveBuffer(Int64)"
+            },
+            {
+              "kind": "case",
+              "name": "ReuseAddress",
+              "signature": "| ReuseAddress(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "ReusePort",
+              "signature": "| ReusePort(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "SendBuffer",
+              "signature": "| SendBuffer(Int64)"
+            }
+          ],
+          "name": "SocketOption",
+          "package": "wirestack.net",
+          "signature": "public enum SocketOption"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "enum",
+          "name": "SocketOption",
+          "signature": "public enum SocketOption",
+          "members": [
+            {
+              "kind": "case",
+              "name": "Broadcast",
+              "signature": "| Broadcast(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "Ipv6Only",
+              "signature": "| Ipv6Only(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "KeepAlive",
+              "signature": "| KeepAlive(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "MulticastHopLimit",
+              "signature": "| MulticastHopLimit(UInt8)"
+            },
+            {
+              "kind": "case",
+              "name": "MulticastInterface",
+              "signature": "| MulticastInterface(UInt32)"
+            },
+            {
+              "kind": "case",
+              "name": "MulticastLoopback",
+              "signature": "| MulticastLoopback(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "MulticastTtl",
+              "signature": "| MulticastTtl(UInt8)"
+            },
+            {
+              "kind": "case",
+              "name": "NoDelay",
+              "signature": "| NoDelay(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "ReceiveBuffer",
+              "signature": "| ReceiveBuffer(Int64)"
+            },
+            {
+              "kind": "case",
+              "name": "ReuseAddress",
+              "signature": "| ReuseAddress(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "ReusePort",
+              "signature": "| ReusePort(Bool)"
+            },
+            {
+              "kind": "case",
+              "name": "SendBuffer",
+              "signature": "| SendBuffer(Int64)"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.TcpListener",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "abort",
+              "signature": "public func abort( reason!: ?api.AbortReason = None<api.AbortReason> ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "accept",
+              "signature": "public func accept( context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+            },
+            {
+              "kind": "func",
+              "name": "bind",
+              "signature": "public static func bind( endpoint: api.SocketEndpoint, backlog!: Int64 = 128, context!: api.OperationContext = api.OperationContext.background() ): TcpListener"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close( context!: api.OperationContext ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "prop",
+              "name": "capabilities",
+              "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "localEndpoint",
+              "signature": "public prop localEndpoint: api.SocketEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "state",
+              "signature": "public prop state: SocketState { accessors:get }"
+            }
+          ],
+          "name": "TcpListener",
+          "package": "wirestack.net",
+          "signature": "public class TcpListener <: Resource"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "class",
+          "name": "TcpListener",
+          "signature": "public class TcpListener <: Resource",
+          "members": [
+            {
+              "kind": "func",
+              "name": "abort",
+              "signature": "public func abort( reason!: ?api.AbortReason = None<api.AbortReason> ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "accept",
+              "signature": "public func accept( context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+            },
+            {
+              "kind": "func",
+              "name": "bind",
+              "signature": "public static func bind( endpoint: api.SocketEndpoint, backlog!: Int64 = 128, options!: Array<SocketOption> = [], acceptedOptions!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): TcpListener"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close( context!: api.OperationContext ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "getOption",
+              "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "prop",
+              "name": "capabilities",
+              "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "localEndpoint",
+              "signature": "public prop localEndpoint: api.SocketEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "state",
+              "signature": "public prop state: SocketState { accessors:get }"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.TcpStream",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "abort",
+              "signature": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connect",
+              "signature": "public static func connect( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "read",
+              "signature": "public func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult"
+            },
+            {
+              "kind": "func",
+              "name": "readExact",
+              "signature": "public func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "readSome",
+              "signature": "public func readSome( destination: api.MutableByteSpan, context!: api.OperationContext = api.OperationContext.background() ): api.ReadResult"
+            },
+            {
+              "kind": "func",
+              "name": "shutdown",
+              "signature": "public func shutdown(direction: api.ShutdownDirection): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "write",
+              "signature": "public func write(source: api.ByteSpan, context!: api.OperationContext): Int64"
+            },
+            {
+              "kind": "func",
+              "name": "writeAll",
+              "signature": "public func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "writeSome",
+              "signature": "public func writeSome( source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+            },
+            {
+              "kind": "prop",
+              "name": "capabilities",
+              "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "info",
+              "signature": "public prop info: api.TransportInfo { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "localEndpoint",
+              "signature": "public prop localEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "remoteEndpoint",
+              "signature": "public prop remoteEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "state",
+              "signature": "public prop state: SocketState { accessors:get }"
+            }
+          ],
+          "name": "TcpStream",
+          "package": "wirestack.net",
+          "signature": "public class TcpStream <: StreamSocket & api.DuplexTransport"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "class",
+          "name": "TcpStream",
+          "signature": "public class TcpStream <: StreamSocket & api.DuplexTransport",
+          "members": [
+            {
+              "kind": "func",
+              "name": "abort",
+              "signature": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "configure",
+              "signature": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connect",
+              "signature": "public static func connect( endpoint: api.SocketEndpoint, options!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+            },
+            {
+              "kind": "func",
+              "name": "getOption",
+              "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "read",
+              "signature": "public func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult"
+            },
+            {
+              "kind": "func",
+              "name": "readExact",
+              "signature": "public func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "readSome",
+              "signature": "public func readSome( destination: api.MutableByteSpan, context!: api.OperationContext = api.OperationContext.background() ): api.ReadResult"
+            },
+            {
+              "kind": "func",
+              "name": "shutdown",
+              "signature": "public func shutdown(direction: api.ShutdownDirection): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "write",
+              "signature": "public func write(source: api.ByteSpan, context!: api.OperationContext): Int64"
+            },
+            {
+              "kind": "func",
+              "name": "writeAll",
+              "signature": "public func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "writeSome",
+              "signature": "public func writeSome( source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+            },
+            {
+              "kind": "prop",
+              "name": "capabilities",
+              "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "info",
+              "signature": "public prop info: api.TransportInfo { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "localEndpoint",
+              "signature": "public prop localEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "remoteEndpoint",
+              "signature": "public prop remoteEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "state",
+              "signature": "public prop state: SocketState { accessors:get }"
+            }
+          ]
+        }
+      },
+      {
+        "name": "wirestack.net.UdpSocket",
+        "baseline": {
+          "kind": "class",
+          "members": [
+            {
+              "kind": "func",
+              "name": "abort",
+              "signature": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "bind",
+              "signature": "public static func bind( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connect",
+              "signature": "public func connect( endpoint: NetworkEndpoint, context!: api.OperationContext = api.OperationContext.background() ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "receive",
+              "signature": "public func receive( capacity: Int64, context!: api.OperationContext = api.OperationContext.background() ): DatagramReceiveResult"
+            },
+            {
+              "kind": "func",
+              "name": "send",
+              "signature": "public func send( source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+            },
+            {
+              "kind": "func",
+              "name": "sendTo",
+              "signature": "public func sendTo( endpoint: NetworkEndpoint, source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+            },
+            {
+              "kind": "prop",
+              "name": "capabilities",
+              "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "localEndpoint",
+              "signature": "public prop localEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "remoteEndpoint",
+              "signature": "public prop remoteEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "state",
+              "signature": "public prop state: SocketState { accessors:get }"
+            }
+          ],
+          "name": "UdpSocket",
+          "package": "wirestack.net",
+          "signature": "public class UdpSocket <: DatagramSocket"
+        },
+        "current": {
+          "package": "wirestack.net",
+          "kind": "class",
+          "name": "UdpSocket",
+          "signature": "public class UdpSocket <: DatagramSocket",
+          "members": [
+            {
+              "kind": "func",
+              "name": "abort",
+              "signature": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "bind",
+              "signature": "public static func bind( endpoint: api.SocketEndpoint, options!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "close",
+              "signature": "public func close(context!: api.OperationContext): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "configure",
+              "signature": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "connect",
+              "signature": "public func connect( endpoint: NetworkEndpoint, context!: api.OperationContext = api.OperationContext.background() ): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "disconnect",
+              "signature": "public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "getOption",
+              "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+            },
+            {
+              "kind": "func",
+              "name": "isClosed",
+              "signature": "public func isClosed(): Bool"
+            },
+            {
+              "kind": "func",
+              "name": "joinMulticastGroup",
+              "signature": "public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "leaveMulticastGroup",
+              "signature": "public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+            },
+            {
+              "kind": "func",
+              "name": "receive",
+              "signature": "public func receive( capacity: Int64, context!: api.OperationContext = api.OperationContext.background() ): DatagramReceiveResult"
+            },
+            {
+              "kind": "func",
+              "name": "send",
+              "signature": "public func send( source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+            },
+            {
+              "kind": "func",
+              "name": "sendTo",
+              "signature": "public func sendTo( endpoint: NetworkEndpoint, source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+            },
+            {
+              "kind": "prop",
+              "name": "capabilities",
+              "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "localEndpoint",
+              "signature": "public prop localEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "remoteEndpoint",
+              "signature": "public prop remoteEndpoint: ?NetworkEndpoint { accessors:get }"
+            },
+            {
+              "kind": "prop",
+              "name": "state",
+              "signature": "public prop state: SocketState { accessors:get }"
+            }
+          ]
+        }
+      }
+    ],
+    "enum_deltas": [
+      {
+        "declaration": "wirestack.NetworkEventKind",
+        "added_members": [
+          {
+            "kind": "case",
+            "name": "AttemptCompleted",
+            "signature": "| AttemptCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "AttemptStarted",
+            "signature": "| AttemptStarted"
+          },
+          {
+            "kind": "case",
+            "name": "BodyCompleted",
+            "signature": "| BodyCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "BodyStarted",
+            "signature": "| BodyStarted"
+          },
+          {
+            "kind": "case",
+            "name": "ConfigurationRotated",
+            "signature": "| ConfigurationRotated"
+          },
+          {
+            "kind": "case",
+            "name": "ConnectionDraining",
+            "signature": "| ConnectionDraining"
+          },
+          {
+            "kind": "case",
+            "name": "LocalBackpressureCompleted",
+            "signature": "| LocalBackpressureCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "LocalBackpressureStarted",
+            "signature": "| LocalBackpressureStarted"
+          },
+          {
+            "kind": "case",
+            "name": "RequestCompleted",
+            "signature": "| RequestCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "RequestStarted",
+            "signature": "| RequestStarted"
+          },
+          {
+            "kind": "case",
+            "name": "StageCompleted",
+            "signature": "| StageCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "StageStarted",
+            "signature": "| StageStarted"
+          }
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.NetworkEventOutcome",
+        "added_members": [
+          {
+            "kind": "case",
+            "name": "NotExecuted",
+            "signature": "| NotExecuted"
+          }
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.http.WebSocketErrorCode",
+        "added_members": [
+          {
+            "kind": "case",
+            "name": "CapacityExceeded",
+            "signature": "| CapacityExceeded"
+          }
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.net.SocketOption",
+        "added_members": [
+          {
+            "kind": "case",
+            "name": "Ipv6Only",
+            "signature": "| Ipv6Only(Bool)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastHopLimit",
+            "signature": "| MulticastHopLimit(UInt8)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastInterface",
+            "signature": "| MulticastInterface(UInt32)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastLoopback",
+            "signature": "| MulticastLoopback(Bool)"
+          }
+        ],
+        "removed_members": []
+      }
+    ],
+    "member_deltas": [
+      {
+        "name": "wirestack.HttpResponse",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource> )"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource>, operationContext!: ?OperationContext = None<OperationContext> )"
+          },
+          {
+            "kind": "let",
+            "name": "operationContext",
+            "signature": "public let operationContext: ?OperationContext"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.NetworkEvent",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64> )"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64>, requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, connectionAttemptIndex!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, timeoutReason!: ?NetworkTimeoutReason = None<NetworkTimeoutReason>, timeoutStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, occurredAt!: ?MonoTime = None<MonoTime> )"
+          },
+          {
+            "kind": "let",
+            "name": "attemptId",
+            "signature": "public let attemptId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "connectionAttemptIndex",
+            "signature": "public let connectionAttemptIndex: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "occurredAt",
+            "signature": "public let occurredAt: ?MonoTime"
+          },
+          {
+            "kind": "let",
+            "name": "requestId",
+            "signature": "public let requestId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "stage",
+            "signature": "public let stage: ?OperationTimeoutStage"
+          },
+          {
+            "kind": "let",
+            "name": "streamId",
+            "signature": "public let streamId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "timeoutReason",
+            "signature": "public let timeoutReason: ?NetworkTimeoutReason"
+          },
+          {
+            "kind": "let",
+            "name": "timeoutStage",
+            "signature": "public let timeoutStage: ?OperationTimeoutStage"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.NetworkEventKind",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "case",
+            "name": "AttemptCompleted",
+            "signature": "| AttemptCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "AttemptStarted",
+            "signature": "| AttemptStarted"
+          },
+          {
+            "kind": "case",
+            "name": "BodyCompleted",
+            "signature": "| BodyCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "BodyStarted",
+            "signature": "| BodyStarted"
+          },
+          {
+            "kind": "case",
+            "name": "ConfigurationRotated",
+            "signature": "| ConfigurationRotated"
+          },
+          {
+            "kind": "case",
+            "name": "ConnectionDraining",
+            "signature": "| ConnectionDraining"
+          },
+          {
+            "kind": "case",
+            "name": "LocalBackpressureCompleted",
+            "signature": "| LocalBackpressureCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "LocalBackpressureStarted",
+            "signature": "| LocalBackpressureStarted"
+          },
+          {
+            "kind": "case",
+            "name": "RequestCompleted",
+            "signature": "| RequestCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "RequestStarted",
+            "signature": "| RequestStarted"
+          },
+          {
+            "kind": "case",
+            "name": "StageCompleted",
+            "signature": "| StageCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "StageStarted",
+            "signature": "| StageStarted"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.NetworkEventOutcome",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "case",
+            "name": "NotExecuted",
+            "signature": "| NotExecuted"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.OperationContext",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink> )"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "forStage",
+            "signature": "public func forStage(stage: OperationTimeoutStage): OperationContext"
+          },
+          {
+            "kind": "func",
+            "name": "withEventCorrelation",
+            "signature": "public func withEventCorrelation(requestId!: ?Int64, attemptId!: ?Int64, connectionId!: ?Int64, streamId!: ?Int64): OperationContext"
+          },
+          {
+            "kind": "func",
+            "name": "withTimeoutPolicy",
+            "signature": "public func withTimeoutPolicy(value: OperationTimeoutPolicy): OperationContext"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink>, timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy(), requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, connectionId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, deadlineStage!: ?OperationTimeoutStage = None<OperationTimeoutStage> )"
+          },
+          {
+            "kind": "let",
+            "name": "attemptId",
+            "signature": "public let attemptId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "connectionId",
+            "signature": "public let connectionId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "deadlineStage",
+            "signature": "public let deadlineStage: ?OperationTimeoutStage"
+          },
+          {
+            "kind": "let",
+            "name": "requestId",
+            "signature": "public let requestId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "stage",
+            "signature": "public let stage: ?OperationTimeoutStage"
+          },
+          {
+            "kind": "let",
+            "name": "streamId",
+            "signature": "public let streamId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "timeoutPolicy",
+            "signature": "public let timeoutPolicy: OperationTimeoutPolicy"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.HttpCancellationHandles",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "retainCancellation",
+            "signature": "public func retainCancellation(callback: () -> Unit): Resource"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.HttpClient",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "func",
+            "name": "connectWebSocket",
+            "signature": "public func connectWebSocket( url: HttpUrl, protocols!: Array<String> = [], headers!: HttpHeaders = HttpHeaders(), webSocketLimits!: WebSocketLimits = WebSocketLimits(), context!: OperationContext = OperationContext.background() ): WebSocketConnectResult"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "configurationSnapshot",
+            "signature": "public func configurationSnapshot(): HttpClientConfigurationSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "configuredLimits",
+            "signature": "public func configuredLimits(): HttpLimits"
+          },
+          {
+            "kind": "func",
+            "name": "connectWebSocket",
+            "signature": "public func connectWebSocket( url: WebSocketUrl, protocols!: Array<String> = [], headers!: HttpHeaders = HttpHeaders(), webSocketLimits!: WebSocketLimits = WebSocketLimits(), context!: OperationContext = OperationContext.background() ): WebSocketConnectResult"
+          },
+          {
+            "kind": "func",
+            "name": "contextForRequest",
+            "signature": "public func contextForRequest(context!: OperationContext = OperationContext.background()): OperationContext"
+          },
+          {
+            "kind": "func",
+            "name": "observationSnapshot",
+            "signature": "public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpClientObservationSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "reserveResponseBuffer",
+            "signature": "public func reserveResponseBuffer(url: HttpUrl, bytes: UInt64, context!: OperationContext = OperationContext.background()): Resource"
+          },
+          {
+            "kind": "func",
+            "name": "resourceSnapshot",
+            "signature": "public func resourceSnapshot(): HttpResourceSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "rotateProxyResolver",
+            "signature": "public func rotateProxyResolver(value: Resolver, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
+            "name": "rotateResolver",
+            "signature": "public func rotateResolver(value: Resolver, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
+            "name": "rotateTls",
+            "signature": "public func rotateTls(value: HttpClientTlsConfig, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
+            "name": "sendOnce",
+            "signature": "public func sendOnce(request: HttpRequest, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.HttpClientBuilder",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "resourceLimits",
+            "signature": "public func resourceLimits(value: HttpResourceLimits): HttpClientBuilder"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.HttpServer",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "observationSnapshot",
+            "signature": "public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpServerObservationSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "resourceSnapshot",
+            "signature": "public func resourceSnapshot(): HttpResourceSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "rotateTls",
+            "signature": "public func rotateTls(value: HttpServerTlsConfig, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
+            "name": "tlsGeneration",
+            "signature": "public func tlsGeneration(): UInt64"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.HttpServerBuilder",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "resourceLimits",
+            "signature": "public func resourceLimits(value: HttpResourceLimits): HttpServerBuilder"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.SystemResolver",
+        "declaration_signature_changed": true,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.WebSocketConnection",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close( code: UInt16, reason: String, context!: OperationContext = OperationContext.background() ): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "receive",
+            "signature": "public func receive( context!: OperationContext = OperationContext.background() ): WebSocketFrame"
+          },
+          {
+            "kind": "func",
+            "name": "send",
+            "signature": "public func send( frame: WebSocketFrame, context!: OperationContext = OperationContext.background() ): Unit"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(code: UInt16, reason: String, context!: OperationContext = OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "receive",
+            "signature": "public func receive(context!: OperationContext = OperationContext.background()): WebSocketFrame"
+          },
+          {
+            "kind": "func",
+            "name": "send",
+            "signature": "public func send(frame: WebSocketFrame, context!: OperationContext = OperationContext.background()): Unit"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.http.WebSocketErrorCode",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "case",
+            "name": "CapacityExceeded",
+            "signature": "| CapacityExceeded"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.DnsClient",
+        "declaration_signature_changed": true,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.Resolver",
+        "declaration_signature_changed": true,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.SocketCapabilities",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = true, multicast!: Bool = true, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false, connectedDatagramSend!: Bool = false )"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = false, multicast!: Bool = false, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false, connectedDatagramSend!: Bool = false )"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.SocketOption",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [],
+        "added_or_replacement_members": [
+          {
+            "kind": "case",
+            "name": "Ipv6Only",
+            "signature": "| Ipv6Only(Bool)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastHopLimit",
+            "signature": "| MulticastHopLimit(UInt8)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastInterface",
+            "signature": "| MulticastInterface(UInt32)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastLoopback",
+            "signature": "| MulticastLoopback(Bool)"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.TcpListener",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "func",
+            "name": "bind",
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, backlog!: Int64 = 128, context!: api.OperationContext = api.OperationContext.background() ): TcpListener"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "bind",
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, backlog!: Int64 = 128, options!: Array<SocketOption> = [], acceptedOptions!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): TcpListener"
+          },
+          {
+            "kind": "func",
+            "name": "getOption",
+            "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.TcpStream",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "func",
+            "name": "connect",
+            "signature": "public static func connect( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "configure",
+            "signature": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "connect",
+            "signature": "public static func connect( endpoint: api.SocketEndpoint, options!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+          },
+          {
+            "kind": "func",
+            "name": "getOption",
+            "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+          }
+        ]
+      },
+      {
+        "name": "wirestack.net.UdpSocket",
+        "declaration_signature_changed": false,
+        "removed_or_replaced_members": [
+          {
+            "kind": "func",
+            "name": "bind",
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+          }
+        ],
+        "added_or_replacement_members": [
+          {
+            "kind": "func",
+            "name": "bind",
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, options!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+          },
+          {
+            "kind": "func",
+            "name": "configure",
+            "signature": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "disconnect",
+            "signature": "public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "getOption",
+            "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+          },
+          {
+            "kind": "func",
+            "name": "joinMulticastGroup",
+            "signature": "public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "leaveMulticastGroup",
+            "signature": "public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          }
+        ]
+      }
+    ]
   },
+  "record_count_boundary": "20 changed declaration records include WebSocketConnection three whitespace-only member-signature differences; this is not a count of semantic or ABI breaks.",
   "source": {
-    "classification": "COMPATIBLE_DECLARATION_CHANGE",
-    "basis": "PDF-rule-derived: Cangjie API declaration compatibility specification, struct constructor parameter-default rule, example 28; non-const, non-Frozen default-value changes are compatible.",
-    "scenario_tool": "compat-agent unavailable; no compatibility-corpus execution claimed"
+    "classification": "NOT_GUARANTEED",
+    "existing_parameter_type_change": "HttpClient.connectWebSocket changes url: HttpUrl to url: WebSocketUrl. Review and migrate old HttpUrl calls; old-consumer compilation was NOT_RUN.",
+    "other_changes": "Optional named parameters, fields and methods are added. SystemResolver, DnsClient and Resolver add ResolverResourceOwner conformance. Inventory presence does not prove every old consumer call or implementation is compatible.",
+    "normative_corpus": "NOT_RUN. Wirestack is outside Cangjie-organization specification scope; no PDF-rule-derived compatibility approval."
   },
-  "exhaustive_match": "No enum case added, removed or changed",
+  "exhaustive_match": {
+    "classification": "RISK_NOT_EXECUTED",
+    "affected_enums": [
+      "NetworkEventKind",
+      "NetworkEventOutcome",
+      "WebSocketErrorCode",
+      "SocketOption"
+    ],
+    "basis": "Enum cases are added. Existing exhaustive matches may require migration; old-consumer compilation and execution were NOT_RUN."
+  },
   "semantic": {
-    "classification": "CHANGED",
-    "default_value": "SocketCapabilities() no longer offers broadcast or multicast",
-    "native_factory": "UdpSocket.capabilities reports broadcast=false and multicast=false because no public configuration or membership operation exists",
-    "preserved": "Connected Internet UDP send remains available; explicit caller-supplied capability values and all existing operation signatures remain unchanged"
+    "classification": "CHANGED_NOT_UNIVERSALLY_QUALIFIED",
+    "default_change": "SocketCapabilities() broadcast and multicast defaults change true -> false.",
+    "current_native_factory": "Read factory-created capabilities. Current native eighteen-scenario and strict 86-row correspondence pass, including configurable UDP broadcast and multicast. The old assertion that no configuration or membership operation exists is obsolete.",
+    "native_receipt": "docs/evidence/M9-003/m9-001-current-map.json",
+    "native_receipt_source_task": "M9-003",
+    "boundary": "Current Linux SDK 1.1.3 contract evidence does not prove old-application semantic equivalence."
   },
   "abi": {
-    "declaration_shape": "UNCHANGED",
+    "declaration_shape": "CHANGED: fields, function/constructor signatures and interface conformances differ.",
     "old_binary_execution": "NOT_RUN",
-    "claim": "No promise of old-binary or cross-SDK compatibility; rebuild static-package consumers"
+    "claim": "Rebuild static consumers; no old-binary or cross-SDK compatibility promise."
   },
   "forward_compatibility": "NOT_RUN across other SDK versions",
-  "migration": "Read capabilities from the actual factory-created object. Do not infer callable broadcast/multicast support from SocketOption values or OS/SDK facilities. M9-002 and M9-003 own future operations and their native evidence."
+  "migration": [
+    "Review all listed changed declarations, not just two defaults.",
+    "Use WebSocketUrl for the changed connectWebSocket parameter.",
+    "Review exhaustive matches over all four changed enums.",
+    "Read actual factory capabilities and use explicitly supported configuration and membership operations.",
+    "Rebuild consumers and execute their own source/runtime regressions."
+  ]
 }

@@ -1,0 +1,319 @@
+[33mwarning[0m: unused function:'waitUntilWriteActive'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:696:5:
+    [36m| [0m
+[36m696[0m [36m| [0m      internal func waitUntilWriteActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m697[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m706[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilReceiveActive'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/udp_socket.cj:718:5:
+    [36m| [0m
+[36m718[0m [36m| [0m      func waitUntilReceiveActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m719[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m725[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilAcceptActive'
+    [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:1054:5:
+     [36m| [0m
+[36m1054[0m [36m| [0m      func waitUntilAcceptActive(timeout: Duration): Bool {[0m
+     [36m| [0m [33m_[0m[33m____^[0m
+[36m1055[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+     [36m| [0m[33m|[0m ...[0m
+[36m1063[0m [36m| [0m[33m|[0m     }[0m
+     [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+     [36m| [0m
+     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+3 warnings generated, 3 warnings printed.
+[33mwarning[0m: unused import 'std.sync.*'
+ [36m==>[0m <work>/wirestack_m9_003_udp_lifecycle/src/main.cj:6:1:
+  [36m| [0m
+[36m6[0m [36m| [0mimport std.sync.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unreachable block in 'while' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:465:31:
+    [36m| [0m
+[36m465[0m [36m| [0m          while (requested > 0) {[0m
+    [36m| [0m [33m_[0m[33m______________________________^[0m
+[36m466[0m [36m| [0m[33m|[0m             checkWriterContext(context)[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m521[0m [36m| [0m[33m|[0m         }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________^ unreachable block in 'while' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:468:44:
+    [36m| [0m
+[36m468[0m [36m| [0m              if (availableBeforeBuffer > 0) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________^[0m
+[36m469[0m [36m| [0m[33m|[0m                 if (availableBeforeBuffer < requested) {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m502[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:469:56:
+    [36m| [0m
+[36m469[0m [36m| [0m                  if (availableBeforeBuffer < requested) {[0m
+    [36m| [0m [33m_[0m[33m_______________________________________________________^[0m
+[36m470[0m [36m| [0m[33m|[0m                     requested = availableBeforeBuffer[0m
+[36m471[0m [36m| [0m[33m|[0m                 }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:500:44:
+    [36m| [0m
+[36m500[0m [36m| [0m                    if (!leaseTransferred) { releaseBufferLease(Some(bufferLease)) }[0m
+    [36m| [0m                                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:505:44:
+    [36m| [0m
+[36m505[0m [36m| [0m              if (permit.amount < requested) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________^[0m
+[36m506[0m [36m| [0m[33m|[0m                 requested = permit.amount[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m509[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/flow_control.cj:569:41:
+    [36m| [0m
+[36m569[0m [36m| [0m                    else if (succeeded) { NetworkEventOutcome.Succeeded } else { NetworkEventOutcome.Discarded },[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/server_connection.cj:613:28:
+    [36m| [0m
+[36m613[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:689:32:
+    [36m| [0m
+[36m689[0m [36m| [0m            if (queueReserved) { releaseQueueCapacity(frames.size, totalBytes, false) }[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:742:32:
+    [36m| [0m
+[36m742[0m [36m| [0m            if (queueReserved) { releaseQueueCapacity(1, size, cleanupSlot) }[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:743:31:
+    [36m| [0m
+[36m743[0m [36m| [0m            if (!transferred) { releaseBufferLease(bufferLease) }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+10 warnings generated, 10 warnings printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/client_pipeline.cj:92:9:
+   [36m| [0m
+[36m92[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'size'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/pool_admission.cj:101:5:
+    [36m| [0m
+[36m101[0m [36m| [0m    func size(): Int64 { waiterCount }[0m
+    [36m| [0m    [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/server_connection.cj:166:23:
+    [36m| [0m
+[36m166[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/http2_connection_pool.cj:453:42:
+    [36m| [0m
+[36m453[0m [36m| [0m            if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/http2_connection_pool.cj:455:42:
+    [36m| [0m
+[36m455[0m [36m| [0m            if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/connection_pool.cj:579:5:
+    [36m| [0m
+[36m579[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m580[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m589[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/http2_connection_pool.cj:659:5:
+    [36m| [0m
+[36m659[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m660[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m669[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/http2_connection_pool.cj:765:32:
+    [36m| [0m
+[36m765[0m [36m| [0m              if (waiterId != 0) {[0m
+    [36m| [0m [33m_[0m[33m_______________________________^[0m
+[36m766[0m [36m| [0m[33m|[0m                 synchronized(mutex) { removeHttp2WaiterLocked(waiterId, false) }[0m
+[36m767[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/tls_client_pipeline.cj:869:9:
+    [36m| [0m
+[36m869[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+11 warnings generated, 11 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/http/client.cj:566:31:
+    [36m| [0m
+[36m566[0m [36m| [0m            if (!transferred) { lifetime.close() }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/http/client.cj:894:29:
+    [36m| [0m
+[36m894[0m [36m| [0m              if (!published) {[0m
+    [36m| [0m [33m_[0m[33m____________________________^[0m
+[36m895[0m [36m| [0m[33m|[0m                 direct.close()[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m897[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/http/client.cj:896:41:
+    [36m| [0m
+[36m896[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/http/client.cj:896:78:
+    [36m| [0m
+[36m896[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                                                             [33m^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/gzip/client.cj:119:31:
+    [36m| [0m
+[36m119[0m [36m| [0m              if (!transferred) {[0m
+    [36m| [0m [33m_[0m[33m______________________________^[0m
+[36m120[0m [36m| [0m[33m|[0m                 try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m122[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/gzip/client.cj:120:31:
+    [36m| [0m
+[36m120[0m [36m| [0m                try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/gzip/client.cj:123:21:
+    [36m| [0m
+[36m123[0m [36m| [0m            if (let Some(value) <- lease) { value.close() }[0m
+    [36m| [0m                    [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/gzip/body.cj:138:25:
+    [36m| [0m
+[36m138[0m [36m| [0m              if (failed) {[0m
+    [36m| [0m [33m_[0m[33m________________________^[0m
+[36m139[0m [36m| [0m[33m|[0m                 try { releaseIfTerminal() } catch (_: Exception) { /* Cleanup must not replace the read failure. */ }[0m
+[36m140[0m [36m| [0m[33m|[0m             } else { releaseIfTerminal() }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.

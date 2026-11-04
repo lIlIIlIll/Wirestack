@@ -37,11 +37,42 @@ factory-specific observed flags are checked separately against the single
 The original seven scenarios remain required even though the auxiliary runner
 also exercises them.
 
+## Exercised current-map command, not task acceptance
+
+The exact authorized manifest command was smoked at integrated code source
+`1631837216989f7eac6986b24b0b9a2c61d0bd20` with qualified official STS 1.1.3.
+The [complete command receipt](maintenance/current-map-command-smoke.json)
+keeps the native receipt's M9-003 identity and the task's BLOCKED boundary.
+
+| Execution | Actual result | Evidence boundary |
+|---|---|---|
+| First complete attempt | 17 scenarios PASS, 1 FAIL; 92.311 seconds | Unix abstract fixture construction reached 109 UTF-8 bytes against its existing 107-byte bound; [original report and logs](maintenance/abstract-temp-failure/original-report.json) remain failures. |
+| After deterministic environment correction | All 18 scenarios PASS; 97.909 seconds | Only a shorter private disk-backed temporary root changed; runner, SDK, 64 resource cycles, 107-byte abstract padding and long deadline stayed unchanged. |
+| Unchanged strict correspondence | PASS, native PASS, all 86 rows | Actual current auxiliary receipt validates against the current description; no seven-case substitution or task-identity rewrite. |
+
+The actual [selected long gate](current-map-task-check.json) still exits
+2/INVALID with no commands because P1-015 is not COMPLETE. Direct native
+success does not satisfy that prerequisite, the independent seven-scenario
+gate, HTML/browser proof or the final task seal.
+
+The [current API comparison](api-compatibility.json) records 39 added
+declarations, no declaration removals and 20 changed declaration records
+against the M8-007 inventory. It includes changed WebSocket parameter types,
+resolver interface conformances, fields and enum cases, not just capability
+defaults. Old-consumer source execution, old binaries and cross-SDK behavior
+remain NOT_RUN; no universal source or ABI compatibility is claimed.
+
 ## Execution order
 
 Use the qualified STS archive and trusted native cjdoc recorded by the current
 qualification environment. Verify the current development baseline first, then
 execute the long gate before the task gate's correspondence command:
+
+Use a short, unique mode-0700 temporary directory under
+`$HOME/.cache/agent-tmp` on the checked disk-backed filesystem. Size the longest
+Unix fixture suffix before running; SDK wrappers that reset `TMPDIR`, `TMP`
+and `TEMP` need the task-specific override applied afterward. This changes
+temporary-path geometry, not endpoint bounds, padding or workload.
 
 ```sh
 python3 tools/development_baseline.py verify

@@ -1,0 +1,12 @@
+2515051 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+2515051 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+2515051 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+2515056 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(57059), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+2515056 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+2515055 +++ exited with 0 +++
+2515054 +++ exited with 0 +++
+2515053 +++ exited with 0 +++
+2515052 +++ exited with 0 +++
+2515056 +++ exited with 0 +++
+2515057 +++ exited with 0 +++
+2515051 +++ exited with 0 +++
