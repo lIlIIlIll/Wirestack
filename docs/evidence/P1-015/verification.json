@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "source_task": "P1-015",
-  "status": "BLOCKED",
-  "scope": "Current four-gate development capture and byte verification pass; selected-task and current prerequisite metadata qualification are not promoted.",
+  "status": "PASS",
+  "scope": "Current four-gate development capture, independent byte verification and all three selected task commands pass. Prerequisite native qualification is real; final shared completion metadata is resealed at the frozen source. No release qualification.",
   "tested_production_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
   "capture": {
     "status": "PASS",
@@ -109,8 +109,7 @@
     ],
     "observed_stdout": "P1-015 current development baseline: PASS; release NOT_QUALIFIED"
   },
-  "task_acceptance": "NOT_PROMOTED",
-  "blocker": "Current P1-014 metadata requires a matching Linux/Windows exact-revision pair and source seal. Existing owner-ref updates are rejected by GitHub during incident smtdswd1h2w4; older report revisions are not edited.",
+  "task_acceptance": "PASS",
   "release": {
     "candidate_86400_second_soak": "NOT_RUN",
     "independent_security_review": "NOT_RUN",
@@ -120,10 +119,28 @@
   "artifact_privacy": "Installed archive remains a private local verification artifact; no public payload-privacy or formal release qualification is claimed.",
   "historical_verification": "docs/evidence/P1-015/maintenance/historical-verification.json",
   "selected_task": {
-    "status": "INVALID",
-    "exit_code": 2,
-    "commands": [],
-    "issue": "DEPENDENCY_INCOMPLETE: P1-015 dependency is not COMPLETE: P1-014",
+    "status": "PASS",
+    "exit_code": 0,
+    "commands": [
+      {
+        "id": "baseline-plan",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 113.759
+      },
+      {
+        "id": "gate-separation",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 414.067
+      },
+      {
+        "id": "current-baseline",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 6169.221
+      }
+    ],
     "report": "docs/evidence/P1-015/task-check.json"
   }
 }
