@@ -2,16 +2,14 @@
   "issues": [],
   "kind": "evidence-freshness",
   "schema_version": 1,
-  "status": "STALE",
+  "status": "PASS",
   "tasks": [
     {
-      "issues": [
-        {
-          "code": "DIGEST_STALE",
-          "detail": "docs/planning/status.md"
-        }
-      ],
-      "status": "STALE",
+      "issues": [],
+      "report_count": 6,
+      "source_count": 84,
+      "stale_paths": [],
+      "status": "PASS",
       "task_id": "P1-014"
     }
   ]

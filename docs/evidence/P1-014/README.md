@@ -2,14 +2,17 @@
 
 ## Status
 
-Task status is **BLOCKED on current metadata**, not a newly observed code
-failure. The actual freshness verifier exits 5/STALE at
-`docs/planning/status.md`. A current matching Linux/Windows revision pair is
-still required after that status change. Existing owner-ref publication fails
-with GitHub server errors during incident `smtdswd1h2w4`; the successful
-create-only preservation anchor does not qualify a new Windows snapshot.
-See [current metadata status](current-metadata-status.json). Neither an old
-receipt revision nor the source inventory is edited to hide this barrier.
+The development task is **COMPLETE** after the real recovered Linux/Windows
+pair and strict source verification passed. The recovered pair identifies
+`8470ee90f1a52007267dd56abf72dd6e013f29dc`; Windows run `41828861359`
+executed actual CRLF checks, and the independent Linux receipt has the same
+normalized digest. Verification passed for all six reports and 84 source paths.
+The source and its create-only preservation anchor are public. GitHub incident
+`smtdswd1h2w4` is no longer a publication blocker. The original stale result
+and server failures remain in `maintenance/recovered-metadata/`.
+See [metadata qualification](current-metadata-status.json). Shared completion
+metadata is requalified at the final frozen source before delivery; no receipt
+revision, source inventory, timeout or threshold is edited to bypass that step.
 
 The post-integration selected task passed all five commands at code source
 `1631837216989f7eac6986b24b0b9a2c61d0bd20` on qualified official STS 1.1.3.

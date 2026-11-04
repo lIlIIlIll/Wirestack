@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-11-04T09:48:03.123387Z",
+  "generated_at_utc": "2026-11-04T12:33:20.373405Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -40,7 +40,7 @@
       "path": "docs/evidence/P1-014/linux-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "73877ac075b2ba8ade98f234da574bfe22a7e9382433182ff446ab24cd882b1d"
+        "sha256": "0f9f3572ab0675cd695da57b454409e992f7366b8fa171b4d7eed0fc53111aaf"
       },
       "source_task": "P1-014"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/P1-014/windows-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "025f19351558d24c7ab17db72ab734d0b02cb54634ae6a20e121a144bd418e81"
+        "sha256": "1a63dac623e12da26592e5b7ea16a5af7143c039640f32a0cd3e9b49871294b9"
       },
       "source_task": "P1-014"
     },
@@ -63,7 +63,7 @@
       "source_task": "P1-014"
     }
   ],
-  "revision": "b78d8d278214bd981572ac82581b185489bab40c",
+  "revision": "8470ee90f1a52007267dd56abf72dd6e013f29dc",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
@@ -104,7 +104,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "18532b5b9ae9cccfcb5b62c78cb506148b1851fb75d0e453cfc92299945e34fa"
+      "sha256": "2b6e62f4aaded1a23a4682991f080c3065bfda6a11738b8eff2cf5b6857f4820"
     },
     "tools/architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
