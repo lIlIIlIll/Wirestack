@@ -9,8 +9,8 @@ complete historical global M3 tasks, M3-001's six-platform target-build
 condition, or any mobile condition. Those remain explicitly excluded.
 
 The current desktop and Core receipts qualify the frozen integrated source
-`6c5eb96e8552975dbc17651f1e86ca947e78b0ac`. The immutable source ref is
-`evidence/M10-002/6c5eb96e8552975dbc17651f1e86ca947e78b0ac`; the actual
+`59e0fcf458f73ff1a395b378d1e1914685ea379a`. The immutable source ref is
+`evidence/M10-002/59e0fcf458f73ff1a395b378d1e1914685ea379a`; the actual
 workflow dispatch branch was `fix/M10-002-resource-owner-backpressure`.
 The tested integrated revision is not presented as the lower M3 owner PR head.
 
@@ -19,12 +19,13 @@ key handles, Apple Keychain/SecKey, or mobile device support.
 
 ## Current executed results
 
-- [Hosted provider run 41698821216](https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216)
+- [Hosted provider run 41779297210](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779297210)
   passed on Windows x86_64 and macOS arm64. Both schema-v11 AWS-LC 5.5.0
   reports passed all 18 required capabilities and retained 11 license files.
-- The direct Windows resolver receipt passed all six selected cases on STS
-  1.2.0; the macOS receipt passed all eight selected cases on STS 1.2.0.
-  Other filtered cases and Apple mobile targets are not qualified.
+- [Windows resolver run 41779351031](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779351031)
+  passed all six selected cases on STS 1.2.0. [macOS resolver run 41779286737](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779286737)
+  passed all eight selected cases on STS 1.2.0. The other 28 Windows and 26
+  macOS filtered cases and Apple mobile targets are not qualified.
 - [Current Core qualification](current-core/qualification.json) passed its
   four executed commands on the qualified Linux STS 1.1.3 SDK: provider build,
   architecture guard, provider substitution, and outside-checkout installed
@@ -41,6 +42,9 @@ The native provider ZIPs were checked byte-for-byte against every retained
 platform payload. Their artifact-byte SHA-256 values are recorded in
 `hosted-run.json`. The current Core release disposition remains
 `NOT_QUALIFIED`; its raw archive is not a published release artifact.
+The hosted provider workflow did not upload `build.log`, so those log bytes are
+not claimed as verified. This does not replace or weaken the nine full
+current-Core logs, which are retained separately.
 
 ## Task-graph boundary
 
@@ -123,6 +127,9 @@ unrelated cases omitted by the class filter are not required-case skips.
 These fixture results do not establish native Core or desktop qualification.
 
 ## Historical hosted provider evidence
+
+Earlier STS provider runs `41698821216` at `6c5eb96e` and `41773758417` at
+`e0cc7f4e` remain historical qualifications.
 
 The retained GitHub Actions run
 [`33461712135`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135)

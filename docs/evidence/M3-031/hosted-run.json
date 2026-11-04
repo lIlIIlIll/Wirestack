@@ -1,53 +1,100 @@
 {
-  "artifacts": [
-    {
-      "artifact_id": 13263215283,
-      "archive_digest": "sha256:664a4c958ccfb8fb6945f91e8a497860df2f982eef3d19675bae00bc10322f56",
-      "expires_at": "2026-11-17T19:02:16Z",
-      "name": "m3-031-windows-x86_64-6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
-      "provider_result_sha256": "665d7261780a808149aabb3f248499d85bdc00937ce442a378c40fb282971ddd",
-      "validation_sha256": "baaf6d489a526f390e9d2e6d30e560ebc8ae629abb869fcb7c34f8913f5d84d2"
-    },
-    {
-      "artifact_id": 13265037215,
-      "archive_digest": "sha256:c5600f6f973431f1b967254f74f3aaf16864e4c715ad5fa04ea1777151d5a26e",
-      "expires_at": "2026-11-17T19:32:57Z",
-      "name": "m3-031-macos-arm64-6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
-      "provider_result_sha256": "2e25f0ffcd123f8de9363d343503330f4312e973cb47477bebb9b52ad7b12aeb",
-      "validation_sha256": "584a33b651f6b78030df302514b2f150a4ef3d30952e05b7d485f2bce80aa01b"
-    }
-  ],
-  "branch": "fix/M10-002-resource-owner-backpressure",
-  "conclusion": "success",
-  "event": "workflow_dispatch",
-  "jobs": [
-    {
-      "completed_at": "2026-11-03T19:02:22Z",
-      "job_id": 126136409610,
-      "name": "windows-aws-lc",
-      "started_at": "2026-11-03T19:00:05Z",
-      "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216/job/126136409610"
-    },
-    {
-      "completed_at": "2026-11-03T19:33:06Z",
-      "job_id": 126136409832,
-      "name": "macos-aws-lc",
-      "started_at": "2026-11-03T19:30:04Z",
-      "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216/job/126136409832"
-    }
-  ],
-  "revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
-  "run_id": 41698821216,
   "schema_version": 2,
+  "task_id": "M3-031",
+  "status": "PASS",
+  "workflow_status": "completed",
+  "conclusion": "success",
+  "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+  "branch": "fix/M10-002-resource-owner-backpressure",
+  "event": "workflow_dispatch",
+  "run_id": 41779297210,
+  "workflow_id": 346212338,
+  "run_number": 50,
+  "created_at": "2026-11-04T05:26:49Z",
+  "updated_at": "2026-11-04T05:35:46Z",
+  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41779297210",
   "source_sha256": {
     "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
     "tools/tls_provider_poc/providers.json": "bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e",
     "tools/tls_provider_poc/run.py": "cba3b7d7aba7b92895eeb13b4d3d1f88811104bdd967168e896a1aa59baf1468",
     "tools/tls_provider_poc/validate.py": "856099f0e6745ad1d1fc233684a47bc79f5f66d2d1bb2fab21c3efa17c5b34c8"
   },
-  "status": "PASS",
-  "task_id": "M3-031",
-  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216"
+  "jobs": [
+    {
+      "job_id": 126406904870,
+      "name": "macos-aws-lc",
+      "status": "PASS",
+      "api_status": "completed",
+      "conclusion": "success",
+      "head_sha": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+      "started_at": "2026-11-04T05:34:00Z",
+      "completed_at": "2026-11-04T05:35:45Z",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41779297210/job/126406904870"
+    },
+    {
+      "job_id": 126406905109,
+      "name": "windows-aws-lc",
+      "status": "PASS",
+      "api_status": "completed",
+      "conclusion": "success",
+      "head_sha": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+      "started_at": "2026-11-04T05:28:25Z",
+      "completed_at": "2026-11-04T05:30:59Z",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41779297210/job/126406905109"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": 13297704732,
+      "archive_digest": "sha256:7f1b76276d3df299ec459acabaee875c390b363963b34875e593e5768c8a7f31",
+      "expires_at": "2026-11-18T05:35:42Z",
+      "name": "m3-031-macos-arm64-59e0fcf458f73ff1a395b378d1e1914685ea379a",
+      "provider_result_sha256": "46f0310b2a2a9e8c27e03aa07e399cbb4e871c5c7b7dc52f3206da009cc45d2d",
+      "validation_sha256": "fdb4f72e548a95f6fec8a250fe54e518dafe2f74bef10d0a94c8a66b114972c8"
+    },
+    {
+      "artifact_id": 13297734109,
+      "archive_digest": "sha256:62c4cc278f67fc6f0f61028484050b056e86902b348c0b8721d6c8fdf9b53665",
+      "expires_at": "2026-11-18T05:30:54Z",
+      "name": "m3-031-windows-x86_64-59e0fcf458f73ff1a395b378d1e1914685ea379a",
+      "provider_result_sha256": "761ac2e402b62170cdd21b19a3ec350cf72cf173e01e139e5d0d16c98159ce47",
+      "validation_sha256": "a73f19ae2ce66a98d5dfb89fdfe31beac9a220fc77e5207bcc2ca427251c44ef"
+    }
+  ],
+  "artifact_api": [
+    {
+      "id": 13297704732,
+      "name": "m3-031-macos-arm64-59e0fcf458f73ff1a395b378d1e1914685ea379a",
+      "size_in_bytes": 54419,
+      "created_at": "2026-11-04T05:35:43Z",
+      "updated_at": "2026-11-04T05:35:43Z",
+      "expires_at": "2026-11-18T05:35:42Z",
+      "digest": "sha256:7f1b76276d3df299ec459acabaee875c390b363963b34875e593e5768c8a7f31",
+      "expired": false,
+      "workflow_run": {
+        "id": 41779297210,
+        "repository_id": 1342891507,
+        "head_repository_id": 1342891507,
+        "head_branch": "fix/M10-002-resource-owner-backpressure",
+        "head_sha": "59e0fcf458f73ff1a395b378d1e1914685ea379a"
+      }
+    },
+    {
+      "id": 13297734109,
+      "name": "m3-031-windows-x86_64-59e0fcf458f73ff1a395b378d1e1914685ea379a",
+      "size_in_bytes": 43429,
+      "created_at": "2026-11-04T05:30:55Z",
+      "updated_at": "2026-11-04T05:30:55Z",
+      "expires_at": "2026-11-18T05:30:54Z",
+      "digest": "sha256:62c4cc278f67fc6f0f61028484050b056e86902b348c0b8721d6c8fdf9b53665",
+      "expired": false,
+      "workflow_run": {
+        "id": 41779297210,
+        "repository_id": 1342891507,
+        "head_repository_id": 1342891507,
+        "head_branch": "fix/M10-002-resource-owner-backpressure",
+        "head_sha": "59e0fcf458f73ff1a395b378d1e1914685ea379a"
+      }
+    }
+  ]
 }
