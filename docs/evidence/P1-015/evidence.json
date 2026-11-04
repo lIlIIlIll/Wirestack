@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-22T06:36:51.792067Z",
+  "generated_at_utc": "2026-11-04T14:10:56.610328Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/P1-015/baseline.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "5cc37d2c99cb97e232eb25df659fb488c908a3167d44ccdab6228d9c11234f86"
+        "sha256": "d08eb6a200bfc998053fffd8d461dfff2dd890b6f9f5921eb74c52a498008308"
       },
       "source_task": "P1-015"
     },
@@ -22,21 +22,39 @@
       "path": "docs/evidence/P1-015/verification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d30c84eb5d084a99d7557d125dc7cdf92d2ecbc7b557cffebe95f9df5f8b73ef"
+        "sha256": "343efa20aed6de5ff6fe0d135d97cf248ff86ea262105e3fca70138dd6cce0d7"
+      },
+      "source_task": "P1-015"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-015/task-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "582f23eb11b5a2a523ae66d97dd3ae77cf2f1e742ed421f7056d0410c33ad9b5"
+      },
+      "source_task": "P1-015"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-015/maintenance/final-source-binding.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "735c88df0b86335ace98a628dcdeb46a7f3dd56c212f9f6d5decd7c0356fee5c"
       },
       "source_task": "P1-015"
     }
   ],
-  "revision": "990873c6669e6d63881a3a943d467146fb562d6d",
+  "revision": "756162212073523a61cb6e23330eb07ceef0685d",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d158937789403d0e1986917116d1f38c744e6a5a86b186afc88aca4a1fa74f5d"
+      "sha256": "49c61ce3c136094b24008eb4a2608561f42a101c17cff0dbe884c2f6d4c6ce9c"
     },
     "docs/evidence/P1-015/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2c4ac59cb361ddcffadf680420605c1f924a266f30e6276be6cbf28017a7bdd0"
+      "sha256": "ae364acefb91137ccddb97c83763d0d6734c6d7c281927e5bfab7109ec698eca"
     },
     "docs/evidence/P1-015/test-plan.md": {
       "domain": "text-utf8-lf-v1",
@@ -44,11 +62,11 @@
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "432218117ea4dcbade1741b93643635c12608743b16218fca1f7c926f9a18b2f"
+      "sha256": "5ff33fea10eec850f3948059c7db069255dadc00f091b9ddc54a8091d306c672"
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c7a10dc708cf314557084512a423ff6eed9344d5b6332de87e01c40dd817472c"
+      "sha256": "aa3f313c9f2c5cd1eb7c630790eac3b532f7e7f5bab35e5fa51b0558755e2f10"
     },
     "docs/product/prd.md": {
       "domain": "text-utf8-lf-v1",

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source_task": "P1-015",
+  "status": "PASS",
+  "frozen_metadata_source": "756162212073523a61cb6e23330eb07ceef0685d",
+  "executed_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "compared_active_integration_inputs": {
+    "production_sources": 193,
+    "execution_inputs": 755
+  },
+  "all_text_digests_match": true,
+  "independent_baseline_verify_exit": 0,
+  "independent_baseline_verify_stdout": "P1-015 current development baseline: PASS; release NOT_QUALIFIED\n",
+  "sdk_matched_archive_files": 497,
+  "boundary": "Metadata-only final source, not relabeling native execution revisions or qualifying the release."
+}

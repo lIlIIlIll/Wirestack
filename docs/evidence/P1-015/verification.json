@@ -142,5 +142,15 @@
       }
     ],
     "report": "docs/evidence/P1-015/task-check.json"
+  },
+  "final_frozen_source_binding": {
+    "status": "PASS",
+    "metadata_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+    "executed_production_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+    "all_production_inputs": 193,
+    "all_execution_inputs": 755,
+    "sdk_archive_matched_files": 497,
+    "independent_verify_exit_code": 0,
+    "report": "docs/evidence/P1-015/maintenance/final-source-binding.json"
   }
 }
