@@ -22,6 +22,27 @@ The focused development/release regression harness now establishes the same
 independently of unittest discovery order. Structural fixture validation and
 strict current-source validation retain their separate behavior.
 
+## Current documentation-time maintenance
+
+The first current canonical check reached its unchanged 1,800-second limit.
+Its documentation phase took approximately 1,751 seconds and published PASS
+only after that deadline. Native descendants then continued outside the failed
+invocation; their later 1,090 passed and 28 skipped cases are diagnostic, not a
+canonical PASS. P1-012 separately fixes that process-group lifetime.
+
+One unchanged combined-DocIR `api-surface` render took 81.465 seconds. The
+approved driver change bounds concurrent public-package/combined views at
+three. Each view owns its staging paths and command list. All 40 commands
+(41 with HTML), strict lint, complete DocIR validation, 100% symbol/parameter
+coverage, the 65,536-entry cache bound, default heap profile and existing task
+limits remain unchanged. Receipts retain manifest order and artifacts publish
+only after every worker has joined and every view has passed.
+
+The bounded-overlap regression and a required-view failure after sibling
+staging exercise concurrency and all-or-nothing publication. They do not
+establish native timing: current qualification still requires actual canonical
+and HTML execution within their original limits.
+
 ## Release boundary
 
 This task does not refresh M7-019 through M7-031 evidence and does not claim the
