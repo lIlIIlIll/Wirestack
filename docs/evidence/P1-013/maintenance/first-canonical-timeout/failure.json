@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-013",
+  "kind": "unaccepted-canonical-timeout",
+  "status": "FAIL",
+  "tested_production_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "canonical_command": {
+    "argv": [
+      "scripts/check"
+    ],
+    "status": "FAIL",
+    "exit_code": null,
+    "error_code": "TIMEOUT",
+    "timed_out": true,
+    "duration_ms": 1800038.083,
+    "started_at_utc": "2026-11-04T02:18:23.612582Z",
+    "finished_at_utc": "2026-11-04T02:48:23.650610Z"
+  },
+  "documentation": {
+    "recorded_start_utc": "2026-11-04T02:19:37.358961Z",
+    "observed_publication_utc": "2026-11-04T02:48:48.180555+00:00",
+    "command_count": 40,
+    "all_commands_passed": true,
+    "publication_after_outer_deadline": true
+  },
+  "late_native_diagnostic": {
+    "total": 1118,
+    "passed": 1090,
+    "skipped": 28,
+    "failed": 0,
+    "errors": 0,
+    "accepted_as_canonical_pass": false
+  },
+  "process_lifecycle": {
+    "owned_descendants_observed_after_timeout": true,
+    "group_leader_parent_was_init": true,
+    "later_exited_naturally": true,
+    "cleanup_kill_issued": false
+  },
+  "retention": {
+    "private_paths_normalized": true,
+    "raw_logs_may_include_post_timeout_output": true,
+    "original_bytes_retained_privately": true,
+    "files": [
+      {
+        "path": "task-check.json",
+        "original_artifact_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "67a10c3613b35b1a5fbaf27f3348e16276a03488a170f8e2e7725d794aa2bab5"
+        },
+        "retained_text_digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2b1a57a5bcdc185e466218b23b584e46af7e6859395c50488b2863f559e15040"
+        }
+      },
+      {
+        "path": "check-docs.json",
+        "original_artifact_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "0e48be75bb9222f45210302da4d1330504d0edf17811e409ed7fbfc99c80878a"
+        },
+        "retained_text_digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0e48be75bb9222f45210302da4d1330504d0edf17811e409ed7fbfc99c80878a"
+        }
+      },
+      {
+        "path": "canonical.stdout.txt",
+        "original_artifact_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "3b7b9aafa889d5f2468fa293c448d136a1ad4fdf3a8a8a89fe8442134a87fe52"
+        },
+        "retained_text_digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3b7b9aafa889d5f2468fa293c448d136a1ad4fdf3a8a8a89fe8442134a87fe52"
+        }
+      },
+      {
+        "path": "canonical.stderr.txt",
+        "original_artifact_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "73629abc485d066582d663a221a02ea5b8b45671234432081f7d955ab5f910be"
+        },
+        "retained_text_digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "988c42eec9d087c79856990d2407b6ea89843d24c5da37819f9d0c3ab215cbaf"
+        }
+      }
+    ]
+  },
+  "release": "NOT_QUALIFIED"
+}
