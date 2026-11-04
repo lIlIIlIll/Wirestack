@@ -1,28 +1,57 @@
 # M10-002 current-source acceptance follow-up
 
-The retained acceptance below records the earlier #216 Q4 source and its
-failures. Current blocker maintenance is recorded separately in
+Current integrated code source is
+`1631837216989f7eac6986b24b0b9a2c61d0bd20`. All eleven unchanged local
+manifest commands ran successfully; this is diagnostic execution, not
+dependency-qualified task acceptance. The selected task still exits 2/INVALID
+on M9-001, and the original default-runtime resource-restoration failure stays
+open. Complete current outputs and source identities are in
+[`current-source-acceptance.json`](stack-200-review/current-source-acceptance.json).
+
+Earlier #216 failures and reviews remain historical. Their exact reports are
+preserved under the `historical-*-e7c4bba5.json` files. The deterministic
+maintenance proof remains
 [`closure-regressions/proof.json`](stack-200-review/closure-regressions/proof.json).
-The maintenance source commit is `e05a13910c752417c3782b1d833bb27c761b58fc`;
-it is not yet a final integrated acceptance candidate.
 
 ## Scope and dependency state
 
 M10-002 implements bounded resource ownership and HTTP/2 Q4 outbound DATA admission. For positive stream flow credit, the sender caps the DATA frame to current credit, waits for a suitably sized managed-buffer lease, rechecks credit, then acquires the flow-control permit. A blocked buffer wait holds no flow permit; if SETTINGS reduces credit after the lease is acquired, the lease is released before retry. Zero flow credit waits without retaining a managed buffer. Stream/controller termination cancels pending lease waiters. Classic CONNECT without `:scheme` uses the actual `http` or `https` transport scheme for resource ownership. No public API was added or changed.
 
-The M10-002 task gate is `INVALID` (exit 2, `commands: []`) because its declared dependency M9-001 is BLOCKED. M9-001 is blocked by P1-015. The P1-012 validator fix is now in the local #216 ancestry, so the task check reaches M9-001 rather than the former plan-only prerequisite mismatch. Repository-wide `validate-tasks` is also `INVALID` (exit 2, no task IDs) at `M10-001 dependency is not COMPLETE: M9-001`.
+The actual current M10-002 selected task is `INVALID` (exit 2,
+`commands: []`): `DEPENDENCY_INCOMPLETE: M10-002 dependency is not COMPLETE:
+M9-001`. M9-001 still depends on incomplete P1-015 qualification. Native
+diagnostic successes do not bypass this closure.
 
-Related task-status edges were refreshed without marking blocked tasks complete.
-M12-002 and M10-003 / #175 remain BLOCKED. P1-012 task acceptance and a
-source-bound seal may PASS independently of global readiness when its own
-complete dependency closure passes. Its current qualification must still be
-regenerated; the historical global-readiness failure is not a PASS seal input.
+P1-012 current selected acceptance passed, and fresh local source seals passed
+their strict verifier. Metadata publication is only partial after two remote
+500 errors during GitHub incident `smtdswd1h2w4`; a current matching Windows
+metadata receipt remains required. Repository-wide readiness and historical
+M7 release qualification are not promoted.
 
-## Retained acceptance before blocker maintenance
+## Current local diagnostics, not task acceptance
 
-Detailed machine-readable results: [`current-source-acceptance.json`](stack-200-review/current-source-acceptance.json). The updated scenario matrix and verification summary are [`scenario-matrix.json`](stack-200-review/scenario-matrix.json) and [`verification.json`](stack-200-review/verification.json).
+The full native run passed 1,090 cases with 28 explicit skips and no error or
+failure. All five changed-path admission cases actually executed. Each exact
+HTTP/2 profile passed 219 cases: FD limit 64, data limit 1 GiB, address-space
+limit 4 GiB, and affinity CPU 0. No CPU substitution, processor override or
+extra heap override was used for those profiles.
 
-| Gate | Current result |
+The manifest's documentation command used its explicit 1 GiB heap and passed
+all 40 commands with complete symbol and parameter coverage. The canonical
+repository command passed in 487.303 seconds. Complete stdout/stderr is
+retained in `stack-200-review/current-local-diagnostics/`; only private path
+prefixes are projected, with original-byte and public-text digests recorded.
+
+The installed default-runtime consumer's original strict result remains FAIL:
+FDs 10 to 10, tasks 14 to 15. Twelve behavioral checks and child exit 0 did not
+satisfy resource restoration. A passing default replay and a processor-count
+control remain diagnostics, not closure or a substitute acceptance profile.
+
+## Historical acceptance before blocker maintenance
+
+Exact earlier results are in [`historical-current-source-acceptance-e7c4bba5.json`](stack-200-review/historical-current-source-acceptance-e7c4bba5.json), with the matching [`historical matrix`](stack-200-review/historical-scenario-matrix-e7c4bba5.json) and [`historical verification`](stack-200-review/historical-verification-e7c4bba5.json). These files are not current qualification inputs.
+
+| Gate | Historical result |
 |---|---|
 | `python3 tools/architecture_guard.py --root . --format text` | Exit 0; PASS. |
 | `python3 tools/check_network_capabilities.py --check` | Exit 0; 86 contract rows pass. Native capability evidence is NOT_RUN; no platform qualification claim. |
@@ -34,7 +63,9 @@ Detailed machine-readable results: [`current-source-acceptance.json`](stack-200-
 | `scripts/check-task M10-002 --json` | INVALID, exit 2, no commands; direct dependency M9-001 is not COMPLETE. |
 | Repository `validate-tasks` | INVALID, exit 2, no task IDs; M10-001 dependency M9-001 is not COMPLETE. |
 
-The current task gate cannot complete, and the full native suite and repository-wide check fail. M10-002 remains **BLOCKED** despite the successful architecture, build/check, strict-doc, and constrained-resource gates. The exact current commands, statuses, failure names, and dependency details are in the machine-readable report above.
+At that earlier source, the full native suite and repository command failed
+and the task dependency check was invalid. Those failures remain failures;
+the current local successes above do not turn old reports into acceptance.
 
 ## Evidence boundaries and PR state
 
