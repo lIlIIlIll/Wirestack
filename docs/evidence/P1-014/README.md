@@ -2,6 +2,15 @@
 
 ## Status
 
+Task status is **BLOCKED on current metadata**, not a newly observed code
+failure. The actual freshness verifier exits 5/STALE at
+`docs/planning/status.md`. A current matching Linux/Windows revision pair is
+still required after that status change. Existing owner-ref publication fails
+with GitHub server errors during incident `smtdswd1h2w4`; the successful
+create-only preservation anchor does not qualify a new Windows snapshot.
+See [current metadata status](current-metadata-status.json). Neither an old
+receipt revision nor the source inventory is edited to hide this barrier.
+
 The post-integration selected task passed all five commands at code source
 `1631837216989f7eac6986b24b0b9a2c61d0bd20` on qualified official STS 1.1.3.
 All 150 focused regressions passed. The unchanged 1,800-second canonical
