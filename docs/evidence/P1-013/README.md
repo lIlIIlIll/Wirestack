@@ -51,8 +51,15 @@ must still pass before publication. The progress regression failed before this
 correction; all 13 documentation tests passed afterward, including the
 three-worker cap and failed-view publication protection.
 
-These regressions do not establish native timing. Current qualification still
-requires actual canonical and HTML execution within their original limits.
+The corrected [native HTML run](maintenance/combined-first-native/qualification.json)
+at `59e0fcf458f73ff1a395b378d1e1914685ea379a` passed all 41 commands in
+542.662 seconds, within the unchanged 900-second limit. All seven layer records
+and combined serialized artifacts match the earlier serial output. Coverage
+remains 100% for 1,873 symbols and 950 parameters. Actual browser search and
+navigation to `HttpClient` passed with visual evidence and no browser errors.
+
+The full 1,800-second canonical task and current dependency seals remain
+required. This maintenance smoke does not complete P1-013, M9 or a release gate.
 
 ## Release boundary
 
