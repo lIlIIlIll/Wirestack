@@ -27,6 +27,7 @@
         "tools.tests.test_m7_031_linux_candidate",
         "tools.tests.test_p1_013_development_release_gate",
         "tools.tests.test_m7_linux_task_graph",
+        "tools.tests.test_m7_033_docs",
         "-v"
       ],
       "gate": "task",
@@ -49,6 +50,7 @@
     "docs/evidence/P1-013",
     "docs/planning/implementation-backlog.md",
     "docs/planning/status.md",
+    "tools/docs/m7_033_docs.py",
     "tools/m7_021_linux_release.py",
     "tools/m7_031_linux_candidate.py",
     "tools/tasks/P1-013.json",
@@ -58,6 +60,7 @@
     "tools/tests/test_m7_029_independent_security_review.py",
     "tools/tests/test_m7_031_linux_candidate.py",
     "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tests/test_m7_033_docs.py",
     "tools/tests/test_p1_013_development_release_gate.py",
     "tools/validate_m7_019_linux_audit.py",
     "tools/validate_m7_020_architecture_audit.py"
@@ -81,6 +84,10 @@
     "docs/evidence/P1-013/test-plan.md",
     "docs/planning/implementation-backlog.md",
     "docs/planning/status.md",
+    "scripts/check",
+    "scripts/check-code",
+    "scripts/check-docs",
+    "tools/docs/m7_033_docs.py",
     "tools/m7_021_linux_release.py",
     "tools/m7_031_linux_candidate.py",
     "tools/tasks/P1-013.json",
@@ -90,6 +97,7 @@
     "tools/tests/test_m7_029_independent_security_review.py",
     "tools/tests/test_m7_031_linux_candidate.py",
     "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tests/test_m7_033_docs.py",
     "tools/tests/test_p1_013_development_release_gate.py",
     "tools/validate_m7_019_linux_audit.py",
     "tools/validate_m7_020_architecture_audit.py"
