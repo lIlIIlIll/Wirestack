@@ -1,6 +1,6 @@
 # Use the repository control plane
 
-Status: **BLOCKED**
+Status: **COMPLETE** for the selected infrastructure task; no global readiness claim.
 
 P1-012 adds bounded diagnostics and validation commands for maintainers, CI,
 and coding agents. The commands use one task contract and one result model, so
@@ -11,6 +11,12 @@ selected task's complete transitive dependency closure. They may PASS while
 global readiness remains INVALID because of an unrelated incomplete
 dependency. Global `validate-tasks`, `check-fast`, `check-full`, and
 `verify-evidence --all` continue to reject an incomplete repository-wide graph.
+
+The current selected `scripts/check-task P1-012` run passed both acceptance
+commands: the 19-path/18-scenario/16-test plan and all repository-tooling
+regressions. Its [task receipt](task-check.json) is separate from the
+repository-wide diagnostic. The current source seal must verify before this
+completion record is published. Unrelated BLOCKED tasks remain unchanged.
 
 ## Prerequisites
 
