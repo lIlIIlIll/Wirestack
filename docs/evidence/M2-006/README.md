@@ -45,6 +45,23 @@ the native gate to record all eight named cases as passed with no failed or
 skipped targeted case, command error, or timeout. This frozen source overview
 does not itself establish qualification.
 
+## Current native desktop STS result
+
+The [current report](current-desktop/macos-arm64/report.json) and
+[validation](current-desktop/macos-arm64/validation.json) passed on native
+`macos-15` arm64 at source `6c5eb96e8552975dbc17651f1e86ca947e78b0ac`.
+[Run 41698885481](https://github.com/lIlIIlIll/Wirestack/actions/runs/41698885481),
+job `126136636324`, was dispatched once on
+`fix/M10-002-resource-owner-backpressure`.
+
+All eight selected cases passed without targeted skips, errors, failures or
+timeout. The 26 other filtered cases were skipped, not qualified. Native SDK
+identity matched 283 archive files, compiler/CJPM 1.2.0 and target
+`aarch64-apple-darwin`. Artifact `13262723175` retained the report, validation
+and five logs. Its raw ZIP is 11,024 bytes, artifact-byte SHA-256
+`505cc5c4ed0c84606f10a05d2f95a00adf9a183c01737f28e08716c5a569c7ce`.
+Full M2-006 remains BLOCKED; this is desktop-only qualification.
+
 ## Mobile and historical evidence
 
 The selected workflow now runs only the native macOS desktop STS job. It does not download a nightly SDK or run an iOS Simulator job. Mobile/iOS remains a separate required qualification for full M2-006 completion and is explicitly unverified.
