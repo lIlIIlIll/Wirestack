@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-016",
+  "kind": "actual-cli-license-byte-mutation-control",
+  "status": "PASS",
+  "scope": "Validator refusal only; not M0-016 completion or release qualification",
+  "native_source_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "native_hosted_run": 41698821216,
+  "platform": "windows-x86_64",
+  "provider": "aws-lc",
+  "provider_version": "5.5.0",
+  "command": [
+    "python3",
+    "-B",
+    "<provider-checkout>/tools/tls_provider_poc/validate.py",
+    "--spec",
+    "<provider-checkout>/tools/tls_provider_poc/providers.json",
+    "--result",
+    "<control-or-mutated>/windows-x86_64/provider-result.json",
+    "--expected-revision",
+    "6c5eb96e8552975dbc17651f1e86ca947e78b0ac"
+  ],
+  "valid": {
+    "exit_code": 0,
+    "stdout": "M0-016 validation: PASS\n",
+    "stderr": ""
+  },
+  "mutated": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "M0-016 validation: FAIL: provider license file digest mismatch\n",
+    "structured_error_code": null
+  },
+  "mutation": {
+    "file": "license-bundle/files/third_party/fiat/LICENSE",
+    "byte_offset_zero_based": 4,
+    "before": "M",
+    "after": "N",
+    "length_before": 1183,
+    "length_after": 1183,
+    "changed_byte_count": 1,
+    "before_artifact_sha256": "7655166f026e793d40f6fe317938ffb8c7f1a4ef6452a2fee1b3bede39144ff6",
+    "after_artifact_sha256": "0ed1d87f586a4424e9a2253de5dc6b6dc1a25d91035234e0a1dacf6deedceb9e",
+    "before_text_sha256": "43e358d7b6eb109d0f51f7b3a090fd82607965767c25fadee39e922475de2061",
+    "after_text_sha256": "74e720e27fee043467ed39bf2d14e0232f0ea2d83cfcd99dfe432f2ac3630b1a"
+  },
+  "manifest_and_provider_result_digests_updated": false,
+  "canonical_platform_tree_unchanged": true,
+  "canonical_hosted_receipt_unchanged": true,
+  "validator_source_sha256": "856099f0e6745ad1d1fc233684a47bc79f5f66d2d1bb2fab21c3efa17c5b34c8",
+  "provider_spec_sha256": "bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e"
+}
