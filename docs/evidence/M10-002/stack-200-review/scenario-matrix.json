@@ -162,5 +162,7 @@
   "historical_matrix": "docs/evidence/M10-002/stack-200-review/historical-scenario-matrix-e7c4bba5.json",
   "evidence_policy": "Overall reports remain BLOCKED and cannot enter a PASS source seal because the original strict default-runtime resource failure is open. Every PASS_SELECTED_TASK case appears as PASSED in the complete retained actual selected native output. Historical replays do not close the original failure.",
   "complete_selected_outputs": "docs/evidence/M10-002/stack-200-review/current-selected/qualification.json",
-  "metadata_binding": "Qualified final shared-metadata source is recorded separately; native execution remains code source 16318372."
+  "metadata_binding": "Qualified final shared-metadata source is recorded separately; native execution remains code source 16318372.",
+  "qualified_metadata_source_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+  "current_code_byte_proof": "docs/evidence/P1-015/maintenance/final-source-binding.json"
 }

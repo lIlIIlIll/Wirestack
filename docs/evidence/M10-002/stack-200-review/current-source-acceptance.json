@@ -621,5 +621,7 @@
   },
   "commands_scope": "Earlier eleven exact-command diagnostics at the same frozen code source, not the new selected-task records.",
   "selected_complete_output_projection": "docs/evidence/M10-002/stack-200-review/current-selected/qualification.json",
-  "metadata_binding": "Qualified final shared-metadata source is recorded separately; native execution remains code source 16318372."
+  "metadata_binding": "Qualified final shared-metadata source is recorded separately; native execution remains code source 16318372.",
+  "qualified_metadata_source_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+  "current_code_byte_proof": "docs/evidence/P1-015/maintenance/final-source-binding.json"
 }

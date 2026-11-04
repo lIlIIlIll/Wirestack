@@ -196,5 +196,7 @@
       }
     },
     "documentation_duration_ms": 292950.175
-  }
+  },
+  "qualified_metadata_source_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+  "current_code_byte_proof": "docs/evidence/P1-015/maintenance/final-source-binding.json"
 }
