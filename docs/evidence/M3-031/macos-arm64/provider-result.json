@@ -3480,17 +3480,17 @@
       {
         "bytes": 4090424,
         "name": "libcrypto.a",
-        "sha256": "e5a54fb9d613d5795358d479810f285f049fc1f6140de172bd88b905c0653e6e"
+        "sha256": "ad99d74b788db96e664db30b28e0b8245da6009b0c9c67d2af40054b12d63be0"
       },
       {
         "bytes": 668872,
         "name": "libssl.a",
-        "sha256": "41597957187ef68cd418732eabe94bca6d5126725eee03c77ba9cc1e6dcc1ddf"
+        "sha256": "47005f6123e77e4496d3e53fdea5e85f72657100fca745adcda85240a5aa5e81"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "c786252ecfc4e846ed89d4805a75b138b16c35fcdaf6b11ac94f461018179621",
+  "build_log_sha256": "d1209e42f180fc45016b0e4dc78ceb74a12cb73fd0ba13d3e329bba964ed6204",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3516,16 +3516,16 @@
     "image_os": "macos15",
     "image_version": "20261028.0489.1",
     "python": "3.15.2",
-    "repository_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+    "repository_revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-11-03T19:32:55.927286+00:00",
+  "finished_at": "2026-11-04T05:35:42.064071+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 46,
+    "cancellation_latency_us": 38,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
@@ -3533,13 +3533,13 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 4390912,
+    "memory_profile_peak_resident_bytes": 4177920,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1385984720,
+    "provider_allocation_bytes": 1385829768,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10297423,
+    "provider_allocation_calls": 10296254,
     "provider_allocation_live_after_cleanup_bytes": 154180,
     "provider_allocation_live_before_cleanup_bytes": 154180,
     "provider_allocation_peak_live_bytes": 220246,
@@ -3554,18 +3554,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 46,
+      "latency_us": 38,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 4390912,
+      "peak_resident_bytes": 4177920,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1385984720,
+      "provider_allocation_bytes": 1385829768,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10297423,
+      "provider_allocation_calls": 10296254,
       "provider_allocation_live_after_cleanup_bytes": 154180,
       "provider_allocation_live_before_cleanup_bytes": 154180,
       "provider_allocation_peak_live_bytes": 220246,
@@ -3577,7 +3577,7 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "40748ec069576b662ef3dbf6a974f8cfbd314ad27fb320eff50b7305eda8ec81",
+      "output_sha256": "f9e5386cecac63712963a3c593dcce6be5ae7cb99003b8a6c63e480c9cbd065f",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -3678,12 +3678,12 @@
         {
           "bytes": 21200184,
           "name": "libcrypto.a",
-          "sha256": "a51b425d056009dc03e762a61ea290688803fc72b61c75a8436195700904ef2b"
+          "sha256": "2b0cd1f3b524220aee74964f87c42ffae95b0c1d852c7a9b3149f15c534b47d3"
         },
         {
           "bytes": 16586408,
           "name": "libssl.a",
-          "sha256": "ff898e408f6479a4357d4e0f433d344aa71d5aa54257cd236671d59128bca14f"
+          "sha256": "71d3e58e40a25c9bb3a083e79e7422d0d7189ede4d4da35df258bef234ca32d6"
         }
       ],
       "status": "PASS",
@@ -3721,7 +3721,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-11-03T19:30:19.119525+00:00",
+  "started_at": "2026-11-04T05:34:08.748925+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

@@ -7,11 +7,11 @@
         "--offline",
         "--json"
       ],
-      "duration_ms": 313.943,
+      "duration_ms": 414.169,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-03T18:48:49.806559Z",
+      "finished_at_utc": "2026-11-04T05:17:47.332976Z",
       "id": "provider-build",
-      "started_at_utc": "2026-11-03T18:48:49.492618Z",
+      "started_at_utc": "2026-11-04T05:17:46.918813Z",
       "status": "PASS",
       "timed_out": false
     },
@@ -24,11 +24,11 @@
         "--format",
         "json"
       ],
-      "duration_ms": 7268.685,
+      "duration_ms": 10273.859,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-03T18:48:57.076225Z",
+      "finished_at_utc": "2026-11-04T05:17:57.608428Z",
       "id": "architecture-guard",
-      "started_at_utc": "2026-11-03T18:48:49.807545Z",
+      "started_at_utc": "2026-11-04T05:17:47.334575Z",
       "status": "PASS",
       "timed_out": false
     },
@@ -44,11 +44,11 @@
         "--no-color",
         "src/internal/tls_engine"
       ],
-      "duration_ms": 17240.146,
+      "duration_ms": 24388.058,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-03T18:49:14.317093Z",
+      "finished_at_utc": "2026-11-04T05:18:21.997670Z",
       "id": "provider-substitution",
-      "started_at_utc": "2026-11-03T18:48:57.076953Z",
+      "started_at_utc": "2026-11-04T05:17:57.609674Z",
       "status": "PASS",
       "timed_out": false
     },
@@ -62,11 +62,11 @@
         "dist/m3-031-current-core",
         "--offline"
       ],
-      "duration_ms": 17866.937,
+      "duration_ms": 25118.21,
       "exit_code": 0,
-      "finished_at_utc": "2026-11-03T18:49:32.185068Z",
+      "finished_at_utc": "2026-11-04T05:18:47.118085Z",
       "id": "installed-consumer",
-      "started_at_utc": "2026-11-03T18:49:14.318136Z",
+      "started_at_utc": "2026-11-04T05:18:21.999875Z",
       "status": "PASS",
       "timed_out": false
     }
@@ -2106,7 +2106,7 @@
     },
     "tools/docs/m7_033_docs.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f86795b45b0f6aee801c7fb05ff35938b0ec690b2850edd63708417f56329e68"
+      "sha256": "ad5117dcc36ea39347edcda2822652d19360bc5d13abc103bff0ec5151089e9f"
     },
     "tools/download_cangjie_nightly.py": {
       "domain": "text-utf8-lf-v1",
@@ -2622,7 +2622,7 @@
     },
     "tools/repository/repository_tooling.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "14eb02ce06a343ab46815d1903dbb5b9b9416eb1381fdf5867c25dbe8393d026"
+      "sha256": "1b6624ebf4baf825d422f35e9a56e2da463559c46c650b02f334bf9217401642"
     },
     "tools/repository/tests/__init__.py": {
       "domain": "text-utf8-lf-v1",
@@ -2630,7 +2630,7 @@
     },
     "tools/repository/tests/test_repository_tooling.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "42c22beb625306680df0e64fcc8dc9479c571eb2400d0a18965e692df7b89a5a"
+      "sha256": "d9cc4436b86000bc9e2ea87417ea11ee9eb6fa5b2b325cd7066f535094a278ae"
     },
     "tools/tasks/M0-014.json": {
       "domain": "text-utf8-lf-v1",
@@ -2790,7 +2790,7 @@
     },
     "tools/tasks/P1-013.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "41f1a276157c385a47ffb39139536a84c0615d90323e17d549f59dfd4164269a"
+      "sha256": "80c3712b6520686a924d05c07d2677aa47e10f6f7320a4d46afebbf84b097ab1"
     },
     "tools/tasks/P1-014.json": {
       "domain": "text-utf8-lf-v1",
@@ -2966,7 +2966,7 @@
     },
     "tools/tests/test_m7_033_docs.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "7271c8c46ff51894dce023215a0be73f323fee30970d0577b076aa2cb667292e"
+      "sha256": "bb3b2295c62416aeba37cbc5daede667e8369866fe35c2fd24ff965be4181abe"
     },
     "tools/tests/test_m7_linux_task_graph.py": {
       "domain": "text-utf8-lf-v1",
@@ -3104,7 +3104,7 @@
     "qualification": {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9b1b9befc273baa6aba74f52d7b82184f91ddf2c1507760c021afc4b3c78006a"
+        "sha256": "af141d7fd7440dfe0cecf21045c62befe6891ec2c85341d96044052412ba516a"
       },
       "path": "dist/m3-031-current-core/qualification.json"
     }
@@ -3116,63 +3116,63 @@
         "domain": "text-utf8-lf-v1",
         "sha256": "2fe53588140e46a64d8da4ba937ae4dd7460cc385dd014de0d2e823585b2d972"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/provider-build.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-build.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/provider-build.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-build.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "16c2c74c0eb589466c4403afda58a413af1d83feb4f1a3da912bde7512aff5bb"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/architecture-guard.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/architecture-guard.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/architecture-guard.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/architecture-guard.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "11718c53a9630a8230dbfc93848065adecb4d8d3c8a9819448d2c5d21ccc272f"
+        "sha256": "23d5f42d8d55bc3654dab9b7424395f864323da562363c8dec5ec9c75d0f0a2a"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/provider-substitution.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-substitution.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "f6f380c88e6461990ed2e89296bbec30b1788158132743c4efba7457686f44dc"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/provider-substitution.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/provider-substitution.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e6e203eb77e56f82af1e69234932a9862676fd033400d2c6ad54b902ae275863"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/installed-consumer.stdout.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/installed-consumer.stdout.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/installed-consumer.stderr.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/installed-consumer.stderr.log"
     },
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "1dca742f4ef0ddb0f008df6cff969a96b7bc063e44601bb652f0ad77830f072e"
+        "sha256": "90b50ec5651426ab83bdbf17f6207d3c6e5228d8e0569501833e0a6aa6fa0a63"
       },
-      "path": "docs/evidence/M3-031/current-core/runs/2b7a91c6aa31456b8396ad4fe0d7de5d/commands/installed-consumer.qualification.log"
+      "path": "docs/evidence/M3-031/current-core/runs/d4900a7419ab4b8694c56741d8cbd8a2/commands/installed-consumer.qualification.log"
     }
   ],
   "native_archive": {
@@ -3968,7 +3968,7 @@
     "qualification": "NOT_QUALIFIED",
     "signing": "NOT_AUTHORIZED"
   },
-  "revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
   "schema_version": 1,
   "sdk": {
     "archive": {
