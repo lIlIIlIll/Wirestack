@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T04:18:22.853758Z",
+  "generated_at_utc": "2026-11-04T06:56:41.229004Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,34 +11,153 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/P1-013/task-check.json",
-      "sha256": "72c3d702f3a862af930ad6b8b4130586b5d76bee48f26ab8e368be067894b14a",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "21d66733d497f04180f62cc7dfe5dcfcf6580c970bd3a02841065b1eaa0b1d47"
+      },
+      "source_task": "P1-013"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-013/maintenance/current-canonical/qualification.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "3a128bf7b9ce46730c847222b22a79d5d0163ced3510c9ce5a8a090e5202165b"
+      },
+      "source_task": "P1-013"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-013/maintenance/current-canonical/docs-report.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "da35ad8e28ceb52ffd7d8efe355615f1a413a291d8617630f5b38058d2313b70"
+      },
+      "source_task": "P1-013"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-013/maintenance/combined-first-native/qualification.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "feb36d3f74960c640dfd5276f30521857795f9ea0c9e89a491ff276be4664001"
+      },
+      "source_task": "P1-013"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-013/maintenance/combined-first-native/docs-report.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cff66ffb86d252626af276dfc14a2ccb0cd67ef04ece6b6d773eef2c7d497460"
+      },
+      "source_task": "P1-013"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-013/maintenance/combined-first-native/browser.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6dbd3dfc4ea0f8bc9f97aabde31be803f01ab30e0cc2c52d6dd4797d8a31f422"
+      },
       "source_task": "P1-013"
     }
   ],
-  "revision": "f65893573d536aab46d05e8daf606c46c86eab24",
-  "schema_version": 1,
+  "revision": "718db35a9700fe32190eb364812fcc1188d22571",
+  "schema_version": 2,
   "source_sha256": {
-    ".gitignore": "4036c86470dc094cdbd56bac65872984ca2c246a4b0f809937532625ab79c21d",
-    "docs/evidence/P1-013/README.md": "a4a1d5e2602976e7c91cabf3d4abaaef4b90f5a42db385655d81f3b22597518b",
-    "docs/evidence/P1-013/test-plan.md": "aff34ee7af58b75c83cd30ec1b1cfa6404557835eaf726c66abc8b2b33309d81",
-    "docs/planning/implementation-backlog.md": "890492f5572d9f5399b23f6d073a6067b59addeab7e04f83604e06a2ad293025",
-    "docs/planning/status.md": "307366b33140508b184f72010fe17b7c7df0017f0898a04c50749d800e0761ae",
-    "tools/m7_021_linux_release.py": "a16419dc2eaca578af64ff5ead1039e2294515c0e67db9dead835cea12432538",
-    "tools/m7_031_linux_candidate.py": "e2b3e14ea11a157f1dfb976f1c706a637754a7702f120ae5c089cdaf62f0c7d9",
-    "tools/tasks/P1-013.json": "41f1a276157c385a47ffb39139536a84c0615d90323e17d549f59dfd4164269a",
-    "tools/tests/test_m7_019_linux_audit.py": "504e7401ab5253d5add51da99aec7abad6e23a50486020a2449674d313fd803a",
-    "tools/tests/test_m7_020_architecture_audit.py": "ad285a68ddc75d22ea4141fcb430642986ab6158ac50ce2bcf65f5e6bc00e919",
-    "tools/tests/test_m7_021_linux_release.py": "9dbb52d879e83384f92fbde8656a6eeab1566da34834996aa04085ef4a532106",
-    "tools/tests/test_m7_029_independent_security_review.py": "a72c29da4e5394aa1175808f5633d552d1a1feabf23444518b9f7bf7e9e56a64",
-    "tools/tests/test_m7_031_linux_candidate.py": "14aa4d29f6ac9598c81d0609d2b1249ae95529ab18a44915f75332ff75bd80a5",
-    "tools/tests/test_m7_linux_task_graph.py": "eb8e645e797003333138c997c9af95b08c777990b743ff43722cd3bff4541bb3",
-    "tools/tests/test_p1_013_development_release_gate.py": "0340eeda0fccd3bbb40bb5039638f5a4eed24ad1f2895bcc5f2e2313e9e64722",
-    "tools/validate_m7_019_linux_audit.py": "1be1d79ef00afaff78954093a50b9447386ebceb15d76d60bbaf48e6e5f2bae9",
-    "tools/validate_m7_020_architecture_audit.py": "b661302fb66649315da76b0cea80dbb51122982b4af737cc987194307f4e9122"
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49c61ce3c136094b24008eb4a2608561f42a101c17cff0dbe884c2f6d4c6ce9c"
+    },
+    "docs/evidence/P1-013/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "84eee8b03d84427f7b86c20a6441220678657b3c9ce3a052d43dedf122f1af92"
+    },
+    "docs/evidence/P1-013/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "95c2893677ffbac4b7cdaee9c5f104cd2606b2683374b1e599e260fa55f6dca0"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5ff33fea10eec850f3948059c7db069255dadc00f091b9ddc54a8091d306c672"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08869fa4543c006e5b898b0e94416f67d078c759ae899f88296ac5e4e3033897"
+    },
+    "scripts/check": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "99f3461d7b672ef2ffc4a72ad2a417f83a26c1270fa4fdeca74dec0c88204079"
+    },
+    "scripts/check-code": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0ea1e7a9cd8a9bea7f4a2e8ebb2038e79019479a8f937202f4d56cdeddd6fd76"
+    },
+    "scripts/check-docs": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10b4d9c6589d4593bcff1c1e672307312e3265a692d9e35a6b4e7445e108e797"
+    },
+    "tools/docs/m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ad5117dcc36ea39347edcda2822652d19360bc5d13abc103bff0ec5151089e9f"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"
+    },
+    "tools/m7_031_linux_candidate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9047889fa4204664047a270be2d270633ec245ea8d49eb8601186e30b699ea79"
+    },
+    "tools/tasks/P1-013.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "80c3712b6520686a924d05c07d2677aa47e10f6f7320a4d46afebbf84b097ab1"
+    },
+    "tools/tests/test_m7_019_linux_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "504e7401ab5253d5add51da99aec7abad6e23a50486020a2449674d313fd803a"
+    },
+    "tools/tests/test_m7_020_architecture_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "050b90e7415f05c8ddddec964781a3de3d74e4f7a4adb298b41fef2bd80c1dbb"
+    },
+    "tools/tests/test_m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ed4b9c4b7eefecaca1a086783af6d0c8b4f0185e5145219067cd35ecbcae8092"
+    },
+    "tools/tests/test_m7_029_independent_security_review.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e40f92e463e8823c179820f0332a9e01037c0ac199d1c643f51eea05e7c8af63"
+    },
+    "tools/tests/test_m7_031_linux_candidate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c8ca3d8ef2b0fda028666af0d07f31ff565f77665ec85f8c14e33349e1cccbc"
+    },
+    "tools/tests/test_m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bb3b2295c62416aeba37cbc5daede667e8369866fe35c2fd24ff965be4181abe"
+    },
+    "tools/tests/test_m7_linux_task_graph.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "deaed3a8ddb41a90d3dd8306be0b41617027ec8740faede9d2b961c40ec0ea86"
+    },
+    "tools/tests/test_p1_013_development_release_gate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0506721a2ca09f4e0b6689cef7d84654156508f9bf7c483b76be7144225454e8"
+    },
+    "tools/validate_m7_019_linux_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a733b4d04c3a1e38e8526202f766022f7ffae5af6724163aa2d2d7814b7a3ca"
+    },
+    "tools/validate_m7_020_architecture_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "be9dd261005ed0bdc9bfec0855f910c89c1efd03b5efa392ab262ca9daabae91"
+    }
   },
   "source_task": "P1-013",
   "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
     "cjpm": "Cangjie Project Manager: 1.1.3"
   }
 }
