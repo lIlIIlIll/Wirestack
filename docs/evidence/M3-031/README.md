@@ -9,8 +9,8 @@ complete historical global M3 tasks, M3-001's six-platform target-build
 condition, or any mobile condition. Those remain explicitly excluded.
 
 The current desktop and Core receipts qualify the frozen integrated source
-`59e0fcf458f73ff1a395b378d1e1914685ea379a`. The immutable source ref is
-`evidence/M10-002/59e0fcf458f73ff1a395b378d1e1914685ea379a`; the actual
+`1631837216989f7eac6986b24b0b9a2c61d0bd20`. The immutable source ref is
+`evidence/M10-002/1631837216989f7eac6986b24b0b9a2c61d0bd20`; the actual
 workflow dispatch branch was `fix/M10-002-resource-owner-backpressure`.
 The tested integrated revision is not presented as the lower M3 owner PR head.
 
@@ -19,11 +19,11 @@ key handles, Apple Keychain/SecKey, or mobile device support.
 
 ## Current executed results
 
-- [Hosted provider run 41779297210](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779297210)
+- [Hosted provider run 41797923287](https://github.com/lIlIIlIll/Wirestack/actions/runs/41797923287)
   passed on Windows x86_64 and macOS arm64. Both schema-v11 AWS-LC 5.5.0
   reports passed all 18 required capabilities and retained 11 license files.
-- [Windows resolver run 41779351031](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779351031)
-  passed all six selected cases on STS 1.2.0. [macOS resolver run 41779286737](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779286737)
+- [Windows resolver run 41797937351](https://github.com/lIlIIlIll/Wirestack/actions/runs/41797937351)
+  passed all six selected cases on STS 1.2.0. [macOS resolver run 41797950640](https://github.com/lIlIIlIll/Wirestack/actions/runs/41797950640)
   passed all eight selected cases on STS 1.2.0. The other 28 Windows and 26
   macOS filtered cases and Apple mobile targets are not qualified.
 - [Current Core qualification](current-core/qualification.json) passed its
@@ -45,6 +45,11 @@ platform payload. Their artifact-byte SHA-256 values are recorded in
 The hosted provider workflow did not upload `build.log`, so those log bytes are
 not claimed as verified. This does not replace or weaken the nine full
 current-Core logs, which are retained separately.
+
+The macOS resolver ZIP also contained inherited prior-source acquisition
+commentary. Its bytes matched the frozen source, but it was excluded from
+current native acceptance. The current parent acquisition receipt records that
+exclusion; all seven authoritative native files remain unchanged.
 
 ## Task-graph boundary
 
@@ -128,8 +133,8 @@ These fixture results do not establish native Core or desktop qualification.
 
 ## Historical hosted provider evidence
 
-Earlier STS provider runs `41698821216` at `6c5eb96e` and `41773758417` at
-`e0cc7f4e` remain historical qualifications.
+Earlier STS provider runs `41779297210` at `59e0fcf4`, `41698821216` at
+`6c5eb96e` and `41773758417` at `e0cc7f4e` remain historical qualifications.
 
 The retained GitHub Actions run
 [`33461712135`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135)
