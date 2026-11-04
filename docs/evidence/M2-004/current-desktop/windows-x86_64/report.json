@@ -1,0 +1,683 @@
+{
+  "build": {
+    "command": [
+      "python",
+      "tools/build_resolver.py",
+      "--root",
+      ".",
+      "--platform",
+      "windows-x86_64",
+      "--test-fixture",
+      "--quiet"
+    ],
+    "duration_ms": 9969.0,
+    "exit_code": 0,
+    "output": "",
+    "timed_out": false
+  },
+  "decision": "PASS",
+  "failures": [],
+  "gate_id": "M2-004-WINDOWS-SYSTEM-RESOLVER",
+  "generated_at_utc": "2026-11-03T19:10:03.375524Z",
+  "logs": {
+    "cjc_version": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9856a5bc24ecc9d9cf8c6ed6ef7f2a365b4fb4939138d3e7ce2e66e481985c6a"
+      },
+      "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/cjc-version.log"
+    },
+    "cjpm_version": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b1c195e5dbffec9fecd265d147dfae24e3ff88b5df16b248a2688b8f6f4693ba"
+      },
+      "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/cjpm-version.log"
+    },
+    "link_stub_archive": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-archive.log"
+    },
+    "link_stub_compile": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-compile.log"
+    },
+    "resolver_build": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-build.log"
+    },
+    "resolver_test": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c6128a989a81ffe0a57eeb855cbc020374a18383b70c1cb4e97ab4a42450f794"
+      },
+      "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-tests.log"
+    }
+  },
+  "platform": {
+    "machine": "AMD64",
+    "release": "2025Server",
+    "runner_image": "win25-vs2026",
+    "runner_image_version": "20261030.294.1",
+    "system": "Windows"
+  },
+  "resolver_manifest": {
+    "archive": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "5ed5983ccd1da31d5c3640a1d7527754afdfe6b4d073c622554e5353ecab4228"
+      },
+      "path": "lib/libwirestack_resolver.a"
+    },
+    "build_fingerprint": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "51a4b5be0915e953ebac6b62f2c51d78549fad8d2c11013d110450d5bd23a1c4"
+    },
+    "close_model": "asynchronous reaper with a process-wide cap of eight live pools and 64 workers; blocking Winsock resolver calls remain quarantined",
+    "inputs": {
+      "compiler": "clang.EXE",
+      "compiler_version": "clang version 20.1.8",
+      "flags": [
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-D_WIN32_WINNT=0x0602",
+        "-DWIRESTACK_RESOLVER_TEST_FIXTURE=1"
+      ],
+      "header_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe"
+      },
+      "schema": 1,
+      "source_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cdf41a40bd57960dc5040289b3803b4af04e9e3203d1e8a7b654446c962bb6c4"
+      },
+      "target": "x86_64-pc-windows-msvc",
+      "test_fixture": true
+    },
+    "platform": "windows-x86_64",
+    "private_runtime_abi": false,
+    "schema_version": 1,
+    "test_fixture": true,
+    "worker_model": "fixed Win32 worker pool with bounded FIFO admission"
+  },
+  "resolver_manifest_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "18d8c932b18e3e65bb55905b02028e4088a4eb1418ca5a4ffdc9f9b4cb5c3589"
+  },
+  "resolver_test": {
+    "command": [
+      "cjpm",
+      "test",
+      "src/internal/resolver",
+      "-j",
+      "1",
+      "--parallel",
+      "1",
+      "--filter",
+      "M2004WindowsSystemResolverTest",
+      "--show-all-output",
+      "--no-color",
+      "--no-progress"
+    ],
+    "duration_ms": 56266.0,
+    "exit_code": 0,
+    "output": "sourceLease): Http1ClientConnection {\n\n   |         ^^^^^^^^^^^^^ unused variable\n\n   | \n\n   # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\internal\\http1\\server_connection.cj:166:23:\n\n    | \n\n166 |         try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }\n\n    |                       ^^^^^^^^^^^^^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unused variable:'resourceLease'\n\n   ==> <workspace>\\src\\internal\\http1\\proxy_client_pipeline.cj:238:9:\n\n    | \n\n238 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {\n\n    |         ^^^^^^^^^^^^^ unused variable\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unused variable:'resourceLease'\n\n   ==> <workspace>\\src\\internal\\http1\\proxy_client_pipeline.cj:279:9:\n\n    | \n\n279 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {\n\n    |         ^^^^^^^^^^^^^ unused variable\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\internal\\http1\\http2_connection_pool.cj:453:42:\n\n    | \n\n453 |             if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }\n\n    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\internal\\http1\\http2_connection_pool.cj:455:42:\n\n    | \n\n455 |             if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }\n\n    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\internal\\http1\\http2_connection_pool.cj:765:32:\n\n    | \n\n765 |               if (waiterId != 0) {\n\n    |  ________________________________^\n\n766 | |                 synchronized(mutex) { removeHttp2WaiterLocked(waiterId, false) }\n\n767 | |             }\n\n    | |_____________^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unused variable:'resourceLease'\n\n   ==> <workspace>\\src\\internal\\http1\\tls_client_pipeline.cj:869:9:\n\n    | \n\n869 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {\n\n    |         ^^^^^^^^^^^^^ unused variable\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\n8 warnings generated, 8 warnings printed.\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\http\\client.cj:566:31:\n\n    | \n\n566 |             if (!transferred) { lifetime.close() }\n\n    |                               ^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\http\\client.cj:894:29:\n\n    | \n\n894 |               if (!published) {\n\n    |  _____________________________^\n\n895 | |                 direct.close()\n\n    | | ...\n\n897 | |             }\n\n    | |_____________^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable pattern\n\n   ==> <workspace>\\src\\http\\client.cj:896:41:\n\n    | \n\n896 |                 match (tunneled) { case Some(native) => native.close(); case None => () }\n\n    |                                         ^^^^^^^^^^^^ \n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable pattern\n\n   ==> <workspace>\\src\\http\\client.cj:896:78:\n\n    | \n\n896 |                 match (tunneled) { case Some(native) => native.close(); case None => () }\n\n    |                                                                              ^^^^ \n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\n4 warnings generated, 4 warnings printed.\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\gzip\\client.cj:119:31:\n\n    | \n\n119 |               if (!transferred) {\n\n    |  _______________________________^\n\n120 | |                 try { if (let Some(value) <- decodedStream) { value.close() } }\n\n    | | ...\n\n122 | |             }\n\n    | |_____________^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\gzip\\client.cj:120:31:\n\n    | \n\n120 |                 try { if (let Some(value) <- decodedStream) { value.close() } }\n\n    |                               ^^^^^^^^^^^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\gzip\\client.cj:123:21:\n\n    | \n\n123 |             if (let Some(value) <- lease) { value.close() }\n\n    |                     ^^^^^^^^^^^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\nwarning\u001b[0m: unreachable block in 'if' expression\n\n   ==> <workspace>\\src\\gzip\\body.cj:138:25:\n\n    | \n\n138 |               if (failed) {\n\n    |  _________________________^\n\n139 | |                 try { releaseIfTerminal() } catch (_: Exception) { /* Cleanup must not replace the read failure. */ }\n\n140 | |             } else { releaseIfTerminal() }\n\n    | |_____________^ unreachable block in 'if' expression\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\n\n4 warnings generated, 4 warnings printed.\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertException) {\n\n    |  ______________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertIntermediateException) {\n\n    |  __________________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is UnittestTimeoutException) {\n\n    |  _______________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unused expression\n\n    | \n\n    |                     None < api.ResolveException >\n\n    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertException) {\n\n    |  ______________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertIntermediateException) {\n\n    |  __________________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is UnittestTimeoutException) {\n\n    |  _______________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unused expression\n\n    | \n\n    |                 None < api.ResolveException >\n\n    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unused expression\n\n    | \n\n    |                     None < api.ResolveException >\n\n    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertException) {\n\n    |  ______________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertIntermediateException) {\n\n    |  __________________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is UnittestTimeoutException) {\n\n    |  _______________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unused expression\n\n    | \n\n    |                 None < api.ResolveException >\n\n    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unused expression\n\n    | \n\n    |                     None < api.ResolveException >\n\n    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertException) {\n\n    |  ______________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is AssertIntermediateException) {\n\n    |  __________________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unreachable block in 'if' expression\n\n    | \n\n    |                       if(e is UnittestTimeoutException) {\n\n    |  _______________________________________________________^\n\n    | |                         throw e\n\n    | |                     }\n\n    | |_____________________^ unreachable block in 'if' expression\n\n    | \n\n\n\nwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n\n   ==> <workspace>\\src\\internal\\resolver\\resolver_observation_test.cj:17:1:\n\n    | \n\n17  |   @Test\n\n    |  _^\n\n18  | | class SystemResolverResourceObservationTest {\n\n    | | ...\n\n111 | | }\n\n    | |_^\n\n    | \n\n    # note: this warning can be suppressed by setting the compiler option `-Woff unused`\n\nnote\u001b[0m: unused expression\n\n    | \n\n    |                 None < api.ResolveException >\n\n    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\n\n    | \n\n\n\n18 warnings generated, 18 warnings printed.\n\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.resolver, time elapsed: 60077800 ns, RESULT:\n    TCS: M2004WindowsSystemResolverTest, time elapsed: 56448700 ns, RESULT:\n    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (11859600 ns)\n    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (381000 ns)\n    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (261700 ns)\n    [ PASSED ] CASE: fixtureMapsWinsockFailuresAndUnknownCodes (1056500 ns)\n    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (40686000 ns)\n    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (210500 ns)\nSummary: TOTAL: 34\n    PASSED: 6, SKIPPED: 28, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 75724900 ns, RESULT:\nTP: wirestack.*, time elapsed: 75587400 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.resolver, time elapsed: 60077800 ns\nSummary: TOTAL: 34\n    PASSED: 6, SKIPPED: 28, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "timed_out": false
+  },
+  "revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "schema_version": 2,
+  "scope": "native Windows x86_64 resolver only",
+  "sdk": {
+    "archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7bd5088ad56fb03c1214e73ea076de5ac08580cc419a8cbd46a524ee1ca250bf"
+    },
+    "archive_name": "cangjie-sdk-windows-x64-1.2.0.zip",
+    "channel": "STS",
+    "cjc": {
+      "relative_path": "bin/cjc.exe",
+      "target": "x86_64-w64-mingw32",
+      "version": "1.2.0",
+      "version_output": "Cangjie Compiler: 1.2.0 (cjnative)\nTarget: x86_64-w64-mingw32"
+    },
+    "cjpm": {
+      "relative_path": "tools/bin/cjpm.exe",
+      "version": "1.2.0",
+      "version_output": "Cangjie Project Manager: 1.2.0"
+    },
+    "matched_archive_files": 310,
+    "platform": {
+      "machine": "AMD64",
+      "native_target": "x86_64-w64-mingw32",
+      "system": "Windows"
+    },
+    "version": "1.2.0"
+  },
+  "source_inventory": {
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c8cdadb2aabd5d63acf442359adcb01d751d45ff297fb1575f406431cdf3898f"
+    },
+    "paths": [
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "49c61ce3c136094b24008eb4a2608561f42a101c17cff0dbe884c2f6d4c6ce9c"
+        },
+        "path": ".gitignore"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4d043defb37bca8f97179438672ec1e7b5b4bf245bc0e9bc7a6b94a3ed4c594f"
+        },
+        "path": ".github/workflows/m2-004-windows-system-resolver.yml"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "64a28c71b2e9f0b610286142f41dc1651adfbb5c3b3098bef90f2c36aad2e2a0"
+        },
+        "path": "build.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1cdbca893f8cc158b618281cb4bbd9d3479f4d297194a73df0e2bffcb5fc9378"
+        },
+        "path": "cjpm.toml"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "21b30448ea08ed82bb70f6a880af67fd1cd310743eea9f67a7652aa32bf89477"
+        },
+        "path": "docs/evidence/M2-004/test-plan.md"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3a2f20b0674f3b159ff5b441c4169c927c06c0a03480af31727fe95853947734"
+        },
+        "path": "docs/references/m2-004-sts-sdk.json"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cdf41a40bd57960dc5040289b3803b4af04e9e3203d1e8a7b654446c962bb6c4"
+        },
+        "path": "native/resolver/windows/wirestack_resolver.c"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe"
+        },
+        "path": "native/resolver/windows/wirestack_resolver.h"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e58e18c61f4d78bcdc56e0ed9f40759dbaf5b661958963192e188728d3e7f968"
+        },
+        "path": "scripts/build-resolver"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+        },
+        "path": "src/byte_span.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d17cfd36391c38dcc4a30c2ad532b20039846f870535d46480c0e12267ec7a38"
+        },
+        "path": "src/cancellation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a9264356fb3508b944f2919255dcf08a30fd3a828a97373fd0af75ea18b98cae"
+        },
+        "path": "src/common.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+        },
+        "path": "src/deadline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+        },
+        "path": "src/hostname_verifier.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+        },
+        "path": "src/http_body.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+        },
+        "path": "src/http_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2815c778848b7e4b5e67f988132a69e57a9285e97e342c91b770a360c91278cb"
+        },
+        "path": "src/http_message.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+        },
+        "path": "src/http_model.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+        },
+        "path": "src/http_push.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0636a1ff272f384c9e6f8775947eb6db9efda9e27de21504ac6c5f138a155b49"
+        },
+        "path": "src/http_url.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177"
+        },
+        "path": "src/http/resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+        },
+        "path": "src/internal/common/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fb866004632785ea6e04c96113cb7f2b7b79e278c0f6c719d9cd07d42f97d959"
+        },
+        "path": "src/internal/resolver/apple_system_resolver_test.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d536557035988f377c8c8269bfc8854d648f4f2e65d1792b0c8126f4621c56cd"
+        },
+        "path": "src/internal/resolver/bounded_backend.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1740d853befd9fa967cea86fd6b6cd25ba654fdb49b6517f57f52f595138c71b"
+        },
+        "path": "src/internal/resolver/bounded_backend_test.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+        },
+        "path": "src/internal/resolver/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d1d9858c2757ca4e729a37a4427d3631dfe0a40ba1926b5f073728235d8440b7"
+        },
+        "path": "src/internal/resolver/resolver_observation_test.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "07eae88f74f2acf70cd6335d5e4755a8df481dd58d590e6f7149f558baabdfc5"
+        },
+        "path": "src/internal/resolver/resolver_test.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "29fe44c8e6568d269452f3d54d0c48929415082fdf36e1afbddd66224f727923"
+        },
+        "path": "src/internal/resolver/system_resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "333d1fff0201b512ca3a002ab41db0e094569b5e783c618099e71f1244a9103a"
+        },
+        "path": "src/internal/resolver/windows_system_resolver_test.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+        },
+        "path": "src/internal/transport/cancellation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+        },
+        "path": "src/internal/transport/completion.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+        },
+        "path": "src/internal/transport/deadline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+        },
+        "path": "src/internal/transport/lifecycle.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+        },
+        "path": "src/internal/transport/memory_transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+        },
+        "path": "src/internal/transport/memory_transport_listener.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+        },
+        "path": "src/internal/transport/network_error.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+        },
+        "path": "src/internal/transport/network_event.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+        },
+        "path": "src/internal/transport/operation_context.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+        },
+        "path": "src/internal/transport/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+        },
+        "path": "src/internal/transport/scripted_transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+        },
+        "path": "src/internal/transport/transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+        },
+        "path": "src/network_error.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8b356f7f4ea634313f745a244cf1288dd9d4d960fb573870a8e0558b78e77956"
+        },
+        "path": "src/network_event.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b445222f06db9333f9c7660e9bafbd4c5e6e4b125238b4120b8dc95379a3eb33"
+        },
+        "path": "src/network_event_buffer.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f19d0fc1cfdb8e952b3550153540afc342a9627bb3a862be4e559caa8aa7859c"
+        },
+        "path": "src/network_pool_snapshot.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "98c98f6d7e325e61cdd239bf8c2e7abfa586ae662e11c892df2aa8428245eb43"
+        },
+        "path": "src/operation_context.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+        },
+        "path": "src/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+        },
+        "path": "src/private_key_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+        },
+        "path": "src/resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b1f82e6f120e77391595abda5289c0376c9013ce8a3d692721ac05669cfb0094"
+        },
+        "path": "src/resolver_snapshot.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+        },
+        "path": "src/tls_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+        },
+        "path": "src/transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+        },
+        "path": "src/trust.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "68ee2dd6c1f3788f8c9f5d2f67e6068575608e0da8b1b7b99f1f11c479e10c32"
+        },
+        "path": "tools/build_native_dependencies.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ac3852722b5495d0115e2a475547e7dcfa30d7457555276a291372b23afa2980"
+        },
+        "path": "tools/build_resolver.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0f46619c708592b92eff94bc17aac393367491c56f663f383f4d570a179cf561"
+        },
+        "path": "tools/build_windows_resolver.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "44f03ada4f369f4b1d74f48312c71b32696094f4d9e3f6adb1a9f879b8b1db84"
+        },
+        "path": "tools/evidence_digest.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "22d70e9516408205100cb53a0d7c249397c17d5d59ec4354ab10975d7e651595"
+        },
+        "path": "tools/gates/m2_004_windows_resolver.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ddd4eb317c861351e91b085310bbe6702962e966bd227b4520b23facceb278c3"
+        },
+        "path": "tools/gates/native/m2_004_tls_link_stub.c"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d2d86ac719dfeabc2afb98c554ba9e07456323c1ef56de00ad85cfb7db25616a"
+        },
+        "path": "tools/gates/sts_sdk_identity.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8a3675ccfafc66eafb2fea2796a128d1c5c3a7574c82f9fe582e5abad7ba0030"
+        },
+        "path": "tools/gates/tests/test_m2_004_windows_resolver.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "18acd063c0f7147f927f945617df3d18bc499807b51cf53bb768e0ea8263bc30"
+        },
+        "path": "tools/gates/tests/test_sts_sdk_identity.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "be481a95ab1c60b19d6dbaf85a1c90e9533d29a1f76c030f88c618a274c179ec"
+        },
+        "path": "tools/tasks/M2-004.json"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3312b4c2691864a3d385dfa56654f5b134b86d913a53b6bea23381c0bde41bf1"
+        },
+        "path": "tools/tests/test_build_resolver.py"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e40f92e463e8823c179820f0332a9e01037c0ac199d1c643f51eea05e7c8af63"
+        },
+        "path": "tools/tests/test_m7_029_independent_security_review.py"
+      }
+    ],
+    "schema_version": 1
+  },
+  "task_id": "M2-004",
+  "test_link_stub": {
+    "archive": {
+      "command": [
+        "llvm-ar.EXE",
+        "rcs",
+        "target/native/test-support/m2-004/lib/libwirestack_m2_004_tls_link_stub.a",
+        "target/native/test-support/m2-004/m2_004_tls_link_stub.o"
+      ],
+      "duration_ms": 15.0,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "archive_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d725768e5ad5e3e1cbd6941cce7b06f0dad1f3b0d5c741b3d9ea0e50c54c433a"
+    },
+    "compile": {
+      "command": [
+        "clang.EXE",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-c",
+        "tools/gates/native/m2_004_tls_link_stub.c",
+        "-o",
+        "target/native/test-support/m2-004/m2_004_tls_link_stub.o"
+      ],
+      "duration_ms": 63.0,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "purpose": "M2-004 resolver-test link support; all functions fail closed",
+    "source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ddd4eb317c861351e91b085310bbe6702962e966bd227b4520b23facceb278c3"
+    },
+    "test_only": true
+  }
+}
