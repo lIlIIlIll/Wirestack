@@ -44,20 +44,20 @@ and generic schema-v1 evidence index remain historical and unchanged.
 
 The [current report](current-desktop/windows-x86_64/report.json) and
 [validation](current-desktop/windows-x86_64/validation.json) passed on
-`windows-2025` at source `59e0fcf458f73ff1a395b378d1e1914685ea379a`.
-[Run 41779351031](https://github.com/lIlIIlIll/Wirestack/actions/runs/41779351031),
-job `126407083128`, was dispatched once on
+`windows-2025` at source `1631837216989f7eac6986b24b0b9a2c61d0bd20`.
+[Run 41797937351](https://github.com/lIlIIlIll/Wirestack/actions/runs/41797937351),
+job `126466416305`, was dispatched once on
 `fix/M10-002-resource-owner-backpressure`.
 
 All six selected cases passed, including both unchanged 50 ms limits. The 28
 other filtered cases were skipped, not qualified. Native SDK identity matched
 310 archive files, compiler/CJPM 1.2.0 and target `x86_64-w64-mingw32`.
-Artifact `13298432362` retained the report, validation and six logs. Its raw
-ZIP is 10,141 bytes, artifact-byte SHA-256
-`400693d35cd5ae814191d489b20122bbf9f425a1fa3884c3b56efb723952b407`.
+Artifact `13306283731` retained the report, validation and six logs. Its raw
+ZIP is 10,512 bytes, artifact-byte SHA-256
+`9c0b1d17cc9d74924bf65e4e2626cf6d0c2bf9646c9d5a8a9a7df09bac2255de`.
 The actual dispatch branch is not relabeled as the separate immutable source ref.
-Earlier STS runs `41698902389` at `6c5eb96e` and `41773923034` at `e0cc7f4e`
-remain historical qualifications.
+Earlier STS runs `41779351031` at `59e0fcf4`, `41698902389` at `6c5eb96e`
+and `41773923034` at `e0cc7f4e` remain historical qualifications.
 
 ## Historical native Windows acceptance (legacy alpha evidence)
 

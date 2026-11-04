@@ -3,31 +3,31 @@
   "task_id": "M2-004",
   "kind": "current-source-windows-native-acquisition",
   "status": "PASS",
-  "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
-  "run_id": 41779351031,
-  "job_id": 126407083128,
-  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41779351031",
-  "artifact_id": 13298432362,
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "run_id": 41797937351,
+  "job_id": 126466416305,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41797937351",
+  "artifact_id": 13306283731,
   "zip_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "400693d35cd5ae814191d489b20122bbf9f425a1fa3884c3b56efb723952b407"
+    "sha256": "9c0b1d17cc9d74924bf65e4e2626cf6d0c2bf9646c9d5a8a9a7df09bac2255de"
   },
-  "zip_size_bytes": 10141,
+  "zip_size_bytes": 10512,
   "report_text_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "16656fa586da74f0785261e501e4f9d5b6ba87366a8f15c8d16962a3a39b878a"
+    "sha256": "031474edb8a2118cf9852f13d52b012e568a19875d1917b560837c1ce31aaf51"
   },
   "uploaded_report_artifact_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "7512656fce59b69f5f6eb6556ba9ca165b66c50b0f01d96eaaa68301ba25ff41"
+    "sha256": "3509f83ca6269a2028dec513f49b04a03405b1f3a6de3a8b4c9601b64cf337f4"
   },
   "validation_text_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "feea470a05e6da5366a97ff991c213f61bad815a6f243e7c1eef106cb838405a"
+    "sha256": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124"
   },
   "uploaded_validation_artifact_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "f28cc53358424ed00fafd8ad51c4898addc8f7634096d070cecadaaec9b6d64e"
+    "sha256": "2ca758fa9717fe9c10820efc386e73d6d614ac6a5ea7a35cd3ef96ce8c548b01"
   },
   "members_byte_matched": 8,
   "log_hashes_matched": 6,
