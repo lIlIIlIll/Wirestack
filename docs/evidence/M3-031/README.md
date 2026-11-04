@@ -8,15 +8,39 @@ arm64 runners at one exact repository revision. This projection does not
 complete historical global M3 tasks, M3-001's six-platform target-build
 condition, or any mobile condition. Those remain explicitly excluded.
 
-The previously recorded hosted run and provider reports below are historical
-evidence for their recorded revision. They do not qualify the current Core.
-The task acceptance now requires a current-source Core qualification at
-`current-core/qualification.json`; do not treat an older M3-031 PASS or hosted
-run as current acceptance until that receipt has been captured and validated
-against the frozen candidate source and pinned SDK.
+The current desktop and Core receipts qualify the frozen integrated source
+`6c5eb96e8552975dbc17651f1e86ca947e78b0ac`. The immutable source ref is
+`evidence/M10-002/6c5eb96e8552975dbc17651f1e86ca947e78b0ac`; the actual
+workflow dispatch branch was `fix/M10-002-resource-owner-backpressure`.
+The tested integrated revision is not presented as the lower M3 owner PR head.
 
 This task does not implement Windows system trust, macOS system trust, Windows
 key handles, Apple Keychain/SecKey, or mobile device support.
+
+## Current executed results
+
+- [Hosted provider run 41698821216](https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216)
+  passed on Windows x86_64 and macOS arm64. Both schema-v11 AWS-LC 5.5.0
+  reports passed all 18 required capabilities and retained 11 license files.
+- The direct Windows resolver receipt passed all six selected cases on STS
+  1.2.0; the macOS receipt passed all eight selected cases on STS 1.2.0.
+  Other filtered cases and Apple mobile targets are not qualified.
+- [Current Core qualification](current-core/qualification.json) passed its
+  four executed commands on the qualified Linux STS 1.1.3 SDK: provider build,
+  architecture guard, provider substitution, and outside-checkout installed
+  HTTPS consumer. Its nine logs retain typed text digests.
+- The full `scripts/check-task M3-031` run passed all five commands. The
+  [audit](core-prerequisite-audit.json) and
+  [matrix](desktop-provider-matrix.json) are retained gate outputs, not
+  hand-authored PASS records.
+- The full historical M3-030 verifier returned `HISTORICAL`, integrity
+  `STALE`, code `STALE_SOURCE`: its `task-check.json` report digest changed.
+  This diagnostic does not promote M3-030 or qualify current Core.
+
+The native provider ZIPs were checked byte-for-byte against every retained
+platform payload. Their artifact-byte SHA-256 values are recorded in
+`hosted-run.json`. The current Core release disposition remains
+`NOT_QUALIFIED`; its raw archive is not a published release artifact.
 
 ## Task-graph boundary
 
