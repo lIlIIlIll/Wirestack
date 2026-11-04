@@ -2,7 +2,7 @@
   "issues": [
     {
       "code": "DEPENDENCY_INCOMPLETE",
-      "detail": "M10-004 dependency is not COMPLETE: M10-003"
+      "detail": "M10-003 dependency is not COMPLETE: M10-001"
     }
   ],
   "kind": "task-contract-validation",
