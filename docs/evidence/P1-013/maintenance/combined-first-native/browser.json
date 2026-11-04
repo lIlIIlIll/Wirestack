@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-013",
+  "kind": "native-generated-docs-browser-smoke",
+  "status": "PASS",
+  "tested_source_revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+  "scope": "Documentation maintenance surface only; M9 task acceptance and release qualification not claimed",
+  "base_url": "<local-docs>",
+  "search_query": "HttpClient",
+  "search_result": "HttpClient class wirestack.http.HttpClient",
+  "navigation": {
+    "relative_url": "symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48747470436c69656e742367302829.html",
+    "title": "wirestack.http.HttpClient",
+    "observed_signature": "public class HttpClient <: Resource"
+  },
+  "visual_check": "Search results and navigated public class page rendered; no blank or error page",
+  "screenshots": [
+    {
+      "name": "search-results",
+      "path": "search-results.webp",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "1bb4e66b1ef6f6fb826b7413155591caccf3da09da9ebbe1cd5d03cbdbe8b2f0"
+      },
+      "size_bytes": 23142
+    },
+    {
+      "name": "public-client-page",
+      "path": "public-client-page.webp",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "35093c13133e002e170f05357624a20b3de413055104c720caf35d0a4b5eea31"
+      },
+      "size_bytes": 31922
+    }
+  ],
+  "initial_query_note": "HttpResourceBudget produced no result; no such public-symbol assumption is used as acceptance",
+  "browser_errors": {
+    "entries": [],
+    "nextSeq": 0,
+    "dropped": 0
+  }
+}
