@@ -583,13 +583,13 @@
 
 18 warnings generated, 18 warnings printed.
 --------------------------------------------------------------------------------------------------
-TP: wirestack.internal.resolver, time elapsed: 722064000 ns, RESULT:
-    TCS: M2006AppleSystemResolverTest, time elapsed: 717681000 ns, RESULT:
-    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (11012000 ns)
-    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (11542000 ns)
-    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (21612000 ns)
-    [ PASSED ] CASE: fixtureMapsPosixFailuresAndUnknownCodes (633000 ns)
-    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (55130000 ns)
+TP: wirestack.internal.resolver, time elapsed: 741590000 ns, RESULT:
+    TCS: M2006AppleSystemResolverTest, time elapsed: 737453000 ns, RESULT:
+    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (10484000 ns)
+    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (13036000 ns)
+    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (12145000 ns)
+    [ PASSED ] CASE: fixtureMapsPosixFailuresAndUnknownCodes (27084000 ns)
+    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (51182000 ns)
     STDERR:
     An exception has occurred:
     ResolveException: resolution cancelled
@@ -598,17 +598,17 @@ TP: wirestack.internal.resolver, time elapsed: 722064000 ns, RESULT:
     	 at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(<repo>/src/internal/resolver/system_resolver.cj:30)
     	 at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(<repo>/src/internal/resolver/system_resolver.cj:39)
     	 at wirestack.internal.resolver/test::M2006AppleSystemResolverTest::fixtureCancellationAndDeadlineReturnBeforeNativeCleanup::lambda.0()(<repo>/src/internal/resolver/apple_system_resolver_test.cj:98)
-    [ PASSED ] CASE: newResolutionObservesNetworkGenerationChange (22530000 ns)
-    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (353000 ns)
-    [ PASSED ] CASE: fixtureBoundsAdmissionAndReleasesQueuedWorkAfterClose (586713000 ns)
+    [ PASSED ] CASE: newResolutionObservesNetworkGenerationChange (23653000 ns)
+    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (89000 ns)
+    [ PASSED ] CASE: fixtureBoundsAdmissionAndReleasesQueuedWorkAfterClose (594532000 ns)
 Summary: TOTAL: 34
     PASSED: 8, SKIPPED: 26, ERROR: 0
     FAILED: 0
 --------------------------------------------------------------------------------------------------
-Project tests finished, time elapsed: 734762000 ns, RESULT:
-TP: wirestack.*, time elapsed: 734714000 ns, RESULT:
+Project tests finished, time elapsed: 790363000 ns, RESULT:
+TP: wirestack.*, time elapsed: 790253000 ns, RESULT:
     PASSED:
-    TP: wirestack.internal.resolver, time elapsed: 722064000 ns
+    TP: wirestack.internal.resolver, time elapsed: 741590000 ns
 Summary: TOTAL: 34
     PASSED: 8, SKIPPED: 26, ERROR: 0
     FAILED: 0
