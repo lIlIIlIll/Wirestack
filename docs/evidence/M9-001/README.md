@@ -2,9 +2,11 @@
 
 ## Current qualification boundary
 
-M9-001 remains BLOCKED until its current prerequisite closure, both native gates,
-capability correspondence, canonical check, HTML/browser proof and source seal
-pass. Historical receipts below do not qualify a changed source candidate.
+M9-001 is COMPLETE for the current development gate: its real prerequisite
+qualification, all six selected task commands and separate eighteen-scenario
+long gate passed at code source `16318372`. Final shared-metadata freshness is
+reported separately by the strict source seal; historical receipts do not
+qualify changed production, build, test or manifest inputs.
 Publication does not authorize release, signing, merge or a ready transition.
 
 ## Current capability correspondence
@@ -37,7 +39,7 @@ factory-specific observed flags are checked separately against the single
 The original seven scenarios remain required even though the auxiliary runner
 also exercises them.
 
-## Exercised current-map command, not task acceptance
+## Initial current-map preflight retained
 
 The exact authorized manifest command was smoked at integrated code source
 `1631837216989f7eac6986b24b0b9a2c61d0bd20` with qualified official STS 1.1.3.
@@ -50,10 +52,9 @@ keeps the native receipt's M9-003 identity and the task's BLOCKED boundary.
 | After deterministic environment correction | All 18 scenarios PASS; 97.909 seconds | Only a shorter private disk-backed temporary root changed; runner, SDK, 64 resource cycles, 107-byte abstract padding and long deadline stayed unchanged. |
 | Unchanged strict correspondence | PASS, native PASS, all 86 rows | Actual current auxiliary receipt validates against the current description; no seven-case substitution or task-identity rewrite. |
 
-The actual [selected long gate](current-map-task-check.json) still exits
-2/INVALID with no commands because P1-015 is not COMPLETE. Direct native
-success does not satisfy that prerequisite, the independent seven-scenario
-gate, HTML/browser proof or the final task seal.
+The earlier dependency-blocked long and task receipts remain under
+`maintenance/dependency-blocked-*.json`. They were not rewritten as successes.
+The actual selected executions after prerequisite qualification are below.
 
 The [current API comparison](api-compatibility.json) records 39 added
 declarations, no declaration removals and 20 changed declaration records
@@ -62,25 +63,29 @@ resolver interface conformances, fields and enum cases, not just capability
 defaults. Old-consumer source execution, old binaries and cross-SDK behavior
 remain NOT_RUN; no universal source or ABI compatibility is claimed.
 
-## Additional current local proof
+## Actual selected acceptance
 
-The independent foundational runner and remaining unchanged manifest commands
-also ran at the same integrated code source. These are local diagnostics, not
-a selected-task PASS.
+All gates below executed after real P1-015 qualification, on qualified official
+STS 1.1.3 with unchanged production, build, test and manifest bytes.
 
-| Current command or surface | Actual result |
+| Gate or surface | Actual result |
 |---|---|
-| Foundational native runner | All 7 scenarios PASS in 89.241 seconds; original M9-001 receipt identity retained. |
-| Canonical repository check | PASS in 513.653 seconds, within the original 1,800-second deadline. |
-| Native HTML gate | All 41 commands PASS in 353.659 seconds, within the original 900-second deadline; seven layers and complete symbol/parameter coverage. |
-| Real Chromium surface | Search for `HttpClient`, click the real result and observe the rendered `wirestack.http.HttpClient` page; zero browser errors and actual screenshots. |
+| Selected task | All 6 commands PASS, including all 30 focused regressions; no timeout or partial replay. |
+| Separate current-map long gate | All 18 scenarios PASS in 86.587 seconds; original 1,800-second deadline and M9-003 receipt identity retained. |
+| Foundational native gate | All 7 scenarios PASS in 60.337 seconds; original M9-001 identity and 900-second deadline retained. |
+| Strict correspondence | PASS in 1.415 seconds, all 86 rows. |
+| Canonical repository check | PASS in 477.300 seconds, original 1,800-second deadline; 1,090 native PASS, 28 explicit SKIP, no failure or error. |
+| Native HTML gate | All 41 commands PASS in 375.630 seconds, original 900-second deadline; seven layers and complete symbol/parameter coverage. |
+| Real Chromium surface | Earlier independent current-code HTML execution: search for `HttpClient`, click the real result and observe `wirestack.http.HttpClient`; zero browser errors. No production, build, test or manifest change followed that proof. |
 
-Complete command projections are under
-[`remaining-local-commands`](maintenance/remaining-local-commands/report.json).
-The [browser receipt](maintenance/current-html-proof/browser-smoke.json) links
-the visual evidence and records the observer's initial unmatched encoded-URL
-wait separately. The page was reached without replaying the click.
-The current prerequisite and source-seal barrier still prevents task promotion.
+The actual [task receipt](task-check.json), [long receipt](current-map-task-check.json)
+and [fourteen complete outputs](maintenance/current-selected/qualification.json)
+retain every selected command. All 86 producer stdout/stderr files from the
+two native receipts were independently text-digest verified before import.
+Earlier direct-smoke projections remain under `maintenance/remaining-local-commands/`.
+The [browser receipt](maintenance/current-html-proof/browser-smoke.json) keeps
+actual screenshots and records the observer's unmatched encoded-URL wait
+separately; the page was reached without replaying the click.
 
 ## Execution order
 

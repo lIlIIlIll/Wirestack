@@ -2,35 +2,15 @@
   "schema_version": 1,
   "source_task": "M9-001",
   "status": "PASS",
-  "scope": "Worktree publication hygiene, not release qualification",
-  "command": "git privacy-check",
+  "command": [
+    "git",
+    "privacy-check"
+  ],
   "exit_code": 0,
-  "findings": [],
-  "authorization": "The project owner authorized separate task publication and repair of the inherited evidence files.",
-  "history_diagnostic": {
-    "command": "git privacy-check --history",
-    "exit_code": 1,
-    "scope": "All reachable history, not only outgoing commits",
-    "findings": "One pre-existing third-party sign-off outside the pending task stack; no unrelated history rewritten",
-    "outbound_gate": "Mandatory pre-push hook remains enabled"
-  },
-  "repaired_paths": [
-    "docs/evidence/M8-007/commands/soak-owner-controls/1790042120606136091/before.stderr.log",
-    "docs/evidence/M8-007/soak-owner-controls.json"
-  ],
-  "dependent_bindings_updated": [
-    "docs/evidence/M8-007/linux_x86_64/security-index.json",
-    "docs/evidence/M8-007/linux_x86_64/security-package.json",
-    "docs/evidence/M8-007/linux_x86_64/review-request.json",
-    "docs/evidence/M8-007/requalification-status.json"
-  ],
-  "validation": {
-    "command": "Python invocation of verify_owner_controls, security.validate with the existing M8-007 input lists, review.build_request comparison, and status digest comparisons",
-    "exit_code": 0,
-    "result": "PASS",
-    "historical_failure_outcome_preserved": true,
-    "historical_seal_modified": false,
-    "release_qualification": "NOT_QUALIFIED",
-    "review_status": "AWAITING_INDEPENDENT_REVIEW"
-  }
+  "scope": "Current full working-tree privacy gate after importing actual native receipts and normalized selected logs; real commit and outbound hooks remain mandatory. Installed archives remain private and are not payload-privacy qualified.",
+  "normalized_environment_paths": true,
+  "native_producer_receipt_and_log_bytes_preserved": true,
+  "hooks_bypassed": false,
+  "release_archive_privacy": "NOT_QUALIFIED",
+  "historical_record": "docs/evidence/M9-001/maintenance/historical-pre-integration-privacy.json"
 }
