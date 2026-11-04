@@ -1,0 +1,87 @@
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 close(3)                        = 0
+2514994 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f1aa1dffce8, parent_tid=0x7f1aa1dff990, exit_signal=0, stack=0x7f1aa0dff000, stack_size=0xfffec0, tls=0x7f1aa1dff6c0} => {parent_tid=[2514995]}, 88) = 2514995
+2514994 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f1aa0dfece8, parent_tid=0x7f1aa0dfe990, exit_signal=0, stack=0x7f1a9fdfe000, stack_size=0xfffec0, tls=0x7f1aa0dfe6c0} => {parent_tid=[2514996]}, 88) = 2514996
+2514994 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f1a9fdfdce8, parent_tid=0x7f1a9fdfd990, exit_signal=0, stack=0x7f1a9fcfd000, stack_size=0xffec0, tls=0x7f1a9fdfd6c0} => {parent_tid=[2514997]}, 88) = 2514997
+2514994 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f1a9fafcce8, parent_tid=0x7f1a9fafc990, exit_signal=0, stack=0x7f1a9eafc000, stack_size=0xfffec0, tls=0x7f1a9fafc6c0} => {parent_tid=[2514998]}, 88) = 2514998
+2514994 close(3)                        = 0
+2514994 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+2514994 bind(3, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+2514994 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+2514994 bind(5, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+2514994 socket(AF_INET6, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 6
+2514994 bind(6, {sa_family=AF_INET6, sin6_port=htons(0), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 0
+2514994 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 7
+2514994 bind(7, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/listener"}, 110) = 0
+2514994 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 8
+2514994 bind(8, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/datagram"}, 110) = 0
+2514994 accept4(3, 0x55803c5d8a50, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
+2514994 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f1a9eafbce8, parent_tid=0x7f1a9eafb990, exit_signal=0, stack=0x7f1a9e9fb000, stack_size=0xffec0, tls=0x7f1a9eafb6c0} => {parent_tid=[2515001]}, 88) = 2515001
+2514994 accept4(3, {sa_family=AF_INET, sin_port=htons(44032), sin_addr=inet_addr("127.0.0.1")}, [120 => 16], SOCK_CLOEXEC|SOCK_NONBLOCK) = 9
+2514994 accept4(7, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 10
+2514994 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 11
+2514994 connect(11, {sa_family=AF_INET, sin_port=htons(56897), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+2514994 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 12
+2514994 connect(12, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/outgoing-stream"}, 110) = 0
+2514994 recvfrom(9, "\1", 1, 0, NULL, NULL) = 1
+2514994 sendto(9, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(10, "\1", 1, 0, NULL, NULL) = 1
+2514994 sendto(10, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 sendto(11, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(11, "\1", 1, 0, NULL, NULL) = 1
+2514994 sendto(12, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(12, "\1", 1, 0, NULL, NULL) = 1
+2514994 connect(5, {sa_family=AF_INET, sin_port=htons(51972), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+2514994 connect(6, {sa_family=AF_INET6, sin6_port=htons(59286), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 0
+2514994 sendto(5, "\1", 1, 0, {sa_family=AF_INET, sin_port=htons(51972), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+2514994 recvfrom(5, "\1", 2, 0, {sa_family=AF_INET, sin_port=htons(51972), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
+2514994 sendto(6, "\1", 1, 0, {sa_family=AF_INET6, sin6_port=htons(59286), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
+2514994 recvfrom(6, 0x55803c667ae0, 2, 0, 0x55803c72f4f0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2514994 recvfrom(6, "\1", 2, 0, {sa_family=AF_INET6, sin6_port=htons(59286), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
+2514994 sendto(8, "\1", 1, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/datagram-peer"}, 110) = 1
+2514994 recvfrom(8, "\1", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/datagram-peer"}, [120 => 102]) = 1
+2514994 connect(8, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/datagram-peer"}, 110) = 0
+2514994 sendto(9, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(9, "\2", 1, 0, NULL, NULL) = 1
+2514994 sendto(10, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(10, 0x55803c6edf50, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+2514994 recvfrom(10, "\2", 1, 0, NULL, NULL) = 1
+2514994 sendto(11, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(11, 0x7f1aa5451690, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+2514994 recvfrom(11, 0x7f1aa5451690, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+2514994 recvfrom(11, "\2", 1, 0, NULL, NULL) = 1
+2514994 sendto(12, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2514994 recvfrom(12, "\2", 1, 0, NULL, NULL) = 1
+2514994 sendto(5, "\2", 1, 0, {sa_family=AF_INET, sin_port=htons(51972), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+2514994 recvfrom(5, "\2", 2, 0, {sa_family=AF_INET, sin_port=htons(51972), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
+2514994 sendto(6, "\2", 1, 0, {sa_family=AF_INET6, sin6_port=htons(59286), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
+2514994 recvfrom(6, 0x55803c667ae0, 2, 0, 0x55803c731290, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2514994 recvfrom(6, "\2", 2, 0, {sa_family=AF_INET6, sin6_port=htons(59286), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
+2514994 sendto(8, "\2", 1, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/datagram-peer"}, 110) = 1
+2514994 recvfrom(8, "\2", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m10-002-closure-TVCJNNBC/wirestack-m9-001-peer-vsgo6osk/datagram-peer"}, [120 => 102]) = 1
+2514994 close(9)                        = 0
+2514994 close(11)                       = 0
+2514994 close(10)                       = 0
+2514994 close(12)                       = 0
+2514994 close(3)                        = 0
+2514994 close(5)                        = 0
+2514994 close(6)                        = 0
+2514994 close(7)                        = 0
+2514994 close(8)                        = 0
+2514998 +++ exited with 0 +++
+2514997 +++ exited with 0 +++
+2514996 +++ exited with 0 +++
+2514995 +++ exited with 0 +++
+2514994 close(4)                        = 0
+2515001 +++ exited with 0 +++
+2514994 +++ exited with 0 +++
