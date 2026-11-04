@@ -3,7 +3,7 @@
   "current_core_qualification": {
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "23a22198bd6176ff8c8846ea643d00f0cf992cf671ad94a152ace1d7f941357a"
+      "sha256": "3c28177d3656ceb204f31224b5da6ca651ce3752f8014b73a502993965f96bd5"
     },
     "installed_consumer": {
       "artifact": {
@@ -16,7 +16,7 @@
       "qualification": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "af141d7fd7440dfe0cecf21045c62befe6891ec2c85341d96044052412ba516a"
+          "sha256": "705d3ff2cc68126fed0201bfa1d74017d2777c84afa7a58bff8ee2eac2abd75c"
         },
         "path": "dist/m3-031-current-core/qualification.json"
       }
@@ -29,7 +29,7 @@
       "path": "target/native/current/lib/libwirestack_tls_provider.a"
     },
     "path": "docs/evidence/M3-031/current-core/qualification.json",
-    "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
+    "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
     "selection": {
       "abi_symbols": [
         "wirestack_tls_certificate_subject_alt_names",
@@ -130,20 +130,20 @@
       "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/cjc-version.log": "9856a5bc24ecc9d9cf8c6ed6ef7f2a365b4fb4939138d3e7ce2e66e481985c6a",
       "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/cjpm-version.log": "b1c195e5dbffec9fecd265d147dfae24e3ff88b5df16b248a2688b8f6f4693ba",
       "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-tests.log": "871a8d41c0d871c775a67e0c9619a5d2798a40f5cf1950f7ed079bb8f0ba2ef6",
+      "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-tests.log": "131906ca800fcb67608a7d027972a168da2aa0aed49a4b7d4f10a2ac6a291032",
       "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-archive.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "docs/evidence/M2-004/current-desktop/windows-x86_64/report.json": "16656fa586da74f0785261e501e4f9d5b6ba87366a8f15c8d16962a3a39b878a",
-      "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json": "feea470a05e6da5366a97ff991c213f61bad815a6f243e7c1eef106cb838405a",
+      "docs/evidence/M2-004/current-desktop/windows-x86_64/report.json": "031474edb8a2118cf9852f13d52b012e568a19875d1917b560837c1ce31aaf51",
+      "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124",
       "docs/evidence/M2-004/test-plan.md": "21b30448ea08ed82bb70f6a880af67fd1cd310743eea9f67a7652aa32bf89477",
       "docs/evidence/M2-006/README.md": "4d67565db103d9764cca2d618117396234ed589e455e78b9fb5c1c5ba2789e3f",
       "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-test.log": "d7b2c6aceee23e89245adb9e32b42f993e5bc7e5ff06acee4a0328c1d5b443b3",
+      "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-test.log": "a67a8ffbccb2cf36ed96bb88e9a63e4a678dc5c6d922aceefd4c1c7204c95156",
       "docs/evidence/M2-006/current-desktop/macos-arm64/logs/test-link-stub-archive.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "docs/evidence/M2-006/current-desktop/macos-arm64/logs/test-link-stub-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "docs/evidence/M2-006/current-desktop/macos-arm64/logs/toolchain-version.log": "48d9c0dbf4b047dc05ec2e312730905ad95d32e27009b75530ee846a30be786a",
-      "docs/evidence/M2-006/current-desktop/macos-arm64/report.json": "e9db18ebe6b4b199b87146fa9d0f02bf29b64cc3a1b2714ff3abe4bac2ecc29d",
-      "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4",
+      "docs/evidence/M2-006/current-desktop/macos-arm64/report.json": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c",
+      "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138",
       "docs/evidence/M2-006/test-plan.md": "8a78282094e60c1a1fa41c507fd9b022d83b5c3c2cf945964d929e2c4ed0af7c",
       "docs/references/m2-004-sts-sdk.json": "3a2f20b0674f3b159ff5b441c4169c927c06c0a03480af31727fe95853947734",
       "docs/references/m2-006-sts-sdk.json": "6257e08fd657d087200462cee62d186a59d0b1d7a7e1ee73f7f92235977a92e4",
@@ -227,7 +227,7 @@
         "report": "docs/evidence/M2-004/current-desktop/windows-x86_64/report.json",
         "report_digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "16656fa586da74f0785261e501e4f9d5b6ba87366a8f15c8d16962a3a39b878a"
+          "sha256": "031474edb8a2118cf9852f13d52b012e568a19875d1917b560837c1ce31aaf51"
         },
         "sdk": {
           "archive": {
@@ -260,7 +260,7 @@
         "validation": "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json",
         "validation_digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "feea470a05e6da5366a97ff991c213f61bad815a6f243e7c1eef106cb838405a"
+          "sha256": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124"
         }
       },
       "M2-006": {
@@ -269,7 +269,7 @@
         "report": "docs/evidence/M2-006/current-desktop/macos-arm64/report.json",
         "report_digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "e9db18ebe6b4b199b87146fa9d0f02bf29b64cc3a1b2714ff3abe4bac2ecc29d"
+          "sha256": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c"
         },
         "sdk": {
           "archive": {
@@ -302,7 +302,7 @@
         "validation": "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json",
         "validation_digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4"
+          "sha256": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138"
         }
       }
     }
@@ -428,22 +428,22 @@
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/cjc-version.log": "9856a5bc24ecc9d9cf8c6ed6ef7f2a365b4fb4939138d3e7ce2e66e481985c6a",
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/cjpm-version.log": "b1c195e5dbffec9fecd265d147dfae24e3ff88b5df16b248a2688b8f6f4693ba",
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-tests.log": "871a8d41c0d871c775a67e0c9619a5d2798a40f5cf1950f7ed079bb8f0ba2ef6",
+    "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-tests.log": "131906ca800fcb67608a7d027972a168da2aa0aed49a4b7d4f10a2ac6a291032",
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-archive.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "docs/evidence/M2-004/current-desktop/windows-x86_64/report.json": "16656fa586da74f0785261e501e4f9d5b6ba87366a8f15c8d16962a3a39b878a",
-    "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json": "feea470a05e6da5366a97ff991c213f61bad815a6f243e7c1eef106cb838405a",
+    "docs/evidence/M2-004/current-desktop/windows-x86_64/report.json": "031474edb8a2118cf9852f13d52b012e568a19875d1917b560837c1ce31aaf51",
+    "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124",
     "docs/evidence/M2-004/test-plan.md": "21b30448ea08ed82bb70f6a880af67fd1cd310743eea9f67a7652aa32bf89477",
     "docs/evidence/M2-006/README.md": "4d67565db103d9764cca2d618117396234ed589e455e78b9fb5c1c5ba2789e3f",
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-test.log": "d7b2c6aceee23e89245adb9e32b42f993e5bc7e5ff06acee4a0328c1d5b443b3",
+    "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-test.log": "a67a8ffbccb2cf36ed96bb88e9a63e4a678dc5c6d922aceefd4c1c7204c95156",
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/test-link-stub-archive.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/test-link-stub-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/toolchain-version.log": "48d9c0dbf4b047dc05ec2e312730905ad95d32e27009b75530ee846a30be786a",
-    "docs/evidence/M2-006/current-desktop/macos-arm64/report.json": "e9db18ebe6b4b199b87146fa9d0f02bf29b64cc3a1b2714ff3abe4bac2ecc29d",
-    "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4",
+    "docs/evidence/M2-006/current-desktop/macos-arm64/report.json": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c",
+    "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138",
     "docs/evidence/M2-006/test-plan.md": "8a78282094e60c1a1fa41c507fd9b022d83b5c3c2cf945964d929e2c4ed0af7c",
-    "docs/evidence/M3-031/current-core/qualification.json": "23a22198bd6176ff8c8846ea643d00f0cf992cf671ad94a152ace1d7f941357a",
+    "docs/evidence/M3-031/current-core/qualification.json": "3c28177d3656ceb204f31224b5da6ca651ce3752f8014b73a502993965f96bd5",
     "docs/planning/implementation-backlog.md": "5ff33fea10eec850f3948059c7db069255dadc00f091b9ddc54a8091d306c672",
     "docs/references/m2-004-sts-sdk.json": "3a2f20b0674f3b159ff5b441c4169c927c06c0a03480af31727fe95853947734",
     "docs/references/m2-006-sts-sdk.json": "6257e08fd657d087200462cee62d186a59d0b1d7a7e1ee73f7f92235977a92e4",
