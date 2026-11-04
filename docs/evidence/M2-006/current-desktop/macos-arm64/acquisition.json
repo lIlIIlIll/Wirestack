@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "task_id": "M2-006",
-  "kind": "parent-recovered-native-acquisition",
+  "kind": "parent-verified-native-acquisition",
   "status": "PASS",
-  "revision": "59e0fcf458f73ff1a395b378d1e1914685ea379a",
-  "run_id": 41779286737,
-  "job_id": 126406872633,
-  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41779286737",
-  "artifact_id": 13299130390,
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "run_id": 41797950640,
+  "job_id": 126466457453,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41797950640",
+  "artifact_id": 13306343451,
   "zip_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "668fa648aadde64c1ca92f70c5a5248132154ac8e68ef16ad5719ae988829fe1"
+    "sha256": "8a251046244c78e1910b074a76b21aa879f857a9a2619d3641f89073a26fb2ff"
   },
   "members_byte_matched": 7,
   "log_hashes_matched": 5,
@@ -43,16 +43,27 @@
     },
     "version": "1.2.0"
   },
-  "collector_failure": "Agent model transport ECONNRESET after native qualification and artifact acquisition completed; recovered existing run without redispatch",
   "full_task_status": "BLOCKED",
   "mobile": "NOT_RUN",
   "report_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "e9db18ebe6b4b199b87146fa9d0f02bf29b64cc3a1b2714ff3abe4bac2ecc29d"
+    "sha256": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c"
   },
   "validation_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4"
+    "sha256": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138"
   },
-  "scope": "Current desktop ARM64 resolver qualification only; full Apple/mobile task remains blocked"
+  "scope": "Current desktop ARM64 resolver qualification only; full Apple/mobile task remains blocked",
+  "zip_size_bytes": 12125,
+  "excluded_inherited_commentary": [
+    {
+      "path": "acquisition.json",
+      "reason": "Inherited prior-source acquisition commentary; retained in original ZIP, not current native acceptance.",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2108a223317d7da76d23c32c33d69389bb7b59393aecf4223cb082e4bdad03de"
+      }
+    }
+  ],
+  "collector_transport_recovery": "Original workflow monitor EOF recovered without redispatch"
 }
