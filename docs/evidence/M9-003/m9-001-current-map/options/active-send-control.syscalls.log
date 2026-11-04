@@ -1,0 +1,12 @@
+2566884 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+2566884 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+2566884 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+2566889 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(50063), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+2566889 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+2566888 +++ exited with 0 +++
+2566887 +++ exited with 0 +++
+2566886 +++ exited with 0 +++
+2566885 +++ exited with 0 +++
+2566889 +++ exited with 0 +++
+2566890 +++ exited with 0 +++
+2566884 +++ exited with 0 +++

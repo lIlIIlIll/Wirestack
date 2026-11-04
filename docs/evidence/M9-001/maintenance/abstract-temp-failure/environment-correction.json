@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "task_id": "M9-001",
+  "status": "FAILURE_ISOLATED_ENVIRONMENT_CORRECTION_NOT_ACCEPTANCE",
+  "tested_source_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "first_attempt": {
+    "scenarios_passed": 17,
+    "scenarios_failed": 1,
+    "scenario": "unix-abstract",
+    "native_exception": "native fixture name exceeded the endpoint bound",
+    "native_source": "examples/linux/m8_003/main.cj:16-22,323-326",
+    "old_cycle_datagram_0_utf8_bytes": 109,
+    "endpoint_bound": 107
+  },
+  "correction": {
+    "kind": "Task-private shorter disk-backed temporary directory",
+    "longest_cycle_datagram_63_utf8_bytes": 95,
+    "mode": "0700",
+    "runner_changed": false,
+    "sdk_changed": false,
+    "scenario_count_changed": false,
+    "resource_cycles_changed": false,
+    "deadline_seconds": 1800,
+    "abstract_endpoint_padding_bytes": 107
+  },
+  "requalification": "Run the same complete eighteen-scenario manifest command once after this deterministic environment correction; retain the failed first report and all original logs. No task promotion or until-green loop."
+}

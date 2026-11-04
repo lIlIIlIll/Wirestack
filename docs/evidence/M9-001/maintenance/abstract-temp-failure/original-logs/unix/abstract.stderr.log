@@ -1,0 +1,5 @@
+An exception has occurred:
+Exception: native fixture name exceeded the endpoint bound
+	 at wirestack_m8_003_native::require(Bool, std.core::String)(<work>/wirestack_m8_003_native/src/main.cj:12)
+	 at wirestack_m8_003_native::endpoint(std.core::String)(<work>/wirestack_m8_003_native/src/main.cj:19)
+	 at wirestack_m8_003_native::main()(<work>/wirestack_m8_003_native/src/main.cj:326)
