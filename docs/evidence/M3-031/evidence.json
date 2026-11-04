@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-11-04T06:56:40.183041Z",
+  "generated_at_utc": "2026-11-04T09:29:52.862925Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M3-031/current-core/qualification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "23a22198bd6176ff8c8846ea643d00f0cf992cf671ad94a152ace1d7f941357a"
+        "sha256": "3c28177d3656ceb204f31224b5da6ca651ce3752f8014b73a502993965f96bd5"
       },
       "source_task": "M3-031"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/M3-031/core-prerequisite-audit.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6397394376683166f0028e4a479ca07621765646542daf843f6b6d1c1f7912d9"
+        "sha256": "53a95a66276e20fa6954f6c0a733d772c323158c09a310b6762a2e00ddaebb25"
       },
       "source_task": "M3-031"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "feea470a05e6da5366a97ff991c213f61bad815a6f243e7c1eef106cb838405a"
+        "sha256": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124"
       },
       "source_task": "M3-031"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4"
+        "sha256": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138"
       },
       "source_task": "M3-031"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M3-031/windows-x86_64/provider-result.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "761ac2e402b62170cdd21b19a3ec350cf72cf173e01e139e5d0d16c98159ce47"
+        "sha256": "437c65d4c44ab1dc20a5ee54a29ba84c1684dcf1637e674504eede02a17e7f08"
       },
       "source_task": "M3-031"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M3-031/windows-x86_64/validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "a73f19ae2ce66a98d5dfb89fdfe31beac9a220fc77e5207bcc2ca427251c44ef"
+        "sha256": "12e63038b48549472a8a1be1e1c96ba0293c0504993d52ce5ce6d4c151342d97"
       },
       "source_task": "M3-031"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M3-031/macos-arm64/provider-result.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "46f0310b2a2a9e8c27e03aa07e399cbb4e871c5c7b7dc52f3206da009cc45d2d"
+        "sha256": "cdeed6393c16375c6d7f62dc12d41fad9eb0dc14b16100096b663ed16877a730"
       },
       "source_task": "M3-031"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M3-031/macos-arm64/validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "fdb4f72e548a95f6fec8a250fe54e518dafe2f74bef10d0a94c8a66b114972c8"
+        "sha256": "4be6eeedf91a6ac53f53d6ba19686e7ae28b71c603123fceeb875e53bd9143a0"
       },
       "source_task": "M3-031"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M3-031/desktop-provider-matrix.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "bad6c1ae4272d96595b494cfdf88207710d8cc8fa76b3c2a12dede3add0ea06b"
+        "sha256": "fea47321d1cd0a9f87ad10873b7482267603c02ebd22e22c753f45d1b4781634"
       },
       "source_task": "M3-031"
     },
@@ -94,7 +94,7 @@
       "path": "docs/evidence/M3-031/hosted-run.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "05411d10deb09db5d3b8511b897bc3a22b54500fd9c5b77051c163bc7f044404"
+        "sha256": "90e6d8016990387941c8c815fc9569f2ac0cffb13c7eadc9564b691c7f141464"
       },
       "source_task": "M3-031"
     },
@@ -103,12 +103,12 @@
       "path": "docs/evidence/M3-031/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "43c4cef71c7529d867d409d9a28e4ab7b8ccb8822ce15239565f0129770ccf6c"
+        "sha256": "e0377b7bbc2814b74283525d336baff15dfe65277b369182f07a3ff33ce7e130"
       },
       "source_task": "M3-031"
     }
   ],
-  "revision": "718db35a9700fe32190eb364812fcc1188d22571",
+  "revision": "b78d8d278214bd981572ac82581b185489bab40c",
   "schema_version": 2,
   "source_sha256": {
     ".gitattributes": {
@@ -149,7 +149,7 @@
     },
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/resolver-tests.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "871a8d41c0d871c775a67e0c9619a5d2798a40f5cf1950f7ed079bb8f0ba2ef6"
+      "sha256": "131906ca800fcb67608a7d027972a168da2aa0aed49a4b7d4f10a2ac6a291032"
     },
     "docs/evidence/M2-004/current-desktop/windows-x86_64/logs/test-link-stub-archive.log": {
       "domain": "text-utf8-lf-v1",
@@ -161,11 +161,11 @@
     },
     "docs/evidence/M2-004/current-desktop/windows-x86_64/report.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "16656fa586da74f0785261e501e4f9d5b6ba87366a8f15c8d16962a3a39b878a"
+      "sha256": "031474edb8a2118cf9852f13d52b012e568a19875d1917b560837c1ce31aaf51"
     },
     "docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "feea470a05e6da5366a97ff991c213f61bad815a6f243e7c1eef106cb838405a"
+      "sha256": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124"
     },
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-build.log": {
       "domain": "text-utf8-lf-v1",
@@ -173,7 +173,7 @@
     },
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/resolver-test.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d7b2c6aceee23e89245adb9e32b42f993e5bc7e5ff06acee4a0328c1d5b443b3"
+      "sha256": "a67a8ffbccb2cf36ed96bb88e9a63e4a678dc5c6d922aceefd4c1c7204c95156"
     },
     "docs/evidence/M2-006/current-desktop/macos-arm64/logs/test-link-stub-archive.log": {
       "domain": "text-utf8-lf-v1",
@@ -189,15 +189,15 @@
     },
     "docs/evidence/M2-006/current-desktop/macos-arm64/report.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "e9db18ebe6b4b199b87146fa9d0f02bf29b64cc3a1b2714ff3abe4bac2ecc29d"
+      "sha256": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c"
     },
     "docs/evidence/M2-006/current-desktop/macos-arm64/validation.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "e8b3b137b5354d4525bce38fade844c2c99bcf9e48745da1d1c90a97855cfed4"
+      "sha256": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138"
     },
     "docs/evidence/M3-031/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6ad702102d2f85a0ad4d81ed0a456b7bc03d5a915c7c82a20848b93e9ea6ea12"
+      "sha256": "5da22b08776eff0ab1ab13ea8d9094beb621c46117162296dd84b2770a2b7c34"
     },
     "docs/evidence/M3-031/current-core/maintenance/combined-before-shared-fixture-correction.log": {
       "domain": "text-utf8-lf-v1",
@@ -333,7 +333,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "08869fa4543c006e5b898b0e94416f67d078c759ae899f88296ac5e4e3033897"
+      "sha256": "18532b5b9ae9cccfcb5b62c78cb506148b1851fb75d0e453cfc92299945e34fa"
     },
     "docs/references/m2-004-sts-sdk.json": {
       "domain": "text-utf8-lf-v1",
