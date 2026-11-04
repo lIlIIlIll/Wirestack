@@ -116,7 +116,7 @@ milestone.
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M3-031 | COMPLETE | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md), [`hosted-run.json`](../evidence/M3-031/hosted-run.json), [`desktop-provider-matrix.json`](../evidence/M3-031/desktop-provider-matrix.json), [`task-check.json`](../evidence/M3-031/task-check.json) | The desktop-scoped Core audit and source-bound exact-revision native Windows Server 2025 x86_64/macOS 15 arm64 AWS-LC 5.5.0 schema-v11 PoCs pass, including measured TLS 1.2 and TLS 1.3 resumption. Global six-platform and mobile conditions remain NOT_EVALUATED; no trust or key adapter is claimed. |
+| M3-031 | COMPLETE | [current Core qualification](../evidence/M3-031/current-core/qualification.json), [native hosted receipt](../evidence/M3-031/hosted-run.json), [desktop matrix](../evidence/M3-031/desktop-provider-matrix.json), [task check](../evidence/M3-031/task-check.json), [scope](../evidence/M3-031/README.md) | Frozen integrated source `6c5eb96`: all four current Linux Core commands, all five selected task commands, both 18-capability native AWS-LC 5.5.0 PoCs, and direct STS 1.2.0 Windows/macOS resolver receipts pass. Historical M3-030 integrity is STALE (`STALE_SOURCE`), diagnostic only. Global six-platform/mobile conditions and release qualification remain excluded. |
 
 ## Future upstream enhancements
 
