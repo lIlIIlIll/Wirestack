@@ -1,13 +1,11 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "kind": "diagnostic-command-execution-not-task-acceptance",
+  "kind": "actual-manifest-selected-task-with-open-default-resource-failure",
   "status": "BLOCKED",
   "tested_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
-  "metadata_revision": "74f2690a75bc345f81cb9f0bbc06ea62c0be4608",
-  "task_acceptance": "NOT_RUN",
-  "prerequisite_barrier": "BLOCKED: current metadata publication and Windows CRLF qualification are unavailable during the observed GitHub incident; P1-015 and M9-001 acceptance remain pending.",
-  "boundary": "These are the exact unchanged manifest commands with their original deadlines. This diagnostic does not run or replace selected-task readiness validation and cannot promote any task. The original default-runtime FD/task failure remains open even if another consumer execution passes.",
+  "task_acceptance": "MANIFEST_PASS_AUXILIARY_RESOURCE_FAILURE_OPEN",
+  "boundary": "All ten actual selected task commands pass after real prerequisite qualification at frozen code source 16318372, with unchanged production/build/test/manifest inputs. The eleven earlier same-code diagnostics, including full canonical check with its original deadline, remain real evidence and are labeled separately. Original default-runtime FD/task restoration still FAILS; no COMPLETE, PASS source seal, release or M10-003 start is authorized.",
   "allowed_cpu_set": [
     0,
     1,
@@ -539,11 +537,72 @@
   ],
   "projection": "Complete outputs retained; only repository, SDK and task-workspace path prefixes replaced. Original bytes remain private.",
   "actual_selected_task": {
-    "status": "INVALID",
-    "exit_code": 2,
-    "commands": [],
+    "status": "PASS",
+    "exit_code": 0,
+    "commands": [
+      {
+        "id": "architecture-guard",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 6819.46
+      },
+      {
+        "id": "network-capability-contract",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 1214.889
+      },
+      {
+        "id": "cjpm-check",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 814.299
+      },
+      {
+        "id": "cjpm-build",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 11455.833
+      },
+      {
+        "id": "full-native-regression",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 95999.216
+      },
+      {
+        "id": "resource-profile-nofile-64",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 8670.612
+      },
+      {
+        "id": "resource-profile-data-1g",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 8172.698
+      },
+      {
+        "id": "resource-profile-as-4g",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 8324.245
+      },
+      {
+        "id": "resource-profile-single-cpu",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 8935.235
+      },
+      {
+        "id": "documentation-check",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 292950.175
+      }
+    ],
     "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json",
-    "issue": "DEPENDENCY_INCOMPLETE: M10-002 dependency is not COMPLETE: M9-001"
+    "complete_outputs": "docs/evidence/M10-002/stack-200-review/current-selected/qualification.json"
   },
   "default_runtime_resource_failure": {
     "status": "OPEN",
@@ -554,5 +613,13 @@
     "observed_tasks_after": 15,
     "boundary": "Original strict default-runtime FAIL remains open. A passing replay or processor-count control does not close it."
   },
-  "historical_acceptance": "docs/evidence/M10-002/stack-200-review/historical-current-source-acceptance-e7c4bba5.json"
+  "historical_acceptance": "docs/evidence/M10-002/stack-200-review/historical-current-source-acceptance-e7c4bba5.json",
+  "prerequisites": {
+    "P1-015": "COMPLETE",
+    "M9-001": "COMPLETE",
+    "basis": "Actual selected task and long receipts; not direct-smoke substitution."
+  },
+  "commands_scope": "Earlier eleven exact-command diagnostics at the same frozen code source, not the new selected-task records.",
+  "selected_complete_output_projection": "docs/evidence/M10-002/stack-200-review/current-selected/qualification.json",
+  "metadata_binding": "Qualified final shared-metadata source is recorded separately; native execution remains code source 16318372."
 }
