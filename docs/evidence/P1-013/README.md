@@ -2,9 +2,10 @@
 
 ## Status
 
-Current qualification requires the current canonical repository gate and a valid
-evidence seal. The records below describe historical acceptance and do not
-qualify a new source candidate.
+The current selected task passes all three acceptance commands on qualified
+STS 1.1.3. Its [task receipt](task-check.json), [complete canonical evidence](maintenance/current-canonical/qualification.json)
+and [source seal](evidence.json) are separate from the historical records below.
+This qualifies the development gate, not a release candidate.
 
 ## Scope
 
@@ -58,8 +59,13 @@ and combined serialized artifacts match the earlier serial output. Coverage
 remains 100% for 1,873 symbols and 950 parameters. Actual browser search and
 navigation to `HttpClient` passed with visual evidence and no browser errors.
 
-The full 1,800-second canonical task and current dependency seals remain
-required. This maintenance smoke does not complete P1-013, M9 or a release gate.
+The full canonical task also passed. Its unchanged 1,800-second canonical
+command completed in 803.463 seconds. All 98 focused regressions passed;
+the native suite passed 1,090 cases with 28 explicit skips and no failures or
+errors. Canonical documentation passed all 40 commands with the same complete
+symbol and parameter coverage. Complete stdout/stderr projections replace only
+private path prefixes; the original bytes and projection digests are retained.
+Neither earlier timeout is relabelled as acceptance.
 
 ## Release boundary
 
