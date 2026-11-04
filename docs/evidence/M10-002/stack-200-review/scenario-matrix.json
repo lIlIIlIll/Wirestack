@@ -2,10 +2,9 @@
   "schema_version": 1,
   "task_id": "M10-002",
   "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
-  "execution_metadata_revision": "74f2690a75bc345f81cb9f0bbc06ea62c0be4608",
   "status": "BLOCKED",
   "platform": "linux-x86_64-glibc",
-  "scope": "Actual local current-code diagnostic coverage only; no branch, mutation, universal source/ABI, or selected-task acceptance claim.",
+  "scope": "Actual complete selected-task regression coverage at frozen current code source; original default-runtime auxiliary FAIL remains open. No universal source/ABI or release claim.",
   "acceptance_scenarios": [
     {
       "id": "retained-cross-origin-discard-turn",
@@ -16,7 +15,7 @@
       "tests": [
         "T101"
       ],
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "executed_cases": [
         "discardedConnectionCleanupPreservesCrossOriginAdmissionTurn"
       ],
@@ -32,7 +31,7 @@
       "tests": [
         "T102"
       ],
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "executed_cases": [
         "cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn"
       ],
@@ -46,7 +45,7 @@
       "tests": [
         "T103"
       ],
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "executed_cases": [
         "closedAdmissionWinsOverCancelledContext"
       ],
@@ -60,7 +59,7 @@
       "tests": [
         "T104"
       ],
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "executed_cases": [
         "openAdmissionPreservesCancelledContext"
       ],
@@ -75,7 +74,7 @@
       "tests": [
         "T105"
       ],
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "executed_cases": [
         "closingClientWakesStalledConnectorConnectionAdmission"
       ],
@@ -83,7 +82,7 @@
     },
     {
       "id": "q4-buffer-before-flow-permit",
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "executed_cases": [
         "blockedOutboundDataBufferWaitDoesNotHoldFlowPermit",
         "blockedFlowPermitWaitDoesNotRetainManagedBufferLease",
@@ -105,7 +104,7 @@
     },
     {
       "id": "resource-limited-regression",
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "profiles": {
         "resource-profile-nofile-64": {
           "total": 219,
@@ -143,7 +142,7 @@
     },
     {
       "id": "current-toolchain-build-test-docs",
-      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "status": "PASS_SELECTED_TASK",
       "report": "docs/evidence/M10-002/stack-200-review/current-source-acceptance.json"
     },
     {
@@ -154,12 +153,14 @@
     },
     {
       "id": "dependency-qualified-task-acceptance",
-      "status": "BLOCKED",
+      "status": "PASS_SELECTED_TASK",
       "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json"
     }
   ],
   "deterministic_red_green_proof": "docs/evidence/M10-002/stack-200-review/closure-regressions/proof.json",
   "complete_current_outputs": "docs/evidence/M10-002/stack-200-review/current-local-diagnostics",
   "historical_matrix": "docs/evidence/M10-002/stack-200-review/historical-scenario-matrix-e7c4bba5.json",
-  "evidence_policy": "Reports remain BLOCKED and cannot enter a PASS source seal. Every PASS_LOCAL_DIAGNOSTIC case above appears as PASSED in the retained full current native output. Historical isolated replays do not replace complete acceptance."
+  "evidence_policy": "Overall reports remain BLOCKED and cannot enter a PASS source seal because the original strict default-runtime resource failure is open. Every PASS_SELECTED_TASK case appears as PASSED in the complete retained actual selected native output. Historical replays do not close the original failure.",
+  "complete_selected_outputs": "docs/evidence/M10-002/stack-200-review/current-selected/qualification.json",
+  "metadata_binding": "Qualified final shared-metadata source is recorded separately; native execution remains code source 16318372."
 }

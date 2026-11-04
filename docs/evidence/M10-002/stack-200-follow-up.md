@@ -1,11 +1,12 @@
 # M10-002 current-source acceptance follow-up
 
 Current integrated code source is
-`1631837216989f7eac6986b24b0b9a2c61d0bd20`. All eleven unchanged local
-manifest commands ran successfully; this is diagnostic execution, not
-dependency-qualified task acceptance. The selected task still exits 2/INVALID
-on M9-001, and the original default-runtime resource-restoration failure stays
-open. Complete current outputs and source identities are in
+`1631837216989f7eac6986b24b0b9a2c61d0bd20`. All ten actual selected task
+commands pass after real P1-015 and M9-001 qualification. The complete canonical
+command also passed at these unchanged production, build, test and manifest
+bytes. Overall M10-002 remains BLOCKED: the original strict default-runtime
+FD/task-restoration failure is still open. Complete actual outputs and source
+identities are in
 [`current-source-acceptance.json`](stack-200-review/current-source-acceptance.json).
 
 Earlier #216 failures and reviews remain historical. Their exact reports are
@@ -17,30 +18,35 @@ maintenance proof remains
 
 M10-002 implements bounded resource ownership and HTTP/2 Q4 outbound DATA admission. For positive stream flow credit, the sender caps the DATA frame to current credit, waits for a suitably sized managed-buffer lease, rechecks credit, then acquires the flow-control permit. A blocked buffer wait holds no flow permit; if SETTINGS reduces credit after the lease is acquired, the lease is released before retry. Zero flow credit waits without retaining a managed buffer. Stream/controller termination cancels pending lease waiters. Classic CONNECT without `:scheme` uses the actual `http` or `https` transport scheme for resource ownership. No public API was added or changed.
 
-The actual current M10-002 selected task is `INVALID` (exit 2,
-`commands: []`): `DEPENDENCY_INCOMPLETE: M10-002 dependency is not COMPLETE:
-M9-001`. M9-001 still depends on incomplete P1-015 qualification. Native
-diagnostic successes do not bypass this closure.
+The actual current selected task exits 0/PASS, with all ten commands executed
+and no timeout. P1-015 completed its original four-gate capture, byte verification
+and three-command selected task. M9-001 then completed all six selected task
+commands and the independent eighteen-scenario long gate. Direct native smoke
+was not substituted for either task.
 
-P1-012 current selected acceptance passed, and fresh local source seals passed
-their strict verifier. Metadata publication is only partial after two remote
-500 errors during GitHub incident `smtdswd1h2w4`; a current matching Windows
-metadata receipt remains required. Repository-wide readiness and historical
+Owner publication has recovered from GitHub incident `smtdswd1h2w4`.
+Shared completion metadata is requalified at the final frozen source with real
+exact-revision Linux/Windows receipts and strict predecessor seals, never by
+editing an older receipt revision. Repository-wide readiness and historical
 M7 release qualification are not promoted.
 
-## Current local diagnostics, not task acceptance
+## Actual selected and canonical evidence
 
-The full native run passed 1,090 cases with 28 explicit skips and no error or
-failure. All five changed-path admission cases actually executed. Each exact
-HTTP/2 profile passed 219 cases: FD limit 64, data limit 1 GiB, address-space
-limit 4 GiB, and affinity CPU 0. No CPU substitution, processor override or
-extra heap override was used for those profiles.
+The actual selected full native run passed 1,090 cases with 28 explicit skips
+and no error or failure. All five changed-path cases and fifteen retained Q4
+cases appear as PASSED in its complete output. Each exact HTTP/2 profile passed
+219 cases: FD limit 64, data limit 1 GiB, address-space limit 4 GiB, and affinity
+CPU 0. No CPU substitution, processor override or extra heap override was used.
 
-The manifest's documentation command used its explicit 1 GiB heap and passed
-all 40 commands with complete symbol and parameter coverage. The canonical
-repository command passed in 487.303 seconds. Complete stdout/stderr is
-retained in `stack-200-review/current-local-diagnostics/`; only private path
-prefixes are projected, with original-byte and public-text digests recorded.
+The actual documentation command used its explicit 1 GiB heap and passed all
+40 commands in 292.950 seconds, within its original 1,800-second deadline,
+with complete symbol and parameter coverage. The earlier full canonical
+invocation at the same frozen code passed in 487.303 seconds within its original
+7,200-second deadline; no production, build, test or manifest input changed.
+All twenty actual selected stdout/stderr projections are under
+`stack-200-review/current-selected/`. The earlier twenty-two full diagnostic
+outputs remain under `stack-200-review/current-local-diagnostics/`; neither set
+is an excerpt-only substitute.
 
 The installed default-runtime consumer's original strict result remains FAIL:
 FDs 10 to 10, tasks 14 to 15. Twelve behavioral checks and child exit 0 did not
@@ -71,7 +77,7 @@ the current local successes above do not turn old reports into acceptance.
 
 Prior independent reviews reported no findings on earlier PR heads; they are historical and are not a review of the refreshed #216 head. Previous published CI results likewise do not replace this local current-source acceptance.
 
-Keep PR #216 **OPEN and DRAFT**; do not mark it ready or merge it. Keep issue #174 open. Leave #175 open and unchanged; M10-003 has not started. Refresh the #216 description with the current report links and blockers. Reassess readiness only after M9-001 and all required acceptance gates are complete on the exact candidate.
+Keep PR #216 **OPEN and DRAFT**; do not mark it ready or merge it. Keep issue #174 open. Leave #175 open and unchanged; M10-003 has not started. The remaining promotion blocker is the original default-runtime strict resource-restoration failure, not prerequisite readiness or the recovered GitHub incident. Passing replays, processor controls and metadata refresh do not close it.
 
 ## Deterministic admission maintenance
 
