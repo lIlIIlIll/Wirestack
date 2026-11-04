@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "status": "PASS",
+  "scope": "Actual current generated HTML browser smoke only, not task acceptance.",
+  "tested_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "html_command_duration_ms": 353658.947,
+  "html_deadline_seconds": 900,
+  "html_commands": 41,
+  "layers": 7,
+  "coverage": {
+    "parameters": {
+      "documented": 950,
+      "percent": 100,
+      "total": 950
+    },
+    "symbols": {
+      "documented": 1873,
+      "percent": 100,
+      "total": 1873
+    }
+  },
+  "browser": "Real Chromium",
+  "observed_title": "wirestack.http.HttpClient",
+  "observed_relative_path": "/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48747470436c69656e742367302829.html",
+  "search_query": "HttpClient",
+  "actions": [
+    "Open current HTML overview",
+    "Fill the real search combobox",
+    "Observe HttpClient search result",
+    "Click the actual observed search-result link",
+    "Observe rendered wirestack.http.HttpClient page and screenshot"
+  ],
+  "browser_errors": [],
+  "screenshots": [
+    {
+      "path": "docs/evidence/M9-001/maintenance/current-html-proof/search.webp",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b88ef76340d65533af5086c4d485f224532eb2c44e8616c8ff1bed114eafc91c"
+      }
+    },
+    {
+      "path": "docs/evidence/M9-001/maintenance/current-html-proof/httpclient.webp",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "35093c13133e002e170f05357624a20b3de413055104c720caf35d0a4b5eea31"
+      }
+    }
+  ],
+  "observer_note": "An initial URL wait expected literal HttpClient text, but the renderer uses encoded symbol slugs. That wait timed out after the successful click; actual post-click URL/title and screenshots prove navigation. The click was not replayed and the renderer was not changed.",
+  "task_boundary": "M9-001 remains BLOCKED pending current prerequisite/source qualification; native M9-003 auxiliary identity is unchanged."
+}
