@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-11-04T06:56:41.229004Z",
+  "generated_at_utc": "2026-11-04T09:29:56.110885Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/P1-013/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "21d66733d497f04180f62cc7dfe5dcfcf6580c970bd3a02841065b1eaa0b1d47"
+        "sha256": "ac2661ea4b0ae25984d247e36c34fe04a55e4349c8e920d6ddc7ef69163c8665"
       },
       "source_task": "P1-013"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/P1-013/maintenance/current-canonical/qualification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "3a128bf7b9ce46730c847222b22a79d5d0163ced3510c9ce5a8a090e5202165b"
+        "sha256": "f792804491d1b2964ea7cc63d3c8bb4cea6fbc67417a3c58d334ad34c3d839bb"
       },
       "source_task": "P1-013"
     },
@@ -31,39 +31,12 @@
       "path": "docs/evidence/P1-013/maintenance/current-canonical/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "da35ad8e28ceb52ffd7d8efe355615f1a413a291d8617630f5b38058d2313b70"
-      },
-      "source_task": "P1-013"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/P1-013/maintenance/combined-first-native/qualification.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "feb36d3f74960c640dfd5276f30521857795f9ea0c9e89a491ff276be4664001"
-      },
-      "source_task": "P1-013"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/P1-013/maintenance/combined-first-native/docs-report.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "cff66ffb86d252626af276dfc14a2ccb0cd67ef04ece6b6d773eef2c7d497460"
-      },
-      "source_task": "P1-013"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/P1-013/maintenance/combined-first-native/browser.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "6dbd3dfc4ea0f8bc9f97aabde31be803f01ab30e0cc2c52d6dd4797d8a31f422"
+        "sha256": "bdaf9724979e0ea5b20e73a3d7aa4f4a122c6ff70278a3e3ffdfc82ccddb9572"
       },
       "source_task": "P1-013"
     }
   ],
-  "revision": "718db35a9700fe32190eb364812fcc1188d22571",
+  "revision": "b78d8d278214bd981572ac82581b185489bab40c",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -72,7 +45,7 @@
     },
     "docs/evidence/P1-013/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "84eee8b03d84427f7b86c20a6441220678657b3c9ce3a052d43dedf122f1af92"
+      "sha256": "badf7e6799c4cc08dc575c3db1f62ec3c4a3eed260cc617f69ad9733a58a4d2d"
     },
     "docs/evidence/P1-013/test-plan.md": {
       "domain": "text-utf8-lf-v1",
@@ -84,7 +57,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "08869fa4543c006e5b898b0e94416f67d078c759ae899f88296ac5e4e3033897"
+      "sha256": "18532b5b9ae9cccfcb5b62c78cb506148b1851fb75d0e453cfc92299945e34fa"
     },
     "scripts/check": {
       "domain": "text-utf8-lf-v1",
