@@ -1,91 +1,53 @@
 {
   "artifacts": [
     {
-      "artifact_id": 9783447375,
-      "archive_digest": "sha256:99b0acf9f3c095c28be1cad2b66c7d5a8a164c5cc5b8600146d64de54148659d",
-      "expires_at": "2026-09-15T02:16:24Z",
-      "name": "m3-031-windows-x86_64-6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
-      "provider_result_sha256": "7e2ce99dd7c454f4051eb6533838563bf1511eda5e6b115e77cb9a31a81daa33",
-      "validation_sha256": "b2328dffc957fc61e02ca5ce5bd2627f95ebfac0a30c1d810463ce43100d81ef"
+      "artifact_id": 13263215283,
+      "archive_digest": "sha256:664a4c958ccfb8fb6945f91e8a497860df2f982eef3d19675bae00bc10322f56",
+      "expires_at": "2026-11-17T19:02:16Z",
+      "name": "m3-031-windows-x86_64-6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+      "provider_result_sha256": "665d7261780a808149aabb3f248499d85bdc00937ce442a378c40fb282971ddd",
+      "validation_sha256": "baaf6d489a526f390e9d2e6d30e560ebc8ae629abb869fcb7c34f8913f5d84d2"
     },
     {
-      "artifact_id": 9783425600,
-      "archive_digest": "sha256:a0bb4e0c29dd0b5c501f6d9a280572b612970714ace4f6b31f62190636f96ebf",
-      "expires_at": "2026-09-15T02:15:25Z",
-      "name": "m3-031-macos-arm64-6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
-      "provider_result_sha256": "6986197fae89cd42266c29c20ee2a6debc58458852a30b6dd42ad2af5707a589",
-      "validation_sha256": "f151679ec305614f0fe2a020e3e677cefa91b2e7eb44a1b5db8f7dcb4424db0f"
+      "artifact_id": 13265037215,
+      "archive_digest": "sha256:c5600f6f973431f1b967254f74f3aaf16864e4c715ad5fa04ea1777151d5a26e",
+      "expires_at": "2026-11-17T19:32:57Z",
+      "name": "m3-031-macos-arm64-6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+      "provider_result_sha256": "2e25f0ffcd123f8de9363d343503330f4312e973cb47477bebb9b52ad7b12aeb",
+      "validation_sha256": "584a33b651f6b78030df302514b2f150a4ef3d30952e05b7d485f2bce80aa01b"
     }
   ],
-  "branch": "task/M3-031-desktop-tls-adoption",
+  "branch": "fix/M10-002-resource-owner-backpressure",
   "conclusion": "success",
-  "event": "push",
+  "event": "workflow_dispatch",
   "jobs": [
     {
-      "completed_at": "2026-09-01T02:16:29Z",
-      "job_id": 99713027334,
+      "completed_at": "2026-11-03T19:02:22Z",
+      "job_id": 126136409610,
       "name": "windows-aws-lc",
-      "started_at": "2026-09-01T02:13:15Z",
+      "started_at": "2026-11-03T19:00:05Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135/job/99713027334"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216/job/126136409610"
     },
     {
-      "completed_at": "2026-09-01T02:15:29Z",
-      "job_id": 99713027538,
+      "completed_at": "2026-11-03T19:33:06Z",
+      "job_id": 126136409832,
       "name": "macos-aws-lc",
-      "started_at": "2026-09-01T02:13:11Z",
+      "started_at": "2026-11-03T19:30:04Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135/job/99713027538"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216/job/126136409832"
     }
   ],
-  "revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
-  "run_id": 33461712135,
+  "revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "run_id": 41698821216,
   "schema_version": 2,
   "source_sha256": {
     "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
-    "tools/tls_provider_poc/providers.json": "600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429",
-    "tools/tls_provider_poc/run.py": "9584507f916463a83a7f0133d791f8cb4e1ac2b090761ad58f94f53e13cc0adf",
-    "tools/tls_provider_poc/validate.py": "e348adeb6ef461c858fff39830add55d7c69f669b097ad9c99aa8fb2c09193ba"
+    "tools/tls_provider_poc/providers.json": "bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e",
+    "tools/tls_provider_poc/run.py": "cba3b7d7aba7b92895eeb13b4d3d1f88811104bdd967168e896a1aa59baf1468",
+    "tools/tls_provider_poc/validate.py": "856099f0e6745ad1d1fc233684a47bc79f5f66d2d1bb2fab21c3efa17c5b34c8"
   },
   "status": "PASS",
-  "superseded_runs": [
-    {
-      "reason": "Superseded by the final dependency-status and complete desktop-acceptance contract review remediation.",
-      "revision": "3a6dca2499ea58a6b6a2e7f7f90de16fe57b8791",
-      "run_id": 33460555383,
-      "status": "PASS"
-    },
-    {
-      "reason": "Superseded by the final review remediation for selected-root metadata loading and current native dependency source binding.",
-      "revision": "88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
-      "run_id": 33459353992,
-      "status": "PASS"
-    },
-    {
-      "reason": "Superseded by the final adoption-validator pin and hosted-artifact digest bindings.",
-      "revision": "24a01fb377c57484daf4268e5588f1de74556ba7",
-      "run_id": 33458663037,
-      "status": "PASS"
-    },
-    {
-      "reason": "Superseded by schema-v11 exact-binary and terminal truncation evidence.",
-      "revision": "ca87467b7a4396179f2b5b1833f5d550884b7481",
-      "run_id": 33357763565,
-      "status": "PASS"
-    },
-    {
-      "reason": "Superseded by the final review-remediated cross-platform evidence-byte contract and exact hosted results.",
-      "revision": "4a7f0c4d46a197c98d48e1f4fab5298c27be5896",
-      "run_id": 33352810108,
-      "status": "PASS"
-    },
-    {
-      "reason": "Superseded by schema-v3 provider results with explicit session-resumption measurement and source-bound hosted evidence.",
-      "revision": "787a6210a245e8cb65757ef2f639db20ca3e2025",
-      "run_id": 33346040908,
-      "status": "PASS"
-    }
-  ],
   "task_id": "M3-031",
-  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135"
+  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41698821216"
 }

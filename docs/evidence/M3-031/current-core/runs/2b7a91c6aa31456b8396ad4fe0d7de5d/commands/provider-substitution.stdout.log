@@ -1,0 +1,19 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 7147929 ns, RESULT:
+    TCS: TlsProviderSubstitutionTest, time elapsed: 1491969 ns, RESULT:
+    [ PASSED ] CASE: testProviderUsesTheProductionFactoryContract (626501 ns)
+    [ PASSED ] CASE: objectsFromDifferentProviderInstancesCannotMix (257666 ns)
+    [ PASSED ] CASE: activeEngineRetainsProviderUntilItCloses (17170 ns)
+Summary: TOTAL: 73
+    PASSED: 3, SKIPPED: 70, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 15314050 ns, RESULT:
+TP: wirestack.*, time elapsed: 15226595 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.tls_engine, time elapsed: 7147929 ns
+Summary: TOTAL: 73
+    PASSED: 3, SKIPPED: 70, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
