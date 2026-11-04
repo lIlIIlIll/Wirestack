@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "task_id": "M3-031",
+  "scope": "actual current Core validator CLI; missing executed-command negative control",
+  "status": "PASS",
+  "source_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "canonical_report": "docs/evidence/M3-031/current-core/qualification.json",
+  "canonical_report_before_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "ddb4e8f4b4131e5fe8393cd42963bbb9f1276e4a1f9cfeb522ad2c5bf79d9c7d"
+  },
+  "valid_before": {
+    "exit_code": 0,
+    "status": "PASS"
+  },
+  "mutation": {
+    "removed_command_id": "provider-build",
+    "changed_production_sources": false,
+    "changed_sdk": false
+  },
+  "invalid_after": {
+    "exit_code": 1,
+    "result": {
+      "code": "CURRENT_CORE_COMMANDS",
+      "detail": "four executed commands are required",
+      "status": "FAIL"
+    }
+  },
+  "canonical_report_unchanged": true,
+  "release": "NOT_QUALIFIED",
+  "desktop_provider_qualification": "NOT_RUN"
+}
