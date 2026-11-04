@@ -2,17 +2,19 @@
 
 ## Status
 
-The development task is **COMPLETE** after the real recovered Linux/Windows
-pair and strict source verification passed. The recovered pair identifies
-`8470ee90f1a52007267dd56abf72dd6e013f29dc`; Windows run `41828861359`
-executed actual CRLF checks, and the independent Linux receipt has the same
-normalized digest. Verification passed for all six reports and 84 source paths.
-The source and its create-only preservation anchor are public. GitHub incident
-`smtdswd1h2w4` is no longer a publication blocker. The original stale result
-and server failures remain in `maintenance/recovered-metadata/`.
-See [metadata qualification](current-metadata-status.json). Shared completion
-metadata is requalified at the final frozen source before delivery; no receipt
-revision, source inventory, timeout or threshold is edited to bypass that step.
+The development task is **COMPLETE**. After all shared completion metadata
+froze, the real Linux/Windows pair executed at
+`756162212073523a61cb6e23330eb07ceef0685d`; Windows run `41841419255`
+checked actual CRLF bytes, and the independent Linux receipt has the same
+normalized digest. Strict verification passed for all six reports and 84
+source paths at that exact source. The source is public.
+
+GitHub incident `smtdswd1h2w4` is no longer a publication blocker. The original
+stale verification, server failures and intermediate recovered pair remain in
+`maintenance/recovered-metadata/`. See
+[final metadata qualification](current-metadata-status.json). Native execution
+revisions, source inventories, timeouts and thresholds were not edited to
+bypass the final-source rerun.
 
 The post-integration selected task passed all five commands at code source
 `1631837216989f7eac6986b24b0b9a2c61d0bd20` on qualified official STS 1.1.3.
