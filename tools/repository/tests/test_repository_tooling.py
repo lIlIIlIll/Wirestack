@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import signal
 import subprocess
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from typing import Sequence
@@ -649,6 +653,61 @@ class RepositoryToolingTests(unittest.TestCase):
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_task(manifest, self.root)
         self.assertEqual("TIMEOUT", caught.exception.code)
+
+    @unittest.skipUnless(
+        os.name == "posix",
+        "POSIX process-group cleanup only; this does not prove Windows descendant cleanup",
+    )
+    def test_timeout_kills_descendant_before_gated_side_effect(self) -> None:
+        """A timed-out POSIX command must not leave its group writing later."""
+        ready = self.root / "descendant-ready"
+        gate = self.root / "allow-side-effect"
+        side_effect = self.root / "late-side-effect"
+        group_file = self.root / "command-group"
+        child_code = (
+            "import pathlib, sys, time\n"
+            "ready, gate, side_effect = map(pathlib.Path, sys.argv[1:])\n"
+            "ready.write_text('ready', encoding='ascii')\n"
+            "while not gate.exists(): time.sleep(0.005)\n"
+            "side_effect.write_text('late', encoding='ascii')\n"
+        )
+        parent_code = (
+            "import os, pathlib, subprocess, sys, time\n"
+            f"child_code = {child_code!r}\n"
+            "ready, gate, side_effect, group_file = map(pathlib.Path, sys.argv[1:])\n"
+            "group_file.write_text(str(os.getpgrp()), encoding='ascii')\n"
+            "subprocess.Popen([sys.executable, '-c', child_code, "
+            "str(ready), str(gate), str(side_effect)])\n"
+            "while not ready.exists(): time.sleep(0.005)\n"
+            "while True: time.sleep(1)\n"
+        )
+        command = {
+            "id": "timeout-descendant",
+            "argv": [sys.executable, "-c", parent_code,
+                     str(ready), str(gate), str(side_effect), str(group_file)],
+            "timeout_seconds": 1,
+            "long_running": False,
+            "gate": "task",
+        }
+        try:
+            result = tooling.run_command(self.root, command, self.root / "build/logs")
+            self.assertEqual("FAIL", result["status"])
+            self.assertEqual("TIMEOUT", result["error_code"])
+            self.assertTrue(result["timed_out"])
+            self.assertIsNone(result["exit_code"])
+            self.assertTrue(ready.exists(), "descendant must be waiting at the gate before timeout")
+            gate.touch()
+            deadline = time.monotonic() + 1
+            while not side_effect.exists() and time.monotonic() < deadline:
+                time.sleep(0.005)
+            self.assertFalse(side_effect.exists(), "descendant wrote after run_command returned")
+        finally:
+            gate.touch(exist_ok=True)
+            if group_file.exists():
+                try:
+                    os.killpg(int(group_file.read_text(encoding="ascii")), signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
 
     def test_command_capture_is_bounded(self) -> None:
         command = {"id": "large", "argv": ["python3", "-c", "print('x'*50000)"],

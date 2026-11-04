@@ -18,6 +18,18 @@ regressions. Its [task receipt](task-check.json) is separate from the
 repository-wide diagnostic. The current source seal must verify before this
 completion record is published. Unrelated BLOCKED tasks remain unchanged.
 
+## Timed-out command ownership
+
+POSIX task commands run in their own session. On timeout or interruption, the
+runner stops the owned process group and reaps its leader before returning.
+The original command limit and `FAIL` / `TIMEOUT` result remain unchanged;
+bounded teardown does not turn an overrun into PASS.
+
+The [cleanup receipt](timeout-descendant-cleanup.json) retains a real
+failing-before/passing-after side-effect reduction and the gated regression.
+All 52 repository-tooling tests passed after the fix. Windows retains its
+existing direct-child handling; no Windows descendant-cleanup proof is claimed.
+
 ## Prerequisites
 
 - Linux x86_64 with glibc for the first manifest.

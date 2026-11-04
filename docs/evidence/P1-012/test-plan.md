@@ -30,6 +30,7 @@ change product networking behavior.
 | P014 | Evidence or acceptance reports SKIPPED/BLOCKED as successful | Freshness rejects the false PASS |
 | P015 | Human output is selected | Output is bounded and names terminal status plus failed checks |
 | P016 | `--json` or `--output` is selected | One schema-stable machine report is emitted or atomically stored |
+| P020 | A POSIX command times out while a descendant waits before an externally visible side effect | The owned process group stops and its leader is reaped before TIMEOUT returns |
 
 ## Input domains and state
 
@@ -64,6 +65,7 @@ change product networking behavior.
 | S018 | Fast/full check invoked with an unknown ID, and with a known ID whose repository graph is invalid | P018,P019 | An unknown ID is rejected as TASK_MISSING; a known ID leaves the global dependency verdict unchanged | Assert TASK_MISSING detail names the ID, and assert the known-ID run reports the same global DEPENDENCY_INCOMPLETE with zero commands | boundary,regression | P0 |
 | S007 | Explicit long selection for a task with or without long commands | P010 | Only declared long commands run; no-long task returns stable SKIPPED | Assert command inventory and exit code | boundary | P1 |
 | S008 | PASS/nonzero/timeout command through shared command runner | P008,P015,P016 | Result, duration, bounded excerpts and full log paths are retained | Assert stable exit mapping and truncation flags | normal,error | P0 |
+| S019 | A POSIX parent launches a descendant gated before a file write; the parent exceeds its command limit | P008,P020 | Returning TIMEOUT cannot leave the descendant able to write after the gate opens | Assert ready-before-timeout, FAIL/TIMEOUT with no exit code, and no post-return side effect; clean the recorded group on test failure | lifecycle,error | P0 |
 | S009 | Existing report with injected failure before replace, followed by success | P011 | Existing report survives failure; success atomically replaces it | Assert old bytes remain then complete JSON appears | fault-injection | P0 |
 | S010 | A valid source-bound evidence index and unchanged candidate files | P012 | Selected-task freshness check passes | Assert report/source digests, task/platform/toolchain, and PASS acceptance match | normal | P0 |
 | S011 | Escaping/missing report, stale report digest or changed source | P013 | Check returns FAIL for contract faults or STALE for drift | Assert no old PASS is reused and affected path is named | boundary,regression | P0 |
@@ -78,6 +80,7 @@ change product networking behavior.
 | T003 | S004,S005 | P005,P006,P007 | Missing task/dependency and cyclic temporary manifests | INVALID | Assert missing IDs and cycle chain | unit,fault-injection |
 | T004 | S006,S007 | P008,P009,P010 | Mixed fast/full/long commands | Long never enters fast/full; explicit long is isolated | Assert selected command IDs and SKIPPED no-long result | unit,safety |
 | T005 | S008 | P008,P015,P016 | PASS, nonzero and oversized-output subprocesses | Stable result and bounded report | Assert exit/status map, truncation and retained log | unit,boundary |
+| T017 | S019 | P008,P020 | Gated descendant plus a one-second POSIX command limit | TIMEOUT without a surviving side-effect owner | `test_timeout_kills_descendant_before_gated_side_effect`; actual red/green CLI reduction; no Windows descendant-cleanup claim | unit,integration,regression |
 | T006 | S009 | P011 | Injected atomic-write failure | No partial report replacement | Assert byte-for-byte preservation and later valid JSON | unit,fault-injection |
 | T007 | S010,S011 | P012,P013 | Current evidence, stale digest, missing/escaping report and source drift | PASS then STALE/FAIL | Assert drift category and nonzero exit | unit,regression |
 | T008 | S012 | P014 | SKIPPED acceptance disguised by PASS summary | FAIL | Assert successful acceptance requires every report PASS | unit,security |
