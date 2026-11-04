@@ -1,0 +1,992 @@
+sourceLease): Http1ClientConnection {
+
+   |         ^^^^^^^^^^^^^ unused variable
+
+   | 
+
+   # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\internal\http1\server_connection.cj:166:23:
+
+    | 
+
+166 |         try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }
+
+    |                       ^^^^^^^^^^^^^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unused variable:'resourceLease'
+
+   ==> <workspace>\src\internal\http1\proxy_client_pipeline.cj:238:9:
+
+    | 
+
+238 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+
+    |         ^^^^^^^^^^^^^ unused variable
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unused variable:'resourceLease'
+
+   ==> <workspace>\src\internal\http1\proxy_client_pipeline.cj:279:9:
+
+    | 
+
+279 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+
+    |         ^^^^^^^^^^^^^ unused variable
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\internal\http1\http2_connection_pool.cj:453:42:
+
+    | 
+
+453 |             if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }
+
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\internal\http1\http2_connection_pool.cj:455:42:
+
+    | 
+
+455 |             if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }
+
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\internal\http1\http2_connection_pool.cj:765:32:
+
+    | 
+
+765 |               if (waiterId != 0) {
+
+    |  ________________________________^
+
+766 | |                 synchronized(mutex) { removeHttp2WaiterLocked(waiterId, false) }
+
+767 | |             }
+
+    | |_____________^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unused variable:'resourceLease'
+
+   ==> <workspace>\src\internal\http1\tls_client_pipeline.cj:869:9:
+
+    | 
+
+869 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+
+    |         ^^^^^^^^^^^^^ unused variable
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+8 warnings generated, 8 warnings printed.
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\http\client.cj:566:31:
+
+    | 
+
+566 |             if (!transferred) { lifetime.close() }
+
+    |                               ^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\http\client.cj:894:29:
+
+    | 
+
+894 |               if (!published) {
+
+    |  _____________________________^
+
+895 | |                 direct.close()
+
+    | | ...
+
+897 | |             }
+
+    | |_____________^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable pattern
+
+   ==> <workspace>\src\http\client.cj:896:41:
+
+    | 
+
+896 |                 match (tunneled) { case Some(native) => native.close(); case None => () }
+
+    |                                         ^^^^^^^^^^^^ 
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable pattern
+
+   ==> <workspace>\src\http\client.cj:896:78:
+
+    | 
+
+896 |                 match (tunneled) { case Some(native) => native.close(); case None => () }
+
+    |                                                                              ^^^^ 
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+4 warnings generated, 4 warnings printed.
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\gzip\client.cj:119:31:
+
+    | 
+
+119 |               if (!transferred) {
+
+    |  _______________________________^
+
+120 | |                 try { if (let Some(value) <- decodedStream) { value.close() } }
+
+    | | ...
+
+122 | |             }
+
+    | |_____________^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\gzip\client.cj:120:31:
+
+    | 
+
+120 |                 try { if (let Some(value) <- decodedStream) { value.close() } }
+
+    |                               ^^^^^^^^^^^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\gzip\client.cj:123:21:
+
+    | 
+
+123 |             if (let Some(value) <- lease) { value.close() }
+
+    |                     ^^^^^^^^^^^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+warning[0m: unreachable block in 'if' expression
+
+   ==> <workspace>\src\gzip\body.cj:138:25:
+
+    | 
+
+138 |               if (failed) {
+
+    |  _________________________^
+
+139 | |                 try { releaseIfTerminal() } catch (_: Exception) { /* Cleanup must not replace the read failure. */ }
+
+140 | |             } else { releaseIfTerminal() }
+
+    | |_____________^ unreachable block in 'if' expression
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+
+
+4 warnings generated, 4 warnings printed.
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertException) {
+
+    |  ______________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertIntermediateException) {
+
+    |  __________________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is UnittestTimeoutException) {
+
+    |  _______________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unused expression
+
+    | 
+
+    |                     None < api.ResolveException >
+
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertException) {
+
+    |  ______________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertIntermediateException) {
+
+    |  __________________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is UnittestTimeoutException) {
+
+    |  _______________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unused expression
+
+    | 
+
+    |                 None < api.ResolveException >
+
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unused expression
+
+    | 
+
+    |                     None < api.ResolveException >
+
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertException) {
+
+    |  ______________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertIntermediateException) {
+
+    |  __________________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is UnittestTimeoutException) {
+
+    |  _______________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unused expression
+
+    | 
+
+    |                 None < api.ResolveException >
+
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unused expression
+
+    | 
+
+    |                     None < api.ResolveException >
+
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertException) {
+
+    |  ______________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is AssertIntermediateException) {
+
+    |  __________________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unreachable block in 'if' expression
+
+    | 
+
+    |                       if(e is UnittestTimeoutException) {
+
+    |  _______________________________________________________^
+
+    | |                         throw e
+
+    | |                     }
+
+    | |_____________________^ unreachable block in 'if' expression
+
+    | 
+
+
+
+warning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+
+   ==> <workspace>\src\internal\resolver\resolver_observation_test.cj:17:1:
+
+    | 
+
+17  |   @Test
+
+    |  _^
+
+18  | | class SystemResolverResourceObservationTest {
+
+    | | ...
+
+111 | | }
+
+    | |_^
+
+    | 
+
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+note[0m: unused expression
+
+    | 
+
+    |                 None < api.ResolveException >
+
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression
+
+    | 
+
+
+
+18 warnings generated, 18 warnings printed.
+
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 60077800 ns, RESULT:
+    TCS: M2004WindowsSystemResolverTest, time elapsed: 56448700 ns, RESULT:
+    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (11859600 ns)
+    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (381000 ns)
+    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (261700 ns)
+    [ PASSED ] CASE: fixtureMapsWinsockFailuresAndUnknownCodes (1056500 ns)
+    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (40686000 ns)
+    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (210500 ns)
+Summary: TOTAL: 34
+    PASSED: 6, SKIPPED: 28, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 75724900 ns, RESULT:
+TP: wirestack.*, time elapsed: 75587400 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.resolver, time elapsed: 60077800 ns
+Summary: TOTAL: 34
+    PASSED: 6, SKIPPED: 28, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
