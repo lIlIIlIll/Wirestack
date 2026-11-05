@@ -1,89 +1,156 @@
 {
-  "publication_privacy": {
-    "command": "git privacy-check",
-    "exit_code": 1,
-    "status": "BLOCKED_BY_EXISTING_M8_007_FILES",
-    "reported_paths": [
-      "docs/evidence/M8-007/commands/soak-owner-controls/1790042120606136091/before.stderr.log",
-      "docs/evidence/M8-007/soak-owner-controls.json"
-    ],
-    "new_task_findings": [],
-    "action": "Preserved existing files; no commit or publication attempted."
-  },
-  "cleanup": {
-    "temporary_probe_script_removed": true,
-    "temporary_execution_input_removed": true,
-    "post_cleanup_verify_exit_code": 0,
-    "post_cleanup_release_state": "NOT_QUALIFIED"
-  },
-  "baseline": {
-    "digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "5cc37d2c99cb97e232eb25df659fb488c908a3167d44ccdab6228d9c11234f86"
-    },
-    "path": "docs/evidence/P1-015/baseline.json"
-  },
-  "initial_attempts": [
-    "Initial capture failed two Python checks: typed digest comparison and a source-spelling bootstrap assertion.",
-    "Next capture passed 467 Python tests but failed the historical performance digest setup. Fresh isolated fixtures now exercise its validator.",
-    "A 30-second outer command timeout interrupted a later run; it is not counted as a passing check.",
-    "Two diagnostic captures were cancelled while closing the execution-input inventory and exact-commit validation gaps; neither counts as PASS."
-  ],
-  "negative_cases": [
-    {
-      "case": "missing-command",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: missing or reordered development gates\n"
-    },
-    {
-      "case": "release-promotion",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: development evidence cannot confer release qualification\n"
-    },
-    {
-      "case": "missing-log",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: required captured logs missing or duplicated\n"
-    },
-    {
-      "case": "production-receipt-drift",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: production inventory drift\n"
-    },
-    {
-      "case": "tree-object-not-commit",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: candidate revision does not resolve to a commit: git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\nerror: e913788f31459c70cde254c5b50839328d6ef428^{commit}: expected commit type, but the object dereferences to tree type\nfatal: Needed a single revision\n"
-    },
-    {
-      "case": "new-execution-input",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: development input inventory drift\n"
-    },
-    {
-      "case": "wrong-sdk",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: SDK archive differs from the qualified pin\n"
-    },
-    {
-      "case": "artifact-byte-tamper",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: artifact drift\n"
-    },
-    {
-      "case": "log-byte-tamper",
-      "exit_code": 1,
-      "output": "P1-015 current development baseline: FAIL: captured log drift\n"
-    },
-    {
-      "case": "clean-restored-baseline",
-      "exit_code": 0,
-      "output": "P1-015 current development baseline: PASS; release NOT_QUALIFIED\n"
-    }
-  ],
-  "release_qualification": "NOT_QUALIFIED",
   "schema_version": 1,
   "source_task": "P1-015",
   "status": "PASS",
-  "workspace_mutation": "Only a newly created execution-input probe and private build copies; all removed."
+  "scope": "Current four-gate development capture, independent byte verification and all three selected task commands pass. Prerequisite native qualification is real; final shared completion metadata is resealed at the frozen source. No release qualification.",
+  "tested_production_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "capture": {
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "python3",
+      "tools/development_baseline.py",
+      "capture",
+      "--revision",
+      "1631837216989f7eac6986b24b0b9a2c61d0bd20"
+    ],
+    "commands": [
+      {
+        "argv": [
+          "scripts/check"
+        ],
+        "duration_ms": 448895.749,
+        "exit_code": 0,
+        "finished_at_utc": "2026-11-04T10:39:21.113149Z",
+        "id": "repository-check",
+        "started_at_utc": "2026-11-04T10:31:52.217410Z",
+        "status": "PASS",
+        "timed_out": false
+      },
+      {
+        "argv": [
+          "python3",
+          "tools/m7_021_linux_release.py",
+          "--root",
+          ".",
+          "--output-dir",
+          "dist/p1-015",
+          "--offline"
+        ],
+        "duration_ms": 18421.242,
+        "exit_code": 0,
+        "finished_at_utc": "2026-11-04T10:39:39.583970Z",
+        "id": "installed-consumer",
+        "started_at_utc": "2026-11-04T10:39:21.162729Z",
+        "status": "PASS",
+        "timed_out": false
+      },
+      {
+        "argv": [
+          "python3",
+          "tools/gates/m7_023_linux_fuzz.py",
+          "--output",
+          "build/current-development-baseline/fuzz.json",
+          "--crash-dir",
+          "build/current-development-baseline/crashes"
+        ],
+        "duration_ms": 215812.026,
+        "exit_code": 0,
+        "finished_at_utc": "2026-11-04T10:43:15.397048Z",
+        "id": "parser-fuzz",
+        "started_at_utc": "2026-11-04T10:39:39.585050Z",
+        "status": "PASS",
+        "timed_out": false
+      },
+      {
+        "argv": [
+          "python3",
+          "-c",
+          "from tools import m7_022_linux_release_soak as soak; import sys; raise SystemExit(soak.main(sys.argv[1:], task_id='P1-015'))",
+          "--preflight",
+          "--duration-seconds",
+          "600",
+          "--application-sample-seconds",
+          "60",
+          "--resource-sample-seconds",
+          "60",
+          "--artifact",
+          "dist/p1-015/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+          "--qualification",
+          "dist/p1-015/qualification.json",
+          "--output",
+          "build/current-development-baseline/preflight.json",
+          "--raw-log",
+          "build/current-development-baseline/preflight.log"
+        ],
+        "duration_ms": 618191.346,
+        "exit_code": 0,
+        "finished_at_utc": "2026-11-04T10:53:33.590593Z",
+        "id": "resource-preflight",
+        "started_at_utc": "2026-11-04T10:43:15.399238Z",
+        "status": "PASS",
+        "timed_out": false
+      }
+    ],
+    "production_source_count": 193,
+    "execution_input_count": 755,
+    "sdk_matched_archive_files": 497,
+    "complete_log_count": 12,
+    "fuzz_targets": 10,
+    "preflight_seconds": 600
+  },
+  "verify": {
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "python3",
+      "tools/development_baseline.py",
+      "verify"
+    ],
+    "observed_stdout": "P1-015 current development baseline: PASS; release NOT_QUALIFIED"
+  },
+  "task_acceptance": "PASS",
+  "release": {
+    "candidate_86400_second_soak": "NOT_RUN",
+    "independent_security_review": "NOT_RUN",
+    "qualification": "NOT_QUALIFIED",
+    "signing": "NOT_AUTHORIZED"
+  },
+  "artifact_privacy": "Installed archive remains a private local verification artifact; no public payload-privacy or formal release qualification is claimed.",
+  "historical_verification": "docs/evidence/P1-015/maintenance/historical-verification.json",
+  "selected_task": {
+    "status": "PASS",
+    "exit_code": 0,
+    "commands": [
+      {
+        "id": "baseline-plan",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 113.759
+      },
+      {
+        "id": "gate-separation",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 414.067
+      },
+      {
+        "id": "current-baseline",
+        "status": "PASS",
+        "exit_code": 0,
+        "duration_ms": 6169.221
+      }
+    ],
+    "report": "docs/evidence/P1-015/task-check.json"
+  },
+  "final_frozen_source_binding": {
+    "status": "PASS",
+    "metadata_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+    "executed_production_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+    "all_production_inputs": 193,
+    "all_execution_inputs": 755,
+    "sdk_archive_matched_files": 497,
+    "independent_verify_exit_code": 0,
+    "report": "docs/evidence/P1-015/maintenance/final-source-binding.json"
+  }
 }
