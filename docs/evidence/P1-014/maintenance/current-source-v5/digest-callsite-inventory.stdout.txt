@@ -1,0 +1,1 @@
+{"entry_count": 987, "issues": [], "kind": "p1-014-digest-inventory", "output": "<repo>/docs/evidence/P1-014/digest-inventory.json", "status": "PASS"}

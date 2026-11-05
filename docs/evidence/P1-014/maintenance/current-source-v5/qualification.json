@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-014",
+  "status": "PASS",
+  "tested_source_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "execution_metadata_revision": "b78d8d278214bd981572ac82581b185489bab40c",
+  "commands": [
+    {
+      "id": "test-plan-matrix",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 164.181
+    },
+    {
+      "id": "digest-boundary-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 30994.147
+    },
+    {
+      "id": "architecture-guard",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 13129.097
+    },
+    {
+      "id": "digest-callsite-inventory",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 6719.064
+    },
+    {
+      "id": "canonical-repository-check",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 685408.784
+    }
+  ],
+  "focused_tests": {
+    "passed": 150,
+    "failed": 0
+  },
+  "native_cases": {
+    "passed": 1090,
+    "skipped": 28,
+    "failed": 0,
+    "error": 0
+  },
+  "files": [
+    {
+      "original_path": "docs/evidence/P1-014/task-check.json",
+      "public_path": "docs/evidence/P1-014/task-check.json",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "50132f5c8f6bc0cd032c7ee5dc5344fb8e4edf96bb0384450b079b4dabb99bc1"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e5fa690979b81ff82ed1d55cc9e3e678e5ceed2a5d7b2cb85d1a6c7710a92afe"
+      }
+    },
+    {
+      "original_path": "docs/evidence/P1-014/digest-inventory.json",
+      "public_path": "docs/evidence/P1-014/digest-inventory.json",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "53e5ddd62f5e63459a901af757ed2e2bab1d3e9655bcf37f1751dac58af9e65b"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "53e5ddd62f5e63459a901af757ed2e2bab1d3e9655bcf37f1751dac58af9e65b"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/architecture-guard.stdout.log",
+      "public_path": "docs/evidence/P1-014/architecture-guard.json",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8249e4454f159aecffc8b58fd313ec69c2134e7acb6a3fdce455d83818e08a65"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "16c2c74c0eb589466c4403afda58a413af1d83feb4f1a3da912bde7512aff5bb"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/test-plan-matrix.stdout.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/test-plan-matrix.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "3fe40f565e59db0f1496a64fc990bc9fc9731755d425e384258f2dbafd950009"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "3fe40f565e59db0f1496a64fc990bc9fc9731755d425e384258f2dbafd950009"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/test-plan-matrix.stderr.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/test-plan-matrix.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/digest-boundary-tests.stdout.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/digest-boundary-tests.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/digest-boundary-tests.stderr.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/digest-boundary-tests.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "61a058d90325e4d5af9888fc682c434ac7a9ced418730019415c7f6caed8e0bf"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0755615bc6cf596513dae49410d95619a34739a443cadf241e309cb3ad23acfd"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/architecture-guard.stdout.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/architecture-guard.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8249e4454f159aecffc8b58fd313ec69c2134e7acb6a3fdce455d83818e08a65"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "16c2c74c0eb589466c4403afda58a413af1d83feb4f1a3da912bde7512aff5bb"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/architecture-guard.stderr.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/architecture-guard.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/digest-callsite-inventory.stdout.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/digest-callsite-inventory.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f78997d53199af51a04953066b1aecafd66627e4adcef058998dd6c7890cc0ab"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "38139c05c048d28d2efe722984aaf106e0151a9f2e4b42b8dab341155b446295"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/digest-callsite-inventory.stderr.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/digest-callsite-inventory.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/canonical-repository-check.stdout.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/canonical-repository-check.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2c84397aa53e8f524b71c60fe6d42f94fc4de3f7bdd99dc4ef7df0a43f537d0a"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2c84397aa53e8f524b71c60fe6d42f94fc4de3f7bdd99dc4ef7df0a43f537d0a"
+      }
+    },
+    {
+      "original_path": "build/repository-tooling/P1-014/canonical-repository-check.stderr.log",
+      "public_path": "docs/evidence/P1-014/maintenance/current-source-v5/canonical-repository-check.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "a80de5324577df787fb7a08efc7f15febe6c911963feaca209004693f7a3164a"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7c33caed42c7674e3165e85f69f6c0ab66a2904ce788590dd23a62764cc14f3d"
+      }
+    }
+  ],
+  "projection": "Only repository, SDK and task-workspace path prefixes replaced; complete raw originals retained privately.",
+  "initial_same_sha_crlf": {
+    "revision": "b78d8d278214bd981572ac82581b185489bab40c",
+    "linux": "maintenance/current-source-v5/linux-crlf-s4.json",
+    "windows": "maintenance/current-source-v5/windows-crlf-s4.json",
+    "workflow_run": 41808713685,
+    "job_id": 126502159139,
+    "artifact_id": 13310509830,
+    "original_zip_byte_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3e37cb7c55599e103a1c8bb8893f5a0f0fb28ca0d0b5a3cdd2b4f80e206b84be"
+    },
+    "transport": "Initial default artifact TLS handshake timed out; same artifact recovered with request-local verified TLS 1.2 and no GitHub Authorization sent to storage."
+  },
+  "boundary": "Development digest qualification only. Any later status/source metadata change requires a matching native CRLF pair and fresh source seal; no formal release qualification."
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "source_task": "P1-014",
+  "status": "PASS",
+  "scope": "Final frozen shared completion metadata qualification; actual matching native Linux/Windows reports and strict source verification PASS. Not release qualification.",
+  "tested_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "qualified_metadata_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+  "full_selected_commands": {
+    "status": "PASS",
+    "commands": 5,
+    "focused_tests_passed": 150,
+    "canonical_duration_ms": 685408.784,
+    "report": "docs/evidence/P1-014/task-check.json"
+  },
+  "same_sha_native_pair": {
+    "status": "PASS",
+    "revision": "756162212073523a61cb6e23330eb07ceef0685d",
+    "windows_run": 41841419255,
+    "windows_job": 126613697136,
+    "artifact_id": 13328323644,
+    "artifact_zip_bytes": 745,
+    "artifact_byte_sha256": "a7201d92b34b36a6e1be6a1c1e174e9e5c2044c4c95c1dc1e624f16984d8ac7b",
+    "linux": "docs/evidence/P1-014/linux-crlf.json",
+    "windows": "docs/evidence/P1-014/windows-crlf.json",
+    "verified_tls12_fallback": false
+  },
+  "qualified_snapshot_freshness": {
+    "issues": [],
+    "kind": "evidence-freshness",
+    "schema_version": 1,
+    "status": "PASS",
+    "tasks": [
+      {
+        "issues": [],
+        "report_count": 6,
+        "source_count": 84,
+        "stale_paths": [],
+        "status": "PASS",
+        "task_id": "P1-014"
+      }
+    ]
+  },
+  "publication": {
+    "status": "PASS",
+    "source_and_create_only_anchor": "PUBLISHED",
+    "source_anchor": "refs/heads/evidence/M10-002/756162212073523a61cb6e23330eb07ceef0685d",
+    "source_revision": "756162212073523a61cb6e23330eb07ceef0685d",
+    "historical_incident": "https://www.githubstatus.com/incidents/smtdswd1h2w4"
+  },
+  "historical_failure": "docs/evidence/P1-014/maintenance/recovered-metadata/incident-current-metadata-status.json",
+  "boundary": "Real current-revision Windows and Linux receipts were executed and strict source verification passed; no old receipt revision, source inventory, threshold or timeout was edited.",
+  "intermediate_recovery": "docs/evidence/P1-014/maintenance/recovered-metadata/"
+}

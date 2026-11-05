@@ -2,10 +2,39 @@
 
 ## Status
 
-P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
-digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33536032265` produced the retained
-Windows report for PR #151 source head `fc4b54a7` (merge revision `1f1d7be5`).
+The development task is **COMPLETE**. After all shared completion metadata
+froze, the real Linux/Windows pair executed at
+`756162212073523a61cb6e23330eb07ceef0685d`; Windows run `41841419255`
+checked actual CRLF bytes, and the independent Linux receipt has the same
+normalized digest. Strict verification passed for all six reports and 84
+source paths at that exact source. The source is public.
+
+GitHub incident `smtdswd1h2w4` is no longer a publication blocker. The original
+stale verification, server failures and intermediate recovered pair remain in
+`maintenance/recovered-metadata/`. See
+[final metadata qualification](current-metadata-status.json). Native execution
+revisions, source inventories, timeouts and thresholds were not edited to
+bypass the final-source rerun.
+
+The post-integration selected task passed all five commands at code source
+`1631837216989f7eac6986b24b0b9a2c61d0bd20` on qualified official STS 1.1.3.
+All 150 focused regressions passed. The unchanged 1,800-second canonical
+command completed in 685.409 seconds, with 1,090 native passes, 28 explicit
+skips, and no failures or errors. Complete command projections and their
+original-byte and public-text digests are retained in
+[current-source qualification](maintenance/current-source-v5/qualification.json).
+
+The initial post-integration Linux/Windows pair both passed at exact metadata
+source `b78d8d278214bd981572ac82581b185489bab40c`; Windows workflow
+`41808713685` produced actual CRLF bytes, while the independent Linux checkout
+produced LF bytes with the same normalized digest. That pair is retained
+separately under `maintenance/current-source-v5/`. The latest canonical
+receipts and evidence seal must identify the same frozen metadata revision;
+later status changes require another native pair and seal, not revision edits
+to older receipts.
+
+The table below remains historical. Its PR #151 reports do not qualify current
+source, and no release qualification is claimed here.
 
 ## Implemented boundary
 
@@ -58,7 +87,7 @@ Windows report for PR #151 source head `fc4b54a7` (merge revision `1f1d7be5`).
 The implementation does not depend on `.gitattributes -text`. Those existing
 entries remain unchanged because they belong to other tasks.
 
-## Local evidence
+## Retained historical local evidence
 
 | Evidence | Result |
 |---|---|
@@ -81,8 +110,14 @@ python3 tools/repository/repository_tooling.py --root . validate-plan docs/evide
 python3 -m unittest tools.repository.tests.test_repository_tooling tools.tests.test_architecture_guard tools.tests.test_p1_014_evidence_digest_types -v
 python3 tools/architecture_guard.py --root . --format json
 python3 tools/evidence_digest.py --root . inventory --output docs/evidence/P1-014/digest-inventory.json
-python3 tools/evidence_digest.py --root . crlf-report --expected-platform linux-x86_64-glibc --expected-revision 1a06e32c42fcce35e0ceee0db8959e01580ff5db --output docs/evidence/P1-014/linux-crlf.json
+python3 tools/evidence_digest.py --root . crlf-report --expected-platform linux-x86_64-glibc --expected-revision <frozen-metadata-sha> --output docs/evidence/P1-014/linux-crlf.json
 ```
+
+The current task manifest runs the architecture guard and digest-callsite
+inventory directly. It retains plan validation, digest-boundary regressions
+and the canonical `scripts/check`. It does not invoke the repository-wide
+`scripts/check-fast`; that command evaluates unrelated task manifests and
+remains a separate strict global-readiness diagnostic.
 
 ## Unrun gates
 
@@ -90,8 +125,8 @@ The one-hour SSE profile, 86,400-second soak, release rebuild, performance,
 fuzz, security-review and signing gates were not run. None is part of the
 non-long-running P1-014 task contract.
 
-M2-004 and other existing repository evidence remain schema v1 historical
-evidence. Current freshness and dependency validators reject it rather than
-silently promoting it to schema v2. The repository regression suite asserts
-that rejection as the required fail-closed behavior. Pre-migration M0-016 and
-M3-031 Windows license-file digests are likewise rejected rather than rewritten.
+Retained pre-migration root evidence is still rejected rather than silently
+promoted to schema v2. This does not describe the separately refreshed
+`current-desktop` native resolver reports or current M3-031 provider reports.
+The regression suite preserves fail-closed rejection of old schema and
+pre-migration license-file digests.

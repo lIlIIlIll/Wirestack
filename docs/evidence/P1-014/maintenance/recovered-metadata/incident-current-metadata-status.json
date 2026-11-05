@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "source_task": "P1-014",
+  "status": "BLOCKED",
+  "tested_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "intended_metadata_revision": "7dcad512ca0e29c0aad1a78b3bf0eed9f3042e70",
+  "qualified_previous_native_revision": "b78d8d278214bd981572ac82581b185489bab40c",
+  "full_selected_commands": {
+    "status": "PASS",
+    "commands": 5,
+    "focused_tests_passed": 150,
+    "canonical_duration_ms": 685408.784,
+    "report": "docs/evidence/P1-014/task-check.json"
+  },
+  "previous_same_sha_native_pair": {
+    "status": "PASS",
+    "revision": "b78d8d278214bd981572ac82581b185489bab40c",
+    "windows_run": 41808713685,
+    "retained_linux": "docs/evidence/P1-014/maintenance/current-source-v5/linux-crlf-s4.json",
+    "retained_windows": "docs/evidence/P1-014/maintenance/current-source-v5/windows-crlf-s4.json"
+  },
+  "current_freshness": {
+    "status": "STALE",
+    "exit_code": 5,
+    "code": "DIGEST_STALE",
+    "path": "docs/planning/status.md",
+    "report": "docs/evidence/P1-014/verification-current.json"
+  },
+  "publication": {
+    "status": "BLOCKED_EXISTING_OWNER_REF",
+    "incident": "https://www.githubstatus.com/incidents/smtdswd1h2w4",
+    "observed_failures": [
+      "remote Internal Server Error",
+      "remote Internal Server Error",
+      "remote fatal error in commit_refs"
+    ],
+    "failed_ref": "refs/heads/fix/M2-004-sts-requalification",
+    "new_value": "49c45eaaf1696c70436041fcaedac2ef3b251fc0",
+    "preserved_public_m10_source": "refs/heads/evidence/M10-002/b78d8d278214bd981572ac82581b185489bab40c"
+  },
+  "boundary": "Functional local commands and previous native pair remain real PASS evidence. They do not qualify changed status metadata. Do not edit old receipt revisions, weaken source inventories or mark P1-014 COMPLETE until a current matching native pair and seal pass."
+}
