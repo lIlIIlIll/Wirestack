@@ -1,20 +1,51 @@
 # Use the repository control plane
 
-Status: **BLOCKED**
+Status: **COMPLETE** for the selected infrastructure task; no global readiness claim.
 
 P1-012 adds bounded diagnostics and validation commands for maintainers, CI,
 and coding agents. The commands use one task contract and one result model, so
 missing capabilities, skipped work, and stale evidence remain visible.
 
+Task-specific acceptance and source-bound evidence are evaluated against the
+selected task's complete transitive dependency closure. They may PASS while
+global readiness remains INVALID because of an unrelated incomplete
+dependency. Global `validate-tasks`, `check-fast`, `check-full`, and
+`verify-evidence --all` continue to reject an incomplete repository-wide graph.
+
+The current selected `scripts/check-task P1-012` run passed both acceptance
+commands: the 20-path/19-scenario/17-test plan and all 52 repository-tooling
+regressions. Its [task receipt](task-check.json) is separate from the
+repository-wide diagnostic. The current source seal must verify before this
+completion record is published. Unrelated BLOCKED tasks remain unchanged.
+
+## Timed-out command ownership
+
+POSIX task commands run in their own session. On timeout or interruption, the
+runner stops the owned process group and reaps its leader before returning.
+The original command limit and `FAIL` / `TIMEOUT` result remain unchanged;
+bounded teardown does not turn an overrun into PASS.
+
+The [cleanup receipt](timeout-descendant-cleanup.json) retains a real
+failing-before/passing-after side-effect reduction and the gated regression.
+All 52 repository-tooling tests passed after the fix. Windows retains its
+existing direct-child handling; no Windows descendant-cleanup proof is claimed.
+
 ## Prerequisites
 
 - Linux x86_64 with glibc for the first manifest.
-- Cangjie Compiler 1.1.0-alpha.20260829040003 and CJPM 1.1.3 for the current
+- Cangjie Compiler and CJPM 1.1.3 from the selected STS SDK for the current
   repository profile.
 - Python 3 and Git. GitButler is recommended for this workspace.
 
 The doctor reports a different platform or missing required tool as BLOCKED.
 Optional tooling and uncommitted changes produce DEGRADED.
+
+The current infrastructure task has no runtime or historical-release task
+prerequisite. M7-024 remains historical provenance, not a current dependency
+edge. Its former transitive closure reached deferred M0-019, M0-020 and M0-022
+global qualifications through the historical Linux release graph. The
+owner-approved projection removes that coupling without changing selected
+closure traversal, cycle detection or any global validator.
 
 ## Diagnose the repository
 
@@ -108,36 +139,45 @@ invalidate the selected task. Structural manifest validation remains global.
 
 ## Evidence boundary
 
-The current `scripts/check-task P1-012 --json` passes: the plan has 19 paths,
-18 scenarios, and 16 tests; all 45 repository-tooling tests pass. The exact
+P1-012's task check and source-bound evidence seal are governed by its complete
+transitive dependency closure. They may PASS while the separate
+`global-readiness.json` diagnostic remains INVALID because of an incomplete
+dependency outside that closure. Repository-wide `validate-tasks`,
+`check-fast`, `check-full`, and `verify-evidence --all` continue to check the
+whole graph and fail closed.
+
+The current `scripts/check-task P1-012 --json` report passes: the plan has 19
+paths, 18 scenarios, and 16 tests; all 51 repository-tooling tests pass. The
 task report and plan validation are retained in
 [`task-check.json`](task-check.json) and
 [`test-plan-validation.json`](test-plan-validation.json).
 
-Direct CLI receipts verify both global modes: `fast` and `full` reject unknown
-`BOGUS-999` with `TASK_MISSING`, while known `P1-012` still encounters the
+Retained CLI receipts verify both global modes: `fast` and `full` reject unknown
+`BOGUS-999` with `TASK_MISSING`, while known `P1-012` encounters the
 repository-wide `M10-004 -> M10-003` dependency blocker. Each exits 2 before
 acceptance commands; see [fast](unknown-fast-cli.json),
 [full](unknown-full-cli.json), [known fast](known-fast-global-cli.json), and
 [known full](known-full-global-cli.json).
 
-Repository-wide readiness is BLOCKED because M10-004 depends on incomplete
-M10-003. A separate draft change (PR #230) records M10-004 as BLOCKED instead
+The retained global receipts diagnose M10-004 depending on incomplete M10-003.
+A separate draft change (PR #230) records M10-004 as BLOCKED instead
 of COMPLETE and claims no acceptance; that correction resolves the misleading
 status record but does not complete M10-003. `validate-tasks` and global
 fast/full checks return INVALID (exit 2) before selecting or executing
-commands; `verify-evidence --all` returns FAIL
-(exit 1) on the same dependency. The reports are linked from
-[`global-readiness.json`](global-readiness.json). P1-012 remains BLOCKED; no
-current PASS evidence seal is claimed. The active
-[`evidence.json`](evidence.json) records BLOCKED, and
+commands; `verify-evidence --all` returns FAIL (exit 1) on the same dependency.
+The reports are linked from [`global-readiness.json`](global-readiness.json).
+The active [`evidence.json`](evidence.json) currently records BLOCKED, so it
+is not a PASS seal. This retained result does not mean that an unrelated global
+dependency blocks a future P1-012 task-scoped PASS.
+
 [`evidence-unqualified-2026-10-19.json`](evidence-unqualified-2026-10-19.json)
 records provenance for the former PASS index, bound to unpublished revision
 `8beeed24620452e0b8101c0375e1494b73e0de6e`. The original index remains in
 earlier PR history and is not current evidence.
 
-A selected `verify-evidence P1-012` also returns FAIL with
-`ACCEPTANCE_NOT_PASS`; the BLOCKED marker cannot be treated as a current seal.
+The retained selected `verify-evidence P1-012` result is FAIL with
+`ACCEPTANCE_NOT_PASS` because the active index says BLOCKED. It reflects that
+receipt, not the unrelated global dependency edge.
 
 [`dependency-scope-reproduction.json`](dependency-scope-reproduction.json)
 separates the two revisions it cites. `historical_after_c1d908a5` records the

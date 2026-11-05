@@ -7,6 +7,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import signal
 import platform
 import re
 import shutil
@@ -601,6 +602,16 @@ def doctor(root: Path, which: Callable[[str], str | None] = shutil.which,
             "platform": identity, "toolchain": versions, "checks": checks}
 
 
+def _terminate_command_process_group(process: subprocess.Popen[bytes]) -> None:
+    """Stop the owned POSIX group before reaping its leader."""
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    finally:
+        process.wait()
+
+
 def run_command(root: Path, command: Mapping[str, Any], artifact_dir: Path) -> dict[str, Any]:
     artifact_dir.mkdir(parents=True, exist_ok=True)
     command_id = command["id"]
@@ -612,18 +623,33 @@ def run_command(root: Path, command: Mapping[str, Any], artifact_dir: Path) -> d
     exit_code: int | None = None
     timed_out = False
     error_code: str | None = None
+    process: subprocess.Popen[bytes] | None = None
     with stdout_path.open("wb") as stdout, stderr_path.open("wb") as stderr:
         try:
-            result = subprocess.run(command["argv"], cwd=root, stdout=stdout, stderr=stderr,
-                                    timeout=float(command["timeout_seconds"]), check=False,
-                                    start_new_session=(os.name != "nt"))
-            exit_code = result.returncode
-            status = "PASS" if result.returncode == 0 else "FAIL"
+            if os.name == "nt":
+                # Preserve direct-child timeout handling on Windows.
+                result = subprocess.run(command["argv"], cwd=root, stdout=stdout, stderr=stderr,
+                                        timeout=float(command["timeout_seconds"]), check=False,
+                                        start_new_session=False)
+                exit_code = result.returncode
+            else:
+                process = subprocess.Popen(command["argv"], cwd=root, stdout=stdout, stderr=stderr,
+                                           start_new_session=True)
+                exit_code = process.wait(timeout=float(command["timeout_seconds"]))
+            status = "PASS" if exit_code == 0 else "FAIL"
         except subprocess.TimeoutExpired:
             timed_out = True
             error_code = "TIMEOUT"
+            if process is not None:
+                _terminate_command_process_group(process)
         except OSError:
             error_code = "EXEC"
+            if process is not None:
+                _terminate_command_process_group(process)
+        except BaseException:
+            if process is not None:
+                _terminate_command_process_group(process)
+            raise
     def excerpt(path: Path) -> tuple[str, bool]:
         data = path.read_bytes()[:CAPTURE_BYTES + 1]
         return data[:CAPTURE_BYTES].decode("utf-8", errors="replace"), len(data) > CAPTURE_BYTES or path.stat().st_size > CAPTURE_BYTES

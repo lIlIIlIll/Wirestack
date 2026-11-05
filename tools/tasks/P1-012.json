@@ -40,7 +40,7 @@
     "docs/evidence/M7-021/linux_x86_64/qualification.json",
     ".gitignore"
   ],
-  "dependencies": ["M7-024"],
+  "dependencies": [],
   "long_running_gate": false,
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [

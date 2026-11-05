@@ -51,6 +51,8 @@ __pycache__/
 !docs/evidence/M0-005/linux_x86_64/*.json
 !docs/evidence/M0-010/linux_x86_64/*.json
 !docs/evidence/M0-016/results/**/*.json
+!docs/evidence/M0-016/advisory-review-2026-10-22.json
+!docs/evidence/M0-016/blocker-maintenance/*.json
 !docs/evidence/M0-016/license-bundles/**/*.json
 !docs/evidence/M0-016/license-bundles/**/LICENSE.txt
 !docs/evidence/M0-011/linux_x86_64/*.json
@@ -58,9 +60,11 @@ __pycache__/
 !docs/evidence/M2-003/linux_x86_64/*.json
 !docs/evidence/M2-004/*.json
 !docs/evidence/M2-004/windows-x86_64/*.json
+!docs/evidence/M2-004/current-desktop/**/*.json
 !docs/evidence/M2-006/*.json
 !docs/evidence/M2-006/macos-arm64/*.json
 !docs/evidence/M2-006/ios-simulator-arm64/*.json
+!docs/evidence/M2-006/current-desktop/**/*.json
 !docs/evidence/M2-005/linux_glibc_x86_64/*.json
 !docs/evidence/M2-015/linux_glibc_x86_64/*.json
 !docs/evidence/M2-016/linux_glibc_x86_64/*.json
@@ -81,8 +85,10 @@ __pycache__/
 !docs/evidence/M3-031/windows-x86_64/*.json
 !docs/evidence/M3-031/macos-arm64/*.json
 !docs/evidence/M3-031/**/license-bundle/manifest.json
+!docs/evidence/M3-031/current-core/**/*.json
 !docs/evidence/M7-029/**/*.json
 !docs/evidence/M7-030/*.json
+!docs/evidence/M7-030/blocker-maintenance/*.json
 !docs/evidence/M7-030/linux_x86_64/*.json
 !docs/evidence/M7-031/*.json
 !docs/evidence/M7-031/linux_x86_64/*.json
@@ -102,6 +108,11 @@ Thumbs.db
 
 # Logs, traces, local benchmark output
 *.log
+!docs/evidence/M0-016/blocker-maintenance/*.log
+!docs/evidence/M3-031/current-core/**/*.log
+!docs/evidence/M7-030/blocker-maintenance/*.log
+!docs/evidence/M2-004/current-desktop/**/*.log
+!docs/evidence/M2-006/current-desktop/**/*.log
 !docs/evidence/M2-003/linux_x86_64/*.log
 !docs/evidence/M2-005/linux_glibc_x86_64/*.log
 !docs/evidence/M7-022/linux_x86_64/*.log
@@ -128,6 +139,8 @@ Thumbs.db
 !docs/references/linux-network-capabilities.json
 !docs/references/m9-002-option-sdk.json
 !docs/references/linux-deployment-inputs.json
+!docs/references/m2-004-sts-sdk.json
+!docs/references/m2-006-sts-sdk.json
 !docs/evidence/M9-002/**/*.json
 !docs/evidence/M9-002/**/*.log
 !docs/evidence/M9-002/**/*.hex
@@ -136,6 +149,7 @@ Thumbs.db
 !docs/evidence/M9-003/**/*.hex
 !docs/evidence/M10-001/stack-200-review/review-regressions.json
 !docs/evidence/M10-002/**/*.json
+!docs/evidence/M10-002/**/*.log
 *.tmp
 *.prof
 *.trace

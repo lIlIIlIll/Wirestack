@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-012",
+  "kind": "posix-timeout-descendant-cleanup",
+  "status": "PASS",
+  "scope": "Task-runner lifecycle only; no Windows descendant-cleanup or native product qualification",
+  "runner_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "1b6624ebf4baf825d422f35e9a56e2da463559c46c650b02f334bf9217401642"
+  },
+  "real_reduction": {
+    "timeout_seconds": 0.2,
+    "child_side_effect_delay_seconds": 0.8,
+    "before": {
+      "status": "FAIL",
+      "error_code": "TIMEOUT",
+      "duration_ms": 205.474,
+      "post_timeout_side_effect_observed": true
+    },
+    "after": {
+      "status": "FAIL",
+      "error_code": "TIMEOUT",
+      "duration_ms": 201.891,
+      "post_timeout_side_effect_observed": false
+    }
+  },
+  "regression": {
+    "name": "RepositoryToolingTests.test_timeout_kills_descendant_before_gated_side_effect",
+    "before": {
+      "exit_code": 1,
+      "failure": "descendant wrote after run_command returned"
+    },
+    "after": {
+      "exit_code": 0,
+      "passed": 1,
+      "skipped": 0
+    }
+  },
+  "repository_tooling_suite": {
+    "exit_code": 0,
+    "passed": 52,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "policy": "Original command limits and FAIL/TIMEOUT/EXEC reporting remain unchanged. POSIX process groups are terminated and the leader is reaped before returning; Windows direct-child handling is unchanged."
+}

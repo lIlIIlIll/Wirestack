@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import signal
 import subprocess
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from typing import Sequence
@@ -286,6 +290,31 @@ class RepositoryToolingTests(unittest.TestCase):
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_repository_tasks(self.root, "TEST-001")
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        self.assertIn("BASE-001", caught.exception.detail)
+
+        repository_root = Path(__file__).resolve().parents[3]
+        script = repository_root / "tools/repository/repository_tooling.py"
+        receipt = self.root / "transitive-check.json"
+        completed = subprocess.run(
+            [
+                "python3", str(script), "--root", str(self.root),
+                "check", "task", "TEST-001", "--json", "--output", str(receipt),
+            ],
+            cwd=repository_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        self.assertEqual(2, completed.returncode, completed.stderr)
+        report = json.loads(receipt.read_text(encoding="utf-8"))
+        self.assertEqual("TEST-001", report["task_id"])
+        self.assertEqual("INVALID", report["status"])
+        self.assertEqual([], report["commands"])
+        self.assertEqual("DEPENDENCY_INCOMPLETE", report["issues"][0]["code"])
+        self.assertIn("BASE-001", report["issues"][0]["detail"])
 
     def test_selected_task_accepts_complete_dependency_without_manifest(self) -> None:
         self.write_planning({
@@ -483,6 +512,10 @@ class RepositoryToolingTests(unittest.TestCase):
             "BLOCKED-001": "BLOCKED",
         })
         selected = self.manifest("TEST-001", ["BASE-001"])
+        selected["required_evidence"] = [
+            "docs/evidence/TEST-001/evidence.json",
+            "docs/evidence/TEST-001/task-check.json",
+        ]
         selected["acceptance_commands"][0]["argv"] = [
             "python3", "-c", "print('selected-task-ran')"
         ]
@@ -499,22 +532,24 @@ class RepositoryToolingTests(unittest.TestCase):
 
         repository_root = Path(__file__).resolve().parents[3]
         script = repository_root / "tools/repository/repository_tooling.py"
-        receipt = self.root / "task-receipt.json"
-        completed = subprocess.run(
-            [
-                "python3", str(script), "--root", str(self.root),
-                "check", "task", "TEST-001", "--json", "--output", str(receipt),
-            ],
-            cwd=repository_root,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            timeout=30,
-            check=False,
-        )
 
+        def run_cli(*arguments: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                ["python3", str(script), "--root", str(self.root), *arguments],
+                cwd=repository_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+
+        task_report_path = self.root / "docs/evidence/TEST-001/task-check.json"
+        completed = run_cli(
+            "check", "task", "TEST-001", "--json", "--output", str(task_report_path)
+        )
         self.assertEqual(0, completed.returncode, completed.stderr)
-        report = json.loads(receipt.read_text(encoding="utf-8"))
+        report = json.loads(task_report_path.read_text(encoding="utf-8"))
         self.assertEqual("PASS", report["status"])
         self.assertEqual(["unit"], [command["id"] for command in report["commands"]])
         self.assertEqual("PASS", report["commands"][0]["status"])
@@ -522,6 +557,60 @@ class RepositoryToolingTests(unittest.TestCase):
         self.assertEqual(
             "selected-task-ran\n", stdout_path.read_text(encoding="utf-8")
         )
+        self.assertFalse((self.root / "unrelated-task-ran").exists())
+
+        evidence_path = self.root / "docs/evidence/TEST-001/evidence.json"
+        sealed = run_cli(
+            "seal-evidence", "TEST-001",
+            "--report", "docs/evidence/TEST-001/task-check.json",
+            "--revision", self.git("rev-parse", "HEAD").stdout.strip(),
+            "--output", str(evidence_path),
+        )
+        self.assertEqual(0, sealed.returncode, sealed.stderr)
+        self.assertIn("seal-evidence: PASS:", sealed.stdout)
+
+        selected_freshness_path = self.root / "selected-freshness.json"
+        selected_freshness = run_cli(
+            "verify-evidence", "--task", "TEST-001", "--json",
+            "--output", str(selected_freshness_path),
+        )
+        self.assertEqual(0, selected_freshness.returncode, selected_freshness.stderr)
+        selected_report = json.loads(
+            selected_freshness_path.read_text(encoding="utf-8")
+        )
+        self.assertEqual("PASS", selected_report["status"])
+        self.assertEqual("PASS", selected_report["tasks"][0]["status"])
+
+        for mode in ("fast", "full"):
+            with self.subTest(mode=mode):
+                global_path = self.root / f"global-{mode}.json"
+                global_check = run_cli(
+                    "check", mode, "--json", "--output", str(global_path)
+                )
+                self.assertEqual(2, global_check.returncode, global_check.stderr)
+                global_report = json.loads(global_path.read_text(encoding="utf-8"))
+                self.assertEqual("INVALID", global_report["status"])
+                self.assertIsNone(global_report["task_id"])
+                self.assertEqual([], global_report["commands"])
+                self.assertEqual(
+                    "DEPENDENCY_INCOMPLETE",
+                    global_report["issues"][0]["code"],
+                )
+                self.assertIn("BLOCKED-001", global_report["issues"][0]["detail"])
+
+        global_evidence_path = self.root / "global-evidence.json"
+        global_evidence = run_cli(
+            "verify-evidence", "--all", "--json",
+            "--output", str(global_evidence_path),
+        )
+        self.assertEqual(1, global_evidence.returncode, global_evidence.stderr)
+        global_report = json.loads(global_evidence_path.read_text(encoding="utf-8"))
+        self.assertEqual("FAIL", global_report["status"])
+        self.assertEqual([], global_report["tasks"])
+        self.assertEqual(
+            "DEPENDENCY_INCOMPLETE", global_report["issues"][0]["code"]
+        )
+        self.assertIn("BLOCKED-001", global_report["issues"][0]["detail"])
         self.assertFalse((self.root / "unrelated-task-ran").exists())
 
     def test_dependency_cycle_is_rejected(self) -> None:
@@ -564,6 +653,61 @@ class RepositoryToolingTests(unittest.TestCase):
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_task(manifest, self.root)
         self.assertEqual("TIMEOUT", caught.exception.code)
+
+    @unittest.skipUnless(
+        os.name == "posix",
+        "POSIX process-group cleanup only; this does not prove Windows descendant cleanup",
+    )
+    def test_timeout_kills_descendant_before_gated_side_effect(self) -> None:
+        """A timed-out POSIX command must not leave its group writing later."""
+        ready = self.root / "descendant-ready"
+        gate = self.root / "allow-side-effect"
+        side_effect = self.root / "late-side-effect"
+        group_file = self.root / "command-group"
+        child_code = (
+            "import pathlib, sys, time\n"
+            "ready, gate, side_effect = map(pathlib.Path, sys.argv[1:])\n"
+            "ready.write_text('ready', encoding='ascii')\n"
+            "while not gate.exists(): time.sleep(0.005)\n"
+            "side_effect.write_text('late', encoding='ascii')\n"
+        )
+        parent_code = (
+            "import os, pathlib, subprocess, sys, time\n"
+            f"child_code = {child_code!r}\n"
+            "ready, gate, side_effect, group_file = map(pathlib.Path, sys.argv[1:])\n"
+            "group_file.write_text(str(os.getpgrp()), encoding='ascii')\n"
+            "subprocess.Popen([sys.executable, '-c', child_code, "
+            "str(ready), str(gate), str(side_effect)])\n"
+            "while not ready.exists(): time.sleep(0.005)\n"
+            "while True: time.sleep(1)\n"
+        )
+        command = {
+            "id": "timeout-descendant",
+            "argv": [sys.executable, "-c", parent_code,
+                     str(ready), str(gate), str(side_effect), str(group_file)],
+            "timeout_seconds": 1,
+            "long_running": False,
+            "gate": "task",
+        }
+        try:
+            result = tooling.run_command(self.root, command, self.root / "build/logs")
+            self.assertEqual("FAIL", result["status"])
+            self.assertEqual("TIMEOUT", result["error_code"])
+            self.assertTrue(result["timed_out"])
+            self.assertIsNone(result["exit_code"])
+            self.assertTrue(ready.exists(), "descendant must be waiting at the gate before timeout")
+            gate.touch()
+            deadline = time.monotonic() + 1
+            while not side_effect.exists() and time.monotonic() < deadline:
+                time.sleep(0.005)
+            self.assertFalse(side_effect.exists(), "descendant wrote after run_command returned")
+        finally:
+            gate.touch(exist_ok=True)
+            if group_file.exists():
+                try:
+                    os.killpg(int(group_file.read_text(encoding="ascii")), signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
 
     def test_command_capture_is_bounded(self) -> None:
         command = {"id": "large", "argv": ["python3", "-c", "print('x'*50000)"],
