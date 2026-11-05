@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "source_task": "M9-001",
+  "source_task": "M9-003",
   "status": "PASS",
   "inventory": {
     "schemaVersion": 1,
-    "taskId": "M9-001",
+    "taskId": "M9-003",
     "profile": "linux-x86_64-glibc",
     "package": {
       "name": "wirestack",
@@ -15,7 +15,10 @@
       "wirestack",
       "wirestack.http",
       "wirestack.net",
-      "wirestack.tls"
+      "wirestack.tls",
+      "wirestack.observability",
+      "wirestack.sse",
+      "wirestack.gzip"
     ],
     "declarations": [
       {
@@ -505,7 +508,7 @@
           {
             "kind": "init",
             "name": "init",
-            "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource> )"
+            "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource>, operationContext!: ?OperationContext = None<OperationContext> )"
           },
           {
             "kind": "let",
@@ -516,6 +519,11 @@
             "kind": "let",
             "name": "headers",
             "signature": "public let headers: HttpHeaders"
+          },
+          {
+            "kind": "let",
+            "name": "operationContext",
+            "signature": "public let operationContext: ?OperationContext"
           },
           {
             "kind": "let",
@@ -620,6 +628,34 @@
             "kind": "let",
             "name": "code",
             "signature": "public let code: IdentityVerificationErrorCode"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "class",
+        "name": "NetworkEventBuffer",
+        "signature": "public class NetworkEventBuffer <: NetworkEventSink & NetworkEventStatistics",
+        "members": [
+          {
+            "kind": "func",
+            "name": "drain",
+            "signature": "public func drain(): Array<NetworkEvent>"
+          },
+          {
+            "kind": "func",
+            "name": "emit",
+            "signature": "public func emit(event: NetworkEvent): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "snapshot",
+            "signature": "public func snapshot(): NetworkEventBufferSnapshot"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(capacity!: Int64 = 256)"
           }
         ]
       },
@@ -1528,6 +1564,31 @@
         "members": [
           {
             "kind": "case",
+            "name": "AttemptCompleted",
+            "signature": "| AttemptCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "AttemptStarted",
+            "signature": "| AttemptStarted"
+          },
+          {
+            "kind": "case",
+            "name": "BodyCompleted",
+            "signature": "| BodyCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "BodyStarted",
+            "signature": "| BodyStarted"
+          },
+          {
+            "kind": "case",
+            "name": "ConfigurationRotated",
+            "signature": "| ConfigurationRotated"
+          },
+          {
+            "kind": "case",
             "name": "ConnectAttemptCompleted",
             "signature": "| ConnectAttemptCompleted"
           },
@@ -1540,6 +1601,11 @@
             "kind": "case",
             "name": "ConnectionClosed",
             "signature": "| ConnectionClosed"
+          },
+          {
+            "kind": "case",
+            "name": "ConnectionDraining",
+            "signature": "| ConnectionDraining"
           },
           {
             "kind": "case",
@@ -1573,8 +1639,38 @@
           },
           {
             "kind": "case",
+            "name": "LocalBackpressureCompleted",
+            "signature": "| LocalBackpressureCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "LocalBackpressureStarted",
+            "signature": "| LocalBackpressureStarted"
+          },
+          {
+            "kind": "case",
             "name": "ProxyTunnelEstablished",
             "signature": "| ProxyTunnelEstablished"
+          },
+          {
+            "kind": "case",
+            "name": "RequestCompleted",
+            "signature": "| RequestCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "RequestStarted",
+            "signature": "| RequestStarted"
+          },
+          {
+            "kind": "case",
+            "name": "StageCompleted",
+            "signature": "| StageCompleted"
+          },
+          {
+            "kind": "case",
+            "name": "StageStarted",
+            "signature": "| StageStarted"
           },
           {
             "kind": "case",
@@ -1608,6 +1704,11 @@
             "kind": "case",
             "name": "Failed",
             "signature": "| Failed"
+          },
+          {
+            "kind": "case",
+            "name": "NotExecuted",
+            "signature": "| NotExecuted"
           },
           {
             "kind": "case",
@@ -1726,6 +1827,82 @@
             "kind": "case",
             "name": "UnixSocket",
             "signature": "| UnixSocket"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "enum",
+        "name": "NetworkTimeoutReason",
+        "signature": "public enum NetworkTimeoutReason",
+        "members": [
+          {
+            "kind": "case",
+            "name": "StageLimit",
+            "signature": "| StageLimit"
+          },
+          {
+            "kind": "case",
+            "name": "TotalDeadline",
+            "signature": "| TotalDeadline"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "enum",
+        "name": "OperationTimeoutStage",
+        "signature": "public enum OperationTimeoutStage",
+        "members": [
+          {
+            "kind": "case",
+            "name": "BodyReadIdle",
+            "signature": "| BodyReadIdle"
+          },
+          {
+            "kind": "case",
+            "name": "ConnectionPool",
+            "signature": "| ConnectionPool"
+          },
+          {
+            "kind": "case",
+            "name": "Dns",
+            "signature": "| Dns"
+          },
+          {
+            "kind": "case",
+            "name": "ProxyConnect",
+            "signature": "| ProxyConnect"
+          },
+          {
+            "kind": "case",
+            "name": "RequestAdmission",
+            "signature": "| RequestAdmission"
+          },
+          {
+            "kind": "case",
+            "name": "RequestWrite",
+            "signature": "| RequestWrite"
+          },
+          {
+            "kind": "case",
+            "name": "ResponseHeaders",
+            "signature": "| ResponseHeaders"
+          },
+          {
+            "kind": "case",
+            "name": "StreamReadIdle",
+            "signature": "| StreamReadIdle"
+          },
+          {
+            "kind": "case",
+            "name": "TcpConnect",
+            "signature": "| TcpConnect"
+          },
+          {
+            "kind": "case",
+            "name": "TlsHandshake",
+            "signature": "| TlsHandshake"
           }
         ]
       },
@@ -2494,6 +2671,12 @@
       {
         "package": "wirestack",
         "kind": "func",
+        "name": "nextNetworkCorrelationId",
+        "signature": "public func nextNetworkCorrelationId(): Int64"
+      },
+      {
+        "package": "wirestack",
+        "kind": "func",
         "name": "readExact",
         "signature": "public func readExact( transport: DuplexTransport, destination: MutableByteSpan, context!: OperationContext = OperationContext.background() ): Unit"
       },
@@ -2658,6 +2841,19 @@
       {
         "package": "wirestack",
         "kind": "interface",
+        "name": "NetworkEventStatistics",
+        "signature": "public interface NetworkEventStatistics",
+        "members": [
+          {
+            "kind": "func",
+            "name": "snapshot",
+            "signature": "func snapshot(): NetworkEventBufferSnapshot"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "interface",
         "name": "Resolver",
         "signature": "public interface Resolver",
         "members": [
@@ -2665,6 +2861,19 @@
             "kind": "func",
             "name": "resolve",
             "signature": "func resolve( host: HostName, service: ?String, options: ResolveOptions, context: OperationContext ): ResolveResult"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "interface",
+        "name": "ResolverResourceOwner",
+        "signature": "public interface ResolverResourceOwner",
+        "members": [
+          {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "func resolverResourceSnapshot(): ResolverResourceSnapshot"
           }
         ]
       },
@@ -3164,13 +3373,81 @@
       {
         "package": "wirestack",
         "kind": "struct",
+        "name": "NetworkConnectionPoolSnapshot",
+        "signature": "public struct NetworkConnectionPoolSnapshot",
+        "members": [
+          {
+            "kind": "func",
+            "name": "combinedWith",
+            "signature": "public func combinedWith(other: NetworkConnectionPoolSnapshot): NetworkConnectionPoolSnapshot"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(leasedConnections!: Int64 = 0, idleConnections!: Int64 = 0, connectingConnections!: Int64 = 0, queuedRequests!: Int64 = 0, activeStreams!: Int64 = 0, reservedStreams!: Int64 = 0, drainingConnections!: Int64 = 0, sampledAt!: MonoTime = MonoTime.now())"
+          },
+          {
+            "kind": "let",
+            "name": "activeStreams",
+            "signature": "public let activeStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "connectingConnections",
+            "signature": "public let connectingConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "drainingConnections",
+            "signature": "public let drainingConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "idleConnections",
+            "signature": "public let idleConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "leasedConnections",
+            "signature": "public let leasedConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "queuedRequests",
+            "signature": "public let queuedRequests: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "reservedStreams",
+            "signature": "public let reservedStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "sampledAt",
+            "signature": "public let sampledAt: MonoTime"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "struct",
         "name": "NetworkEvent",
         "signature": "public struct NetworkEvent",
         "members": [
           {
             "kind": "init",
             "name": "init",
-            "signature": "public init( kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64> )"
+            "signature": "public init(kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64>, requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, connectionAttemptIndex!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, timeoutReason!: ?NetworkTimeoutReason = None<NetworkTimeoutReason>, timeoutStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, occurredAt!: ?MonoTime = None<MonoTime> )"
+          },
+          {
+            "kind": "let",
+            "name": "attemptId",
+            "signature": "public let attemptId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "connectionAttemptIndex",
+            "signature": "public let connectionAttemptIndex: ?Int64"
           },
           {
             "kind": "let",
@@ -3189,6 +3466,11 @@
           },
           {
             "kind": "let",
+            "name": "occurredAt",
+            "signature": "public let occurredAt: ?MonoTime"
+          },
+          {
+            "kind": "let",
             "name": "outcome",
             "signature": "public let outcome: NetworkEventOutcome"
           },
@@ -3199,8 +3481,61 @@
           },
           {
             "kind": "let",
+            "name": "requestId",
+            "signature": "public let requestId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "stage",
+            "signature": "public let stage: ?OperationTimeoutStage"
+          },
+          {
+            "kind": "let",
+            "name": "streamId",
+            "signature": "public let streamId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "timeoutReason",
+            "signature": "public let timeoutReason: ?NetworkTimeoutReason"
+          },
+          {
+            "kind": "let",
+            "name": "timeoutStage",
+            "signature": "public let timeoutStage: ?OperationTimeoutStage"
+          },
+          {
+            "kind": "let",
             "name": "trace",
             "signature": "public let trace: ?NetworkTraceContext"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "struct",
+        "name": "NetworkEventBufferSnapshot",
+        "signature": "public struct NetworkEventBufferSnapshot",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(capacity: Int64, queuedEvents: Int64, droppedEvents: Int64)"
+          },
+          {
+            "kind": "let",
+            "name": "capacity",
+            "signature": "public let capacity: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "droppedEvents",
+            "signature": "public let droppedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "queuedEvents",
+            "signature": "public let queuedEvents: Int64"
           }
         ]
       },
@@ -3240,6 +3575,11 @@
           },
           {
             "kind": "func",
+            "name": "forStage",
+            "signature": "public func forStage(stage: OperationTimeoutStage): OperationContext"
+          },
+          {
+            "kind": "func",
             "name": "isCancellationRequested",
             "signature": "public func isCancellationRequested(): Bool"
           },
@@ -3265,8 +3605,18 @@
           },
           {
             "kind": "func",
+            "name": "withEventCorrelation",
+            "signature": "public func withEventCorrelation(requestId!: ?Int64, attemptId!: ?Int64, connectionId!: ?Int64, streamId!: ?Int64): OperationContext"
+          },
+          {
+            "kind": "func",
             "name": "withEventSink",
             "signature": "public func withEventSink(value: ?NetworkEventSink): OperationContext"
+          },
+          {
+            "kind": "func",
+            "name": "withTimeoutPolicy",
+            "signature": "public func withTimeoutPolicy(value: OperationTimeoutPolicy): OperationContext"
           },
           {
             "kind": "func",
@@ -3276,7 +3626,12 @@
           {
             "kind": "init",
             "name": "init",
-            "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink> )"
+            "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink>, timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy(), requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, connectionId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, deadlineStage!: ?OperationTimeoutStage = None<OperationTimeoutStage> )"
+          },
+          {
+            "kind": "let",
+            "name": "attemptId",
+            "signature": "public let attemptId: ?Int64"
           },
           {
             "kind": "let",
@@ -3285,8 +3640,18 @@
           },
           {
             "kind": "let",
+            "name": "connectionId",
+            "signature": "public let connectionId: ?Int64"
+          },
+          {
+            "kind": "let",
             "name": "deadline",
             "signature": "public let deadline: ?Deadline"
+          },
+          {
+            "kind": "let",
+            "name": "deadlineStage",
+            "signature": "public let deadlineStage: ?OperationTimeoutStage"
           },
           {
             "kind": "let",
@@ -3295,8 +3660,91 @@
           },
           {
             "kind": "let",
+            "name": "requestId",
+            "signature": "public let requestId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "stage",
+            "signature": "public let stage: ?OperationTimeoutStage"
+          },
+          {
+            "kind": "let",
+            "name": "streamId",
+            "signature": "public let streamId: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "timeoutPolicy",
+            "signature": "public let timeoutPolicy: OperationTimeoutPolicy"
+          },
+          {
+            "kind": "let",
             "name": "trace",
             "signature": "public let trace: ?NetworkTraceContext"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "struct",
+        "name": "OperationTimeoutPolicy",
+        "signature": "public struct OperationTimeoutPolicy",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( requestAdmission!: ?Duration = None<Duration>, connectionPool!: ?Duration = None<Duration>, dns!: ?Duration = None<Duration>, tcpConnect!: ?Duration = None<Duration>, proxyConnect!: ?Duration = None<Duration>, tlsHandshake!: ?Duration = None<Duration>, requestWrite!: ?Duration = None<Duration>, responseHeaders!: ?Duration = None<Duration>, bodyReadIdle!: ?Duration = None<Duration>, streamReadIdle!: ?Duration = None<Duration> )"
+          },
+          {
+            "kind": "let",
+            "name": "bodyReadIdle",
+            "signature": "public let bodyReadIdle: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "connectionPool",
+            "signature": "public let connectionPool: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "dns",
+            "signature": "public let dns: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "proxyConnect",
+            "signature": "public let proxyConnect: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "requestAdmission",
+            "signature": "public let requestAdmission: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "requestWrite",
+            "signature": "public let requestWrite: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "responseHeaders",
+            "signature": "public let responseHeaders: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "streamReadIdle",
+            "signature": "public let streamReadIdle: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "tcpConnect",
+            "signature": "public let tcpConnect: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "tlsHandshake",
+            "signature": "public let tlsHandshake: ?Duration"
           }
         ]
       },
@@ -3396,6 +3844,59 @@
             "kind": "prop",
             "name": "addresses",
             "signature": "public prop addresses: Array<IpAddress> { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack",
+        "kind": "struct",
+        "name": "ResolverResourceSnapshot",
+        "signature": "public struct ResolverResourceSnapshot",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(ownerId: Int64, activeQueries: Int64, queuedQueries: Int64, runningWork: Int64, cacheEntries: Int64, rejectedQueries: Int64, sampledAt!: MonoTime = MonoTime.now(), isLive!: Bool = true)"
+          },
+          {
+            "kind": "let",
+            "name": "activeQueries",
+            "signature": "public let activeQueries: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "cacheEntries",
+            "signature": "public let cacheEntries: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "isLive",
+            "signature": "public let isLive: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "ownerId",
+            "signature": "public let ownerId: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "queuedQueries",
+            "signature": "public let queuedQueries: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "rejectedQueries",
+            "signature": "public let rejectedQueries: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "runningWork",
+            "signature": "public let runningWork: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "sampledAt",
+            "signature": "public let sampledAt: MonoTime"
           }
         ]
       },
@@ -3608,6 +4109,314 @@
         ]
       },
       {
+        "package": "wirestack.gzip",
+        "kind": "class",
+        "name": "GzipBodyStream",
+        "signature": "public class GzipBodyStream <: HttpBodyStream",
+        "members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "isClosed",
+            "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "read",
+            "signature": "public func read(destination: Array<Byte>): Int64"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(source: HttpBodyStream, limits!: GzipLimits = GzipLimits(), context!: OperationContext = OperationContext.background())"
+          },
+          {
+            "kind": "prop",
+            "name": "contentLength",
+            "signature": "public prop contentLength: ?Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "decodedBytes",
+            "signature": "public prop decodedBytes: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "encodedBytesRead",
+            "signature": "public prop encodedBytesRead: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "integrityVerified",
+            "signature": "public prop integrityVerified: Bool { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "maximumWorkBetweenChecks",
+            "signature": "public prop maximumWorkBetweenChecks: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "memberCount",
+            "signature": "public prop memberCount: Int64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.gzip",
+        "kind": "class",
+        "name": "GzipClient",
+        "signature": "public class GzipClient",
+        "members": [
+          {
+            "kind": "func",
+            "name": "send",
+            "signature": "public func send(request: HttpRequest, context!: OperationContext = OperationContext.background(), cancellation!: HttpCancellationHandles = HttpCancellationHandles()): GzipResponse"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(client: HttpClient, limits!: GzipLimits = GzipLimits(), passThroughUnsupported!: Bool = false)"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.gzip",
+        "kind": "class",
+        "name": "GzipException",
+        "signature": "public class GzipException <: Exception",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(code: GzipErrorCode, message: String, cause!: ?Exception = None<Exception>)"
+          },
+          {
+            "kind": "let",
+            "name": "cause",
+            "signature": "public let cause: ?Exception"
+          },
+          {
+            "kind": "let",
+            "name": "code",
+            "signature": "public let code: GzipErrorCode"
+          },
+          {
+            "kind": "prop",
+            "name": "phase",
+            "signature": "public prop phase: NetworkPhase { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "retryability",
+            "signature": "public prop retryability: Retryability { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.gzip",
+        "kind": "class",
+        "name": "GzipLimits",
+        "signature": "public class GzipLimits",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(maximumEncodedBytes!: Int64 = 64 * 1024 * 1024, maximumDecodedBytes!: Int64 = 64 * 1024 * 1024, maximumHeaderBytes!: Int64 = 4096, maximumMembers!: Int64 = 1, maximumBlocks!: Int64 = 4096, inputBufferBytes!: Int64 = 4096, maximumReadBytes!: Int64 = 16 * 1024)"
+          },
+          {
+            "kind": "let",
+            "name": "inputBufferBytes",
+            "signature": "public let inputBufferBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumBlocks",
+            "signature": "public let maximumBlocks: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumDecodedBytes",
+            "signature": "public let maximumDecodedBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumEncodedBytes",
+            "signature": "public let maximumEncodedBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumHeaderBytes",
+            "signature": "public let maximumHeaderBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumMembers",
+            "signature": "public let maximumMembers: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumReadBytes",
+            "signature": "public let maximumReadBytes: Int64"
+          },
+          {
+            "kind": "prop",
+            "name": "maximumRetainedBytes",
+            "signature": "public prop maximumRetainedBytes: UInt64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.gzip",
+        "kind": "class",
+        "name": "GzipResponse",
+        "signature": "public class GzipResponse <: Resource",
+        "members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "isClosed",
+            "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "let",
+            "name": "isDecoded",
+            "signature": "public let isDecoded: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "response",
+            "signature": "public let response: HttpResponse"
+          },
+          {
+            "kind": "let",
+            "name": "wireContentLength",
+            "signature": "public let wireContentLength: ?Int64"
+          },
+          {
+            "kind": "let",
+            "name": "wireHeaders",
+            "signature": "public let wireHeaders: HttpHeaders"
+          },
+          {
+            "kind": "prop",
+            "name": "decodedBytes",
+            "signature": "public prop decodedBytes: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "encodedBytesRead",
+            "signature": "public prop encodedBytesRead: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "integrityVerified",
+            "signature": "public prop integrityVerified: Bool { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "memberCount",
+            "signature": "public prop memberCount: Int64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.gzip",
+        "kind": "enum",
+        "name": "GzipErrorCode",
+        "signature": "public enum GzipErrorCode <: Equatable<GzipErrorCode>",
+        "members": [
+          {
+            "kind": "case",
+            "name": "BlockLimit",
+            "signature": "| BlockLimit"
+          },
+          {
+            "kind": "case",
+            "name": "ChecksumMismatch",
+            "signature": "| ChecksumMismatch"
+          },
+          {
+            "kind": "case",
+            "name": "Closed",
+            "signature": "| Closed"
+          },
+          {
+            "kind": "case",
+            "name": "ConcurrentOperation",
+            "signature": "| ConcurrentOperation"
+          },
+          {
+            "kind": "case",
+            "name": "HeaderLimit",
+            "signature": "| HeaderLimit"
+          },
+          {
+            "kind": "case",
+            "name": "InputLimit",
+            "signature": "| InputLimit"
+          },
+          {
+            "kind": "case",
+            "name": "InvalidDeflate",
+            "signature": "| InvalidDeflate"
+          },
+          {
+            "kind": "case",
+            "name": "InvalidHeader",
+            "signature": "| InvalidHeader"
+          },
+          {
+            "kind": "case",
+            "name": "MemberLimit",
+            "signature": "| MemberLimit"
+          },
+          {
+            "kind": "case",
+            "name": "OutputLimit",
+            "signature": "| OutputLimit"
+          },
+          {
+            "kind": "case",
+            "name": "SizeMismatch",
+            "signature": "| SizeMismatch"
+          },
+          {
+            "kind": "case",
+            "name": "TrailingData",
+            "signature": "| TrailingData"
+          },
+          {
+            "kind": "case",
+            "name": "UnexpectedEof",
+            "signature": "| UnexpectedEof"
+          },
+          {
+            "kind": "case",
+            "name": "UnsupportedCoding",
+            "signature": "| UnsupportedCoding"
+          },
+          {
+            "kind": "operator",
+            "name": "!=",
+            "signature": "public operator func !=(other: GzipErrorCode): Bool"
+          },
+          {
+            "kind": "operator",
+            "name": "==",
+            "signature": "public operator func ==(other: GzipErrorCode): Bool"
+          }
+        ]
+      },
+      {
         "package": "wirestack.http",
         "kind": "class",
         "name": "Cookie",
@@ -3801,6 +4610,11 @@
         "signature": "public class HttpCancellationHandles",
         "members": [
           {
+            "kind": "func",
+            "name": "retainCancellation",
+            "signature": "public func retainCancellation(callback: () -> Unit): Resource"
+          },
+          {
             "kind": "init",
             "name": "init",
             "signature": "public init( request!: ?HttpRequestCancellationHandle = None<HttpRequestCancellationHandle>, connection!: ?HttpConnectionCancellationHandle = None<HttpConnectionCancellationHandle>, stream!: ?HttpStreamCancellationHandle = None<HttpStreamCancellationHandle> )"
@@ -3840,8 +4654,23 @@
           },
           {
             "kind": "func",
+            "name": "configurationSnapshot",
+            "signature": "public func configurationSnapshot(): HttpClientConfigurationSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "configuredLimits",
+            "signature": "public func configuredLimits(): HttpLimits"
+          },
+          {
+            "kind": "func",
             "name": "connectWebSocket",
-            "signature": "public func connectWebSocket( url: HttpUrl, protocols!: Array<String> = [], headers!: HttpHeaders = HttpHeaders(), webSocketLimits!: WebSocketLimits = WebSocketLimits(), context!: OperationContext = OperationContext.background() ): WebSocketConnectResult"
+            "signature": "public func connectWebSocket( url: WebSocketUrl, protocols!: Array<String> = [], headers!: HttpHeaders = HttpHeaders(), webSocketLimits!: WebSocketLimits = WebSocketLimits(), context!: OperationContext = OperationContext.background() ): WebSocketConnectResult"
+          },
+          {
+            "kind": "func",
+            "name": "contextForRequest",
+            "signature": "public func contextForRequest(context!: OperationContext = OperationContext.background()): OperationContext"
           },
           {
             "kind": "func",
@@ -3865,6 +4694,36 @@
           },
           {
             "kind": "func",
+            "name": "observationSnapshot",
+            "signature": "public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpClientObservationSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "reserveResponseBuffer",
+            "signature": "public func reserveResponseBuffer(url: HttpUrl, bytes: UInt64, context!: OperationContext = OperationContext.background()): Resource"
+          },
+          {
+            "kind": "func",
+            "name": "resourceSnapshot",
+            "signature": "public func resourceSnapshot(): HttpResourceSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "rotateProxyResolver",
+            "signature": "public func rotateProxyResolver(value: Resolver, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
+            "name": "rotateResolver",
+            "signature": "public func rotateResolver(value: Resolver, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
+            "name": "rotateTls",
+            "signature": "public func rotateTls(value: HttpClientTlsConfig, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
             "name": "send",
             "signature": "public func send(request: HttpRequest, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
           },
@@ -3872,6 +4731,11 @@
             "kind": "func",
             "name": "sendControlled",
             "signature": "public func sendControlled( request: HttpRequest, cancellation: HttpCancellationHandles, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
+          },
+          {
+            "kind": "func",
+            "name": "sendOnce",
+            "signature": "public func sendOnce(request: HttpRequest, context!: OperationContext = OperationContext.background(), trailer!: HttpTrailer = HttpTrailer() ): HttpResponse"
           },
           {
             "kind": "func",
@@ -3935,6 +4799,11 @@
             "kind": "func",
             "name": "resolver",
             "signature": "public func resolver(value: Resolver): HttpClientBuilder"
+          },
+          {
+            "kind": "func",
+            "name": "resourceLimits",
+            "signature": "public func resourceLimits(value: HttpResourceLimits): HttpClientBuilder"
           },
           {
             "kind": "func",
@@ -4218,6 +5087,104 @@
       {
         "package": "wirestack.http",
         "kind": "class",
+        "name": "HttpResourceLimits",
+        "signature": "public class HttpResourceLimits",
+        "members": [
+          {
+            "kind": "func",
+            "name": "clientDefault",
+            "signature": "public static func clientDefault(): HttpResourceLimits"
+          },
+          {
+            "kind": "func",
+            "name": "serverDefault",
+            "signature": "public static func serverDefault(): HttpResourceLimits"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( maximumConnections!: Int64 = 128, maximumConnectionsPerRoute!: Int64 = 16, maximumConnectionsPerOrigin!: Int64 = 32, maximumRequests!: Int64 = 4096, maximumRequestsPerRoute!: Int64 = 1024, maximumRequestsPerOrigin!: Int64 = 2048, maximumStreams!: Int64 = 4096, maximumStreamsPerRoute!: Int64 = 1024, maximumStreamsPerOrigin!: Int64 = 2048, maximumManagedBufferBytes!: UInt64 = 134217728u64, reservedControlBufferBytes!: UInt64 = 1048576u64, maximumWaiters!: Int64 = 256, maximumManagedBufferBytesPerRoute!: UInt64 = 33554432u64, maximumManagedBufferBytesPerOrigin!: UInt64 = 67108864u64, maximumOwners!: Int64 = 8192 )"
+          },
+          {
+            "kind": "let",
+            "name": "maximumConnections",
+            "signature": "public let maximumConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumConnectionsPerOrigin",
+            "signature": "public let maximumConnectionsPerOrigin: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumConnectionsPerRoute",
+            "signature": "public let maximumConnectionsPerRoute: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumManagedBufferBytes",
+            "signature": "public let maximumManagedBufferBytes: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumManagedBufferBytesPerOrigin",
+            "signature": "public let maximumManagedBufferBytesPerOrigin: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumManagedBufferBytesPerRoute",
+            "signature": "public let maximumManagedBufferBytesPerRoute: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumOwners",
+            "signature": "public let maximumOwners: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumRequests",
+            "signature": "public let maximumRequests: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumRequestsPerOrigin",
+            "signature": "public let maximumRequestsPerOrigin: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumRequestsPerRoute",
+            "signature": "public let maximumRequestsPerRoute: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumStreams",
+            "signature": "public let maximumStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumStreamsPerOrigin",
+            "signature": "public let maximumStreamsPerOrigin: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumStreamsPerRoute",
+            "signature": "public let maximumStreamsPerRoute: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumWaiters",
+            "signature": "public let maximumWaiters: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "reservedControlBufferBytes",
+            "signature": "public let reservedControlBufferBytes: UInt64"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "class",
         "name": "HttpRetryPolicy",
         "signature": "public class HttpRetryPolicy",
         "members": [
@@ -4261,6 +5228,21 @@
           },
           {
             "kind": "func",
+            "name": "observationSnapshot",
+            "signature": "public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpServerObservationSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "resourceSnapshot",
+            "signature": "public func resourceSnapshot(): HttpResourceSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "rotateTls",
+            "signature": "public func rotateTls(value: HttpServerTlsConfig, policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful, context!: OperationContext = OperationContext.background()): UInt64"
+          },
+          {
+            "kind": "func",
             "name": "serve",
             "signature": "public func serve(context!: OperationContext = OperationContext.background()): Unit"
           },
@@ -4268,6 +5250,11 @@
             "kind": "func",
             "name": "shutdown",
             "signature": "public func shutdown(context!: OperationContext = OperationContext.background()): HttpServerShutdownResult"
+          },
+          {
+            "kind": "func",
+            "name": "tlsGeneration",
+            "signature": "public func tlsGeneration(): UInt64"
           },
           {
             "kind": "let",
@@ -4321,6 +5308,11 @@
             "kind": "func",
             "name": "requestsPerConnectionLimit",
             "signature": "public func requestsPerConnectionLimit(value: Int64): HttpServerBuilder"
+          },
+          {
+            "kind": "func",
+            "name": "resourceLimits",
+            "signature": "public func resourceLimits(value: HttpResourceLimits): HttpServerBuilder"
           },
           {
             "kind": "func",
@@ -4769,7 +5761,7 @@
         "package": "wirestack.http",
         "kind": "class",
         "name": "SystemResolver",
-        "signature": "public class SystemResolver <: Resolver & Resource",
+        "signature": "public class SystemResolver <: Resolver & Resource & api.ResolverResourceOwner",
         "members": [
           {
             "kind": "func",
@@ -4792,6 +5784,11 @@
             "signature": "public func resolve( host: HostName, service: ?String, options: ResolveOptions, context: OperationContext ): ResolveResult"
           },
           {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+          },
+          {
             "kind": "init",
             "name": "init",
             "signature": "public init(workerCount!: Int64 = 4, queueCapacity!: Int64 = 64)"
@@ -4807,12 +5804,12 @@
           {
             "kind": "func",
             "name": "close",
-            "signature": "public func close( code: UInt16, reason: String, context!: OperationContext = OperationContext.background() ): Unit"
+            "signature": "public func close(): Unit"
           },
           {
             "kind": "func",
             "name": "close",
-            "signature": "public func close(): Unit"
+            "signature": "public func close(code: UInt16, reason: String, context!: OperationContext = OperationContext.background()): Unit"
           },
           {
             "kind": "func",
@@ -4822,12 +5819,12 @@
           {
             "kind": "func",
             "name": "receive",
-            "signature": "public func receive( context!: OperationContext = OperationContext.background() ): WebSocketFrame"
+            "signature": "public func receive(context!: OperationContext = OperationContext.background()): WebSocketFrame"
           },
           {
             "kind": "func",
             "name": "send",
-            "signature": "public func send( frame: WebSocketFrame, context!: OperationContext = OperationContext.background() ): Unit"
+            "signature": "public func send(frame: WebSocketFrame, context!: OperationContext = OperationContext.background()): Unit"
           },
           {
             "kind": "let",
@@ -4937,6 +5934,54 @@
       },
       {
         "package": "wirestack.http",
+        "kind": "class",
+        "name": "WebSocketUrl",
+        "signature": "public class WebSocketUrl <: ToString",
+        "members": [
+          {
+            "kind": "func",
+            "name": "parse",
+            "signature": "public static func parse(value: String): WebSocketUrl"
+          },
+          {
+            "kind": "func",
+            "name": "toString",
+            "signature": "public func toString(): String"
+          },
+          {
+            "kind": "let",
+            "name": "scheme",
+            "signature": "public let scheme: String"
+          },
+          {
+            "kind": "prop",
+            "name": "authority",
+            "signature": "public prop authority: String { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "explicitPort",
+            "signature": "public prop explicitPort: Bool { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "host",
+            "signature": "public prop host: String { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "port",
+            "signature": "public prop port: UInt16 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "requestTarget",
+            "signature": "public prop requestTarget: String { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
         "kind": "enum",
         "name": "FileHandlerErrorCode",
         "signature": "public enum FileHandlerErrorCode",
@@ -5032,6 +6077,24 @@
             "kind": "case",
             "name": "StrictTls13",
             "signature": "| StrictTls13"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "enum",
+        "name": "HttpConfigurationRotation",
+        "signature": "public enum HttpConfigurationRotation",
+        "members": [
+          {
+            "kind": "case",
+            "name": "Graceful",
+            "signature": "| Graceful"
+          },
+          {
+            "kind": "case",
+            "name": "SecurityReplacement",
+            "signature": "| SecurityReplacement"
           }
         ]
       },
@@ -5317,6 +6380,11 @@
         "members": [
           {
             "kind": "case",
+            "name": "CapacityExceeded",
+            "signature": "| CapacityExceeded"
+          },
+          {
+            "kind": "case",
             "name": "Closed",
             "signature": "| Closed"
           },
@@ -5498,6 +6566,271 @@
             "kind": "func",
             "name": "serve",
             "signature": "func serve(connection: WebSocketConnection, context: OperationContext): Unit"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "struct",
+        "name": "HttpClientConfigurationSnapshot",
+        "signature": "public struct HttpClientConfigurationSnapshot",
+        "members": [
+          {
+            "kind": "let",
+            "name": "directDnsGeneration",
+            "signature": "public let directDnsGeneration: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "proxyDnsGeneration",
+            "signature": "public let proxyDnsGeneration: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "retainedGenerations",
+            "signature": "public let retainedGenerations: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "retainedTlsContexts",
+            "signature": "public let retainedTlsContexts: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "tlsGeneration",
+            "signature": "public let tlsGeneration: UInt64"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "struct",
+        "name": "HttpClientObservationSnapshot",
+        "signature": "public struct HttpClientObservationSnapshot",
+        "members": [
+          {
+            "kind": "let",
+            "name": "configuration",
+            "signature": "public let configuration: HttpClientConfigurationSnapshot"
+          },
+          {
+            "kind": "let",
+            "name": "observations",
+            "signature": "public let observations: ?api.NetworkEventBufferSnapshot"
+          },
+          {
+            "kind": "let",
+            "name": "pools",
+            "signature": "public let pools: api.NetworkConnectionPoolSnapshot"
+          },
+          {
+            "kind": "let",
+            "name": "resolvers",
+            "signature": "public let resolvers: Array<api.ResolverResourceSnapshot>"
+          },
+          {
+            "kind": "let",
+            "name": "resources",
+            "signature": "public let resources: HttpResourceSnapshot"
+          },
+          {
+            "kind": "let",
+            "name": "unavailableResolvers",
+            "signature": "public let unavailableResolvers: Int64"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "struct",
+        "name": "HttpResourceOwnerSnapshot",
+        "signature": "public struct HttpResourceOwnerSnapshot",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( origin: String, route: String, connections: Int64, requests: Int64, streams: Int64, managedBufferBytes: UInt64, waiters: Int64, reservedConnections!: Int64 = 0, reservedStreams!: Int64 = 0 )"
+          },
+          {
+            "kind": "let",
+            "name": "connections",
+            "signature": "public let connections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "managedBufferBytes",
+            "signature": "public let managedBufferBytes: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "origin",
+            "signature": "public let origin: String"
+          },
+          {
+            "kind": "let",
+            "name": "requests",
+            "signature": "public let requests: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "reservedConnections",
+            "signature": "public let reservedConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "reservedStreams",
+            "signature": "public let reservedStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "route",
+            "signature": "public let route: String"
+          },
+          {
+            "kind": "let",
+            "name": "streams",
+            "signature": "public let streams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "waiters",
+            "signature": "public let waiters: Int64"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "struct",
+        "name": "HttpResourceSnapshot",
+        "signature": "public struct HttpResourceSnapshot",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( limits: HttpResourceLimits, activeConnections: Int64, activeRequests: Int64, activeStreams: Int64, managedBufferBytes: UInt64, admissionWaiters: Int64, highWaterConnections: Int64, highWaterRequests: Int64, highWaterStreams: Int64, highWaterManagedBufferBytes: UInt64, highWaterAdmissionWaiters: Int64, owners: Array<HttpResourceOwnerSnapshot>, sampledAt!: MonoTime = MonoTime.now(), reservedConnections!: Int64 = 0, reservedStreams!: Int64 = 0, rejectedOperations!: Int64 = 0, completedCancellations!: Int64 = 0, lastCancellationCompletionLatency!: ?Duration = None<Duration> )"
+          },
+          {
+            "kind": "let",
+            "name": "activeConnections",
+            "signature": "public let activeConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "activeRequests",
+            "signature": "public let activeRequests: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "activeStreams",
+            "signature": "public let activeStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "admissionWaiters",
+            "signature": "public let admissionWaiters: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "completedCancellations",
+            "signature": "public let completedCancellations: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "highWaterAdmissionWaiters",
+            "signature": "public let highWaterAdmissionWaiters: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "highWaterConnections",
+            "signature": "public let highWaterConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "highWaterManagedBufferBytes",
+            "signature": "public let highWaterManagedBufferBytes: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "highWaterRequests",
+            "signature": "public let highWaterRequests: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "highWaterStreams",
+            "signature": "public let highWaterStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "lastCancellationCompletionLatency",
+            "signature": "public let lastCancellationCompletionLatency: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "limits",
+            "signature": "public let limits: HttpResourceLimits"
+          },
+          {
+            "kind": "let",
+            "name": "managedBufferBytes",
+            "signature": "public let managedBufferBytes: UInt64"
+          },
+          {
+            "kind": "let",
+            "name": "owners",
+            "signature": "public let owners: Array<HttpResourceOwnerSnapshot>"
+          },
+          {
+            "kind": "let",
+            "name": "rejectedOperations",
+            "signature": "public let rejectedOperations: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "reservedConnections",
+            "signature": "public let reservedConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "reservedStreams",
+            "signature": "public let reservedStreams: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "sampledAt",
+            "signature": "public let sampledAt: MonoTime"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.http",
+        "kind": "struct",
+        "name": "HttpServerObservationSnapshot",
+        "signature": "public struct HttpServerObservationSnapshot",
+        "members": [
+          {
+            "kind": "let",
+            "name": "drainingConnections",
+            "signature": "public let drainingConnections: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "observations",
+            "signature": "public let observations: ?api.NetworkEventBufferSnapshot"
+          },
+          {
+            "kind": "let",
+            "name": "resources",
+            "signature": "public let resources: HttpResourceSnapshot"
+          },
+          {
+            "kind": "let",
+            "name": "retainedTlsGenerations",
+            "signature": "public let retainedTlsGenerations: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "tlsGeneration",
+            "signature": "public let tlsGeneration: UInt64"
           }
         ]
       },
@@ -5841,7 +7174,7 @@
         "package": "wirestack.net",
         "kind": "class",
         "name": "DnsClient",
-        "signature": "public class DnsClient <: Resource",
+        "signature": "public class DnsClient <: Resource & api.ResolverResourceOwner",
         "members": [
           {
             "kind": "func",
@@ -5862,6 +7195,11 @@
             "kind": "func",
             "name": "query",
             "signature": "public func query( name: String, recordType: DnsRecordType, context!: api.OperationContext = api.OperationContext.background() ): DnsMessageSummary"
+          },
+          {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
           },
           {
             "kind": "init",
@@ -5915,7 +7253,7 @@
         "package": "wirestack.net",
         "kind": "class",
         "name": "Resolver",
-        "signature": "public class Resolver <: api.Resolver & Resource",
+        "signature": "public class Resolver <: api.Resolver & Resource & api.ResolverResourceOwner",
         "members": [
           {
             "kind": "func",
@@ -5948,6 +7286,11 @@
             "signature": "public func resolve(name: String, options!: api.ResolveOptions = api.ResolveOptions(), context!: api.OperationContext = api.OperationContext.background()): api.ResolveResult"
           },
           {
+            "kind": "func",
+            "name": "resolverResourceSnapshot",
+            "signature": "public func resolverResourceSnapshot(): api.ResolverResourceSnapshot"
+          },
+          {
             "kind": "init",
             "name": "init",
             "signature": "public init(config!: DnsResolverConfig = DnsResolverConfig.fromSystem(), dns!: ?DnsClient = None<DnsClient>)"
@@ -5978,7 +7321,7 @@
           {
             "kind": "func",
             "name": "bind",
-            "signature": "public static func bind( endpoint: api.SocketEndpoint, backlog!: Int64 = 128, context!: api.OperationContext = api.OperationContext.background() ): TcpListener"
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, backlog!: Int64 = 128, options!: Array<SocketOption> = [], acceptedOptions!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): TcpListener"
           },
           {
             "kind": "func",
@@ -5989,6 +7332,11 @@
             "kind": "func",
             "name": "close",
             "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "getOption",
+            "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
           },
           {
             "kind": "func",
@@ -6035,8 +7383,18 @@
           },
           {
             "kind": "func",
+            "name": "configure",
+            "signature": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
             "name": "connect",
-            "signature": "public static func connect( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+            "signature": "public static func connect( endpoint: api.SocketEndpoint, options!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): TcpStream"
+          },
+          {
+            "kind": "func",
+            "name": "getOption",
+            "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
           },
           {
             "kind": "func",
@@ -6119,7 +7477,7 @@
           {
             "kind": "func",
             "name": "bind",
-            "signature": "public static func bind( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, options!: Array<SocketOption> = [], context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
           },
           {
             "kind": "func",
@@ -6133,13 +7491,38 @@
           },
           {
             "kind": "func",
+            "name": "configure",
+            "signature": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
             "name": "connect",
             "signature": "public func connect( endpoint: NetworkEndpoint, context!: api.OperationContext = api.OperationContext.background() ): Unit"
           },
           {
             "kind": "func",
+            "name": "disconnect",
+            "signature": "public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "getOption",
+            "signature": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption"
+          },
+          {
+            "kind": "func",
             "name": "isClosed",
             "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "joinMulticastGroup",
+            "signature": "public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "leaveMulticastGroup",
+            "signature": "public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
           },
           {
             "kind": "func",
@@ -6519,8 +7902,28 @@
           },
           {
             "kind": "case",
+            "name": "Ipv6Only",
+            "signature": "| Ipv6Only(Bool)"
+          },
+          {
+            "kind": "case",
             "name": "KeepAlive",
             "signature": "| KeepAlive(Bool)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastHopLimit",
+            "signature": "| MulticastHopLimit(UInt8)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastInterface",
+            "signature": "| MulticastInterface(UInt32)"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastLoopback",
+            "signature": "| MulticastLoopback(Bool)"
           },
           {
             "kind": "case",
@@ -6551,6 +7954,74 @@
             "kind": "case",
             "name": "SendBuffer",
             "signature": "| SendBuffer(Int64)"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.net",
+        "kind": "enum",
+        "name": "SocketOptionName",
+        "signature": "public enum SocketOptionName",
+        "members": [
+          {
+            "kind": "case",
+            "name": "Broadcast",
+            "signature": "| Broadcast"
+          },
+          {
+            "kind": "case",
+            "name": "Ipv6Only",
+            "signature": "| Ipv6Only"
+          },
+          {
+            "kind": "case",
+            "name": "KeepAlive",
+            "signature": "| KeepAlive"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastHopLimit",
+            "signature": "| MulticastHopLimit"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastInterface",
+            "signature": "| MulticastInterface"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastLoopback",
+            "signature": "| MulticastLoopback"
+          },
+          {
+            "kind": "case",
+            "name": "MulticastTtl",
+            "signature": "| MulticastTtl"
+          },
+          {
+            "kind": "case",
+            "name": "NoDelay",
+            "signature": "| NoDelay"
+          },
+          {
+            "kind": "case",
+            "name": "ReceiveBuffer",
+            "signature": "| ReceiveBuffer"
+          },
+          {
+            "kind": "case",
+            "name": "ReuseAddress",
+            "signature": "| ReuseAddress"
+          },
+          {
+            "kind": "case",
+            "name": "ReusePort",
+            "signature": "| ReusePort"
+          },
+          {
+            "kind": "case",
+            "name": "SendBuffer",
+            "signature": "| SendBuffer"
           }
         ]
       },
@@ -7120,6 +8591,593 @@
             "kind": "let",
             "name": "option",
             "signature": "public let option: Int32"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.observability",
+        "kind": "class",
+        "name": "BoundedNetworkEventSink",
+        "signature": "public class BoundedNetworkEventSink <: api.NetworkEventSink & api.NetworkEventStatistics",
+        "members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(context: api.OperationContext): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "detailedSnapshot",
+            "signature": "public func detailedSnapshot(): NetworkEventSinkSnapshot"
+          },
+          {
+            "kind": "func",
+            "name": "emit",
+            "signature": "public func emit(event: api.NetworkEvent): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "flush",
+            "signature": "public func flush(context: api.OperationContext): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "snapshot",
+            "signature": "public func snapshot(): api.NetworkEventBufferSnapshot"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(exporter: NetworkEventExporter, config!: NetworkEventSinkConfig = NetworkEventSinkConfig())"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.observability",
+        "kind": "interface",
+        "name": "NetworkEventExporter",
+        "signature": "public interface NetworkEventExporter",
+        "members": [
+          {
+            "kind": "func",
+            "name": "export",
+            "signature": "func export(events: Array<api.NetworkEvent>, context: api.OperationContext): Unit"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.observability",
+        "kind": "struct",
+        "name": "NetworkEventSinkConfig",
+        "signature": "public struct NetworkEventSinkConfig",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(capacity!: Int64 = 256, batchSize!: Int64 = 64, sampleEvery!: Int64 = 1, shutdownCap!: Duration = Duration.second)"
+          },
+          {
+            "kind": "let",
+            "name": "batchSize",
+            "signature": "public let batchSize: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "capacity",
+            "signature": "public let capacity: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "sampleEvery",
+            "signature": "public let sampleEvery: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "shutdownCap",
+            "signature": "public let shutdownCap: Duration"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.observability",
+        "kind": "struct",
+        "name": "NetworkEventSinkSnapshot",
+        "signature": "public struct NetworkEventSinkSnapshot",
+        "members": [
+          {
+            "kind": "let",
+            "name": "cancellationCompleted",
+            "signature": "public let cancellationCompleted: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "capacity",
+            "signature": "public let capacity: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "closed",
+            "signature": "public let closed: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "closedDroppedEvents",
+            "signature": "public let closedDroppedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "dispatcherRunning",
+            "signature": "public let dispatcherRunning: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "exportFaultDroppedEvents",
+            "signature": "public let exportFaultDroppedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "exportFaults",
+            "signature": "public let exportFaults: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "exportedEvents",
+            "signature": "public let exportedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "inFlightEvents",
+            "signature": "public let inFlightEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "queueFullDroppedEvents",
+            "signature": "public let queueFullDroppedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "queuedEvents",
+            "signature": "public let queuedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "sampledOutEvents",
+            "signature": "public let sampledOutEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "shutdownDroppedEvents",
+            "signature": "public let shutdownDroppedEvents: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "workerRunning",
+            "signature": "public let workerRunning: Bool"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseDecodeResult",
+        "signature": "public class SseDecodeResult",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(consumed: Int64, event: ?SseEvent)"
+          },
+          {
+            "kind": "let",
+            "name": "consumed",
+            "signature": "public let consumed: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "event",
+            "signature": "public let event: ?SseEvent"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseDecoder",
+        "signature": "public class SseDecoder",
+        "members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "decode",
+            "signature": "public func decode(bytes: Array<Byte>, offset!: Int64 = 0, length!: ?Int64 = None<Int64>): SseDecodeResult"
+          },
+          {
+            "kind": "func",
+            "name": "finish",
+            "signature": "public func finish(): Unit"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(limits!: SseLimits = SseLimits(), lastEventId!: String = \"\")"
+          },
+          {
+            "kind": "prop",
+            "name": "lastEventId",
+            "signature": "public prop lastEventId: String { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "retainedBytes",
+            "signature": "public prop retainedBytes: UInt64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "retryMilliseconds",
+            "signature": "public prop retryMilliseconds: ?UInt64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseEncoder",
+        "signature": "public class SseEncoder",
+        "members": [
+          {
+            "kind": "func",
+            "name": "comment",
+            "signature": "public func comment(value: String): Array<Byte>"
+          },
+          {
+            "kind": "func",
+            "name": "encode",
+            "signature": "public func encode(event: SseEvent, retryMilliseconds!: ?UInt64 = None<UInt64>): Array<Byte>"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(limits!: SseLimits = SseLimits())"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseEvent",
+        "signature": "public class SseEvent",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(data: String, eventType!: String = \"message\", lastEventId!: String = \"\")"
+          },
+          {
+            "kind": "let",
+            "name": "data",
+            "signature": "public let data: String"
+          },
+          {
+            "kind": "let",
+            "name": "eventType",
+            "signature": "public let eventType: String"
+          },
+          {
+            "kind": "let",
+            "name": "lastEventId",
+            "signature": "public let lastEventId: String"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseException",
+        "signature": "public class SseException <: Exception",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(code: SseErrorCode, message: String, cause!: ?Exception = None<Exception>)"
+          },
+          {
+            "kind": "let",
+            "name": "cause",
+            "signature": "public let cause: ?Exception"
+          },
+          {
+            "kind": "let",
+            "name": "code",
+            "signature": "public let code: SseErrorCode"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseLimits",
+        "signature": "public class SseLimits",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(maximumLineBytes!: Int64 = 16 * 1024, maximumEventBytes!: Int64 = 256 * 1024, maximumFieldsPerEvent!: Int64 = 1024, maximumBytesWithoutEvent!: Int64 = 1024 * 1024, maximumIdBytes!: Int64 = 4096, maximumRetryMilliseconds!: UInt64 = 60000u64)"
+          },
+          {
+            "kind": "let",
+            "name": "maximumBytesWithoutEvent",
+            "signature": "public let maximumBytesWithoutEvent: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumEventBytes",
+            "signature": "public let maximumEventBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumFieldsPerEvent",
+            "signature": "public let maximumFieldsPerEvent: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumIdBytes",
+            "signature": "public let maximumIdBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumLineBytes",
+            "signature": "public let maximumLineBytes: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumRetryMilliseconds",
+            "signature": "public let maximumRetryMilliseconds: UInt64"
+          },
+          {
+            "kind": "prop",
+            "name": "maximumRetainedBytes",
+            "signature": "public prop maximumRetainedBytes: UInt64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseSession",
+        "signature": "public class SseSession <: Resource",
+        "members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "eventSource",
+            "signature": "public static func eventSource(client: HttpClient, url: HttpUrl, headers!: HttpHeaders = HttpHeaders(), limits!: SseLimits = SseLimits(), policy!: SseSessionPolicy = SseSessionPolicy(), readBufferBytes!: Int64 = 16 * 1024, context!: OperationContext = OperationContext.background()): SseSession"
+          },
+          {
+            "kind": "func",
+            "name": "isClosed",
+            "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "oneShot",
+            "signature": "public static func oneShot(client: HttpClient, request: HttpRequest, limits!: SseLimits = SseLimits(), policy!: SseSessionPolicy = SseSessionPolicy(), readBufferBytes!: Int64 = 16 * 1024, context!: OperationContext = OperationContext.background()): SseSession"
+          },
+          {
+            "kind": "func",
+            "name": "receive",
+            "signature": "public func receive(): ?SseEvent"
+          },
+          {
+            "kind": "prop",
+            "name": "lastEventId",
+            "signature": "public prop lastEventId: String { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "lastFailure",
+            "signature": "public prop lastFailure: ?Exception { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "reconnectCount",
+            "signature": "public prop reconnectCount: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "requestId",
+            "signature": "public prop requestId: Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "reservedBufferBytes",
+            "signature": "public prop reservedBufferBytes: UInt64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseSessionPolicy",
+        "signature": "public class SseSessionPolicy",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(maximumReconnects!: Int64 = 0, maximumDuration!: Duration = 5 * Duration.minute, initialRetryDelay!: Duration = Duration.second, minimumRetryDelay!: Duration = 50 * Duration.millisecond, maximumRetryDelay!: Duration = 30 * Duration.second, jitterPermille!: Int64 = 200, bodyReadIdle!: ?Duration = None<Duration>)"
+          },
+          {
+            "kind": "let",
+            "name": "bodyReadIdle",
+            "signature": "public let bodyReadIdle: ?Duration"
+          },
+          {
+            "kind": "let",
+            "name": "initialRetryDelay",
+            "signature": "public let initialRetryDelay: Duration"
+          },
+          {
+            "kind": "let",
+            "name": "jitterPermille",
+            "signature": "public let jitterPermille: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumDuration",
+            "signature": "public let maximumDuration: Duration"
+          },
+          {
+            "kind": "let",
+            "name": "maximumReconnects",
+            "signature": "public let maximumReconnects: Int64"
+          },
+          {
+            "kind": "let",
+            "name": "maximumRetryDelay",
+            "signature": "public let maximumRetryDelay: Duration"
+          },
+          {
+            "kind": "let",
+            "name": "minimumRetryDelay",
+            "signature": "public let minimumRetryDelay: Duration"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "class",
+        "name": "SseWriter",
+        "signature": "public class SseWriter <: HttpBodyStream",
+        "members": [
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "comment",
+            "signature": "public func comment(value: String, context!: OperationContext = OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "complete",
+            "signature": "public func complete(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "flush",
+            "signature": "public func flush(context!: OperationContext = OperationContext.background()): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "isClosed",
+            "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "read",
+            "signature": "public func read(destination: Array<Byte>): Int64"
+          },
+          {
+            "kind": "func",
+            "name": "write",
+            "signature": "public func write(event: SseEvent, context!: OperationContext = OperationContext.background(), retryMilliseconds!: ?UInt64 = None<UInt64>): Unit"
+          },
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init(limits!: SseLimits = SseLimits(), maximumBufferBytes!: Int64 = 64 * 1024, context!: OperationContext = OperationContext.background())"
+          },
+          {
+            "kind": "let",
+            "name": "maximumBufferBytes",
+            "signature": "public let maximumBufferBytes: Int64"
+          },
+          {
+            "kind": "prop",
+            "name": "contentLength",
+            "signature": "public prop contentLength: ?Int64 { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "queuedBytes",
+            "signature": "public prop queuedBytes: Int64 { accessors:get }"
+          }
+        ]
+      },
+      {
+        "package": "wirestack.sse",
+        "kind": "enum",
+        "name": "SseErrorCode",
+        "signature": "public enum SseErrorCode <: Equatable<SseErrorCode>",
+        "members": [
+          {
+            "kind": "case",
+            "name": "Closed",
+            "signature": "| Closed"
+          },
+          {
+            "kind": "case",
+            "name": "ConcurrentOperation",
+            "signature": "| ConcurrentOperation"
+          },
+          {
+            "kind": "case",
+            "name": "EventLimit",
+            "signature": "| EventLimit"
+          },
+          {
+            "kind": "case",
+            "name": "FieldLimit",
+            "signature": "| FieldLimit"
+          },
+          {
+            "kind": "case",
+            "name": "IdLimit",
+            "signature": "| IdLimit"
+          },
+          {
+            "kind": "case",
+            "name": "InvalidMetadata",
+            "signature": "| InvalidMetadata"
+          },
+          {
+            "kind": "case",
+            "name": "InvalidResponse",
+            "signature": "| InvalidResponse"
+          },
+          {
+            "kind": "case",
+            "name": "LineLimit",
+            "signature": "| LineLimit"
+          },
+          {
+            "kind": "case",
+            "name": "NoProgress",
+            "signature": "| NoProgress"
+          },
+          {
+            "kind": "case",
+            "name": "ReconnectLimit",
+            "signature": "| ReconnectLimit"
+          },
+          {
+            "kind": "operator",
+            "name": "!=",
+            "signature": "public operator func !=(other: SseErrorCode): Bool"
+          },
+          {
+            "kind": "operator",
+            "name": "==",
+            "signature": "public operator func ==(other: SseErrorCode): Bool"
           }
         ]
       },
@@ -8925,7 +10983,7 @@
             {
               "kind": "init",
               "name": "init",
-              "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource> )"
+              "signature": "public init( status: Int64, reason: String, body: ResponseBody, version!: HttpVersion = HttpVersion.Http11, headers!: HttpHeaders = HttpHeaders(), pushes!: ?HttpPushSource = None<HttpPushSource>, operationContext!: ?OperationContext = None<OperationContext> )"
             },
             {
               "kind": "let",
@@ -8936,6 +10994,11 @@
               "kind": "let",
               "name": "headers",
               "signature": "public let headers: HttpHeaders"
+            },
+            {
+              "kind": "let",
+              "name": "operationContext",
+              "signature": "public let operationContext: ?OperationContext"
             },
             {
               "kind": "let",
@@ -9469,7 +11532,17 @@
             {
               "kind": "init",
               "name": "init",
-              "signature": "public init( kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64> )"
+              "signature": "public init(kind: NetworkEventKind, outcome: NetworkEventOutcome, trace!: ?NetworkTraceContext = None<NetworkTraceContext>, phase!: ?NetworkPhase = None<NetworkPhase>, errorCode!: ?NetworkErrorCode = None<NetworkErrorCode>, connectionId!: ?Int64 = None<Int64>, requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, connectionAttemptIndex!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, timeoutReason!: ?NetworkTimeoutReason = None<NetworkTimeoutReason>, timeoutStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, occurredAt!: ?MonoTime = None<MonoTime> )"
+            },
+            {
+              "kind": "let",
+              "name": "attemptId",
+              "signature": "public let attemptId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "connectionAttemptIndex",
+              "signature": "public let connectionAttemptIndex: ?Int64"
             },
             {
               "kind": "let",
@@ -9488,6 +11561,11 @@
             },
             {
               "kind": "let",
+              "name": "occurredAt",
+              "signature": "public let occurredAt: ?MonoTime"
+            },
+            {
+              "kind": "let",
               "name": "outcome",
               "signature": "public let outcome: NetworkEventOutcome"
             },
@@ -9495,6 +11573,31 @@
               "kind": "let",
               "name": "phase",
               "signature": "public let phase: ?NetworkPhase"
+            },
+            {
+              "kind": "let",
+              "name": "requestId",
+              "signature": "public let requestId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "stage",
+              "signature": "public let stage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "streamId",
+              "signature": "public let streamId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutReason",
+              "signature": "public let timeoutReason: ?NetworkTimeoutReason"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutStage",
+              "signature": "public let timeoutStage: ?OperationTimeoutStage"
             },
             {
               "kind": "let",
@@ -9517,6 +11620,31 @@
           "members": [
             {
               "kind": "case",
+              "name": "AttemptCompleted",
+              "signature": "| AttemptCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "AttemptStarted",
+              "signature": "| AttemptStarted"
+            },
+            {
+              "kind": "case",
+              "name": "BodyCompleted",
+              "signature": "| BodyCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "BodyStarted",
+              "signature": "| BodyStarted"
+            },
+            {
+              "kind": "case",
+              "name": "ConfigurationRotated",
+              "signature": "| ConfigurationRotated"
+            },
+            {
+              "kind": "case",
               "name": "ConnectAttemptCompleted",
               "signature": "| ConnectAttemptCompleted"
             },
@@ -9529,6 +11657,11 @@
               "kind": "case",
               "name": "ConnectionClosed",
               "signature": "| ConnectionClosed"
+            },
+            {
+              "kind": "case",
+              "name": "ConnectionDraining",
+              "signature": "| ConnectionDraining"
             },
             {
               "kind": "case",
@@ -9562,8 +11695,38 @@
             },
             {
               "kind": "case",
+              "name": "LocalBackpressureCompleted",
+              "signature": "| LocalBackpressureCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "LocalBackpressureStarted",
+              "signature": "| LocalBackpressureStarted"
+            },
+            {
+              "kind": "case",
               "name": "ProxyTunnelEstablished",
               "signature": "| ProxyTunnelEstablished"
+            },
+            {
+              "kind": "case",
+              "name": "RequestCompleted",
+              "signature": "| RequestCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "RequestStarted",
+              "signature": "| RequestStarted"
+            },
+            {
+              "kind": "case",
+              "name": "StageCompleted",
+              "signature": "| StageCompleted"
+            },
+            {
+              "kind": "case",
+              "name": "StageStarted",
+              "signature": "| StageStarted"
             },
             {
               "kind": "case",
@@ -9603,6 +11766,11 @@
               "kind": "case",
               "name": "Failed",
               "signature": "| Failed"
+            },
+            {
+              "kind": "case",
+              "name": "NotExecuted",
+              "signature": "| NotExecuted"
             },
             {
               "kind": "case",
@@ -9856,6 +12024,11 @@
             },
             {
               "kind": "func",
+              "name": "forStage",
+              "signature": "public func forStage(stage: OperationTimeoutStage): OperationContext"
+            },
+            {
+              "kind": "func",
               "name": "isCancellationRequested",
               "signature": "public func isCancellationRequested(): Bool"
             },
@@ -9881,8 +12054,18 @@
             },
             {
               "kind": "func",
+              "name": "withEventCorrelation",
+              "signature": "public func withEventCorrelation(requestId!: ?Int64, attemptId!: ?Int64, connectionId!: ?Int64, streamId!: ?Int64): OperationContext"
+            },
+            {
+              "kind": "func",
               "name": "withEventSink",
               "signature": "public func withEventSink(value: ?NetworkEventSink): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withTimeoutPolicy",
+              "signature": "public func withTimeoutPolicy(value: OperationTimeoutPolicy): OperationContext"
             },
             {
               "kind": "func",
@@ -9892,7 +12075,12 @@
             {
               "kind": "init",
               "name": "init",
-              "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink> )"
+              "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink>, timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy(), requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, connectionId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, deadlineStage!: ?OperationTimeoutStage = None<OperationTimeoutStage> )"
+            },
+            {
+              "kind": "let",
+              "name": "attemptId",
+              "signature": "public let attemptId: ?Int64"
             },
             {
               "kind": "let",
@@ -9901,13 +12089,43 @@
             },
             {
               "kind": "let",
+              "name": "connectionId",
+              "signature": "public let connectionId: ?Int64"
+            },
+            {
+              "kind": "let",
               "name": "deadline",
               "signature": "public let deadline: ?Deadline"
             },
             {
               "kind": "let",
+              "name": "deadlineStage",
+              "signature": "public let deadlineStage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
               "name": "eventSink",
               "signature": "public let eventSink: ?NetworkEventSink"
+            },
+            {
+              "kind": "let",
+              "name": "requestId",
+              "signature": "public let requestId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "stage",
+              "signature": "public let stage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "streamId",
+              "signature": "public let streamId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutPolicy",
+              "signature": "public let timeoutPolicy: OperationTimeoutPolicy"
             },
             {
               "kind": "let",
@@ -11761,6 +13979,11 @@
             },
             {
               "kind": "func",
+              "name": "forStage",
+              "signature": "public func forStage(stage: OperationTimeoutStage): OperationContext"
+            },
+            {
+              "kind": "func",
               "name": "isCancellationRequested",
               "signature": "public func isCancellationRequested(): Bool"
             },
@@ -11786,8 +14009,18 @@
             },
             {
               "kind": "func",
+              "name": "withEventCorrelation",
+              "signature": "public func withEventCorrelation(requestId!: ?Int64, attemptId!: ?Int64, connectionId!: ?Int64, streamId!: ?Int64): OperationContext"
+            },
+            {
+              "kind": "func",
               "name": "withEventSink",
               "signature": "public func withEventSink(value: ?NetworkEventSink): OperationContext"
+            },
+            {
+              "kind": "func",
+              "name": "withTimeoutPolicy",
+              "signature": "public func withTimeoutPolicy(value: OperationTimeoutPolicy): OperationContext"
             },
             {
               "kind": "func",
@@ -11797,7 +14030,12 @@
             {
               "kind": "init",
               "name": "init",
-              "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink> )"
+              "signature": "public init( deadline!: ?Deadline = None<Deadline>, cancellation!: CancellationToken = CancellationToken.none(), trace!: ?NetworkTraceContext = None<NetworkTraceContext>, eventSink!: ?NetworkEventSink = None<NetworkEventSink>, timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy(), requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>, connectionId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>, stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>, deadlineStage!: ?OperationTimeoutStage = None<OperationTimeoutStage> )"
+            },
+            {
+              "kind": "let",
+              "name": "attemptId",
+              "signature": "public let attemptId: ?Int64"
             },
             {
               "kind": "let",
@@ -11806,13 +14044,43 @@
             },
             {
               "kind": "let",
+              "name": "connectionId",
+              "signature": "public let connectionId: ?Int64"
+            },
+            {
+              "kind": "let",
               "name": "deadline",
               "signature": "public let deadline: ?Deadline"
             },
             {
               "kind": "let",
+              "name": "deadlineStage",
+              "signature": "public let deadlineStage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
               "name": "eventSink",
               "signature": "public let eventSink: ?NetworkEventSink"
+            },
+            {
+              "kind": "let",
+              "name": "requestId",
+              "signature": "public let requestId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "stage",
+              "signature": "public let stage: ?OperationTimeoutStage"
+            },
+            {
+              "kind": "let",
+              "name": "streamId",
+              "signature": "public let streamId: ?Int64"
+            },
+            {
+              "kind": "let",
+              "name": "timeoutPolicy",
+              "signature": "public let timeoutPolicy: OperationTimeoutPolicy"
             },
             {
               "kind": "let",
@@ -12948,6 +15216,6 @@
       "streaming-socket",
       "trust-all"
     ],
-    "inventorySha256": "3d6cd0585422a627ff5cbdbfb3c9fd1668f7644cd0a260fe6b5a2bb172cb564b"
+    "inventorySha256": "7bf82d46aadd665afaa5ad77d2f85623ce932c4059c3af8b9280e5f290d2d6b6"
   }
 }

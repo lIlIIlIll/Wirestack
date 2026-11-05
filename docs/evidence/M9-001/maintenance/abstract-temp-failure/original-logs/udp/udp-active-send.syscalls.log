@@ -1,0 +1,8 @@
+2515153 sendto(5, "e", 1, 0, {sa_family=AF_INET, sin_port=htons(55520), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+2515157 +++ exited with 0 +++
+2515156 +++ exited with 0 +++
+2515155 +++ exited with 0 +++
+2515154 +++ exited with 0 +++
+2515159 +++ exited with 0 +++
+2515158 +++ exited with 0 +++
+2515153 +++ exited with 0 +++
