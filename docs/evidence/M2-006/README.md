@@ -1,68 +1,60 @@
 # M2-006 Apple SystemResolver evidence
 
-Status: COMPLETE
+Status: BLOCKED at the full M2-006 task level. Current desktop qualification is determined by the current-desktop receipts; mobile/iOS remains unverified.
 
-M2-006 adds a build-time Apple resolver adapter for macOS arm64 and iOS
-Simulator arm64. The adapter reuses the bounded POSIX worker implementation,
-retains the provider-neutral resolver ABI, and does not import `std.net`, call a
-private runtime ABI, create an event loop, or own a second cancellation or
-Deadline policy.
+M2-006 adds a build-time Apple resolver adapter for macOS arm64 and iOS Simulator arm64. The adapter reuses the bounded POSIX worker implementation, retains the provider-neutral resolver ABI, and does not import `std.net`, call a private runtime ABI, create an event loop, or own a separate cancellation or Deadline policy.
 
-## Current evidence
+## Current desktop qualification
 
-- The P/S/T test plan passes the repository matrix validator with 10 paths,
-  10 scenarios, and 10 tests.
-- Build selection accepts native `macos-arm64` and explicit
-  `ios-simulator-arm64`; unsupported targets fail closed.
-- Python fault-injection tests reject wrong platforms, stale revisions,
-  unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
-  simulator evidence, incomplete or duplicated native trace sequences, and a
-  missing fixture binding, unsafe cache eviction, stale leases, malformed lease
-  metadata, and cache saturation by active builds. All 30 focused tests pass.
-- GitHub Actions run
-  [`33369108722`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33369108722)
-  passed both hosted jobs at exact revision
-  `451af03abba6a511c2504e3280be9c1c88b0d337`.
-- The native `macos-15` arm64 job ran all eight selected Cangjie resolver cases
-  with zero failures and stored its exact-revision report and validation.
-- The native iOS Simulator arm64 job built the standalone Cangjie probe,
-  bundled and signed the official simulator runtime, installed the app, and
-  ran all eight cases with zero failures on the booted iOS 26.2 Simulator. The
-  gate validates the unbuffered native `START`/`PASS` trace sequence because
-  `std.env.exit` does not guarantee that Cangjie stdout is flushed.
-- The iOS gate permits one recorded Simulator restart only when the first
-  `simctl launch --console` attempt times out before producing any app output.
-  Partial protocol execution, case output, and nonzero exits are never retried.
-- Both reports record Cangjie
-  `1.3.0-alpha.20260831010012`, Apple clang, runner image identity, adapter
-  source digests, build fingerprint, platform, and exact repository revision.
+The macOS workflow uses the official Cangjie STS 1.2.0 macOS arm64 archive specified in [`docs/references/m2-006-sts-sdk.json`](../../references/m2-006-sts-sdk.json):
 
-## Hosted Apple evidence
+- Archive: `cangjie-sdk-mac-aarch64-1.2.0.tar.gz`
+- Size: 163,787,681 bytes
+- SHA-256: `de88d6ba2185c94979e0ab2fe8ac1d81535dfdff3fcb51fbba71e4b99d851f97`
+- Official sources: [STS 1.2.0 downloads](https://cangjie-lang.cn/en/download/1.2.0), [release notes](https://cj-docs.gitcode.com/zh/1.2.0/release-notes/cangjie_1.2_release_notes.html), and the [macOS installation guide](https://cj-docs.gitcode.com/zh/1.2.0/dev-guide/source_zh_cn/first_understanding/install.html).
 
-The `M2-006 Apple SystemResolver` GitHub workflow has two independent jobs:
+The workflow checks out the exact source revision, verifies the official
+archive checksum, and extracts the SDK. Before accepting a report, the shared
+SDK identity helper checks the pinned archive byte count, streams each archive
+file against the installation, and requires an exact installed-file inventory.
+It invokes `cjc` and `cjpm` by their SDK-root paths to record version and
+native-target identity. The runner requires a clean checkout whose `HEAD`
+matches the requested SHA. The typed source inventory follows the ordered
+`source_paths` in `tools/tasks/M2-006.json`, including the workflow, task
+manifest, gate tests and digest helper while excluding generated current
+reports and logs to avoid self-reference. It binds the Apple and shared
+resolver sources, Cangjie resolver test sources, build inputs and SDK pin. The
+native report records the resolver archive as an artifact-byte digest and
+retains typed text digests for each command log.
 
-- native macOS arm64 execution on `macos-15`;
-- iOS Simulator arm64 execution on `macos-15` with the official prebuilt
-  `cangjie-sdk-mac-aarch64-ios` nightly.
+Initial capture requires a clean checkout. Post-capture and report validation
+exclude only the named generated report, validation receipt and five command
+logs from the cleanliness check. Other tracked or untracked changes still fail;
+an output path that overlaps a bound source input also fails.
 
-Both jobs ran eight selected Cangjie cases and retained exact-revision reports.
-The iOS job compiles a standalone Cangjie resolver probe, packages the
-official `ios_simulator_aarch64_cjnative` runtime under the app's `Frameworks`
-directory, records the signed bundle inputs, installs the app, and launches it
-in the booted Simulator. This avoids a child-process test runner, which the app
-sandbox cannot launch. The probe terminates with `std.env.exit` after emitting
-all eight case records so process-wide resolver workers cannot keep the test app
-alive. Compilation alone does not satisfy the task.
+`xcrun` discovery returns raw operational compiler, archiver and SDK paths.
+Only recorded commands, diagnostics and logs are sanitized. A redacted
+`<XCODE_PATH>` is never used as an executable or sysroot.
+The [executable-path regression receipt](maintenance/xcrun-path-regression.json)
+retains the failed native stage and the real Linux compiler-consumer red/green
+proof. That smoke and the gate unit tests do not qualify native macOS behavior.
 
-## Test-only link support
+The current desktop receipt location is
+`docs/evidence/M2-006/current-desktop/macos-arm64/`. A desktop PASS requires
+the native gate to record all eight named cases as passed with no failed or
+skipped targeted case, command error, or timeout. This frozen source overview
+does not itself establish qualification.
 
-The resolver test target retains three unused TLS certificate-helper foreign
-references from the root package. The hosted gate builds a separate
-`m2_006_tls_link_stub` archive for the selected Apple target. Every entry fails
-closed. The archive is test-only and is not a provider or release payload.
+## Mobile and historical evidence
+
+The selected workflow now runs only the native macOS desktop STS job. It does not download a nightly SDK or run an iOS Simulator job. Mobile/iOS remains a separate required qualification for full M2-006 completion and is explicitly unverified.
+
+The older schema-1 generic index and existing macOS/iOS reports remain unchanged as historical records. They used prerelease/nightly toolchains and do not qualify the current STS desktop source. The previous hosted run [`33369108722`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33369108722) is historical evidence only; it is not a current-source STS result.
+
+## Resolver test-only link support
+
+The resolver test target retains unused TLS certificate-helper foreign references from the root package. The hosted macOS gate builds a separate `m2_006_tls_link_stub` archive for the selected Apple target. Every entry fails closed. The archive is test-only and is not a provider or release payload.
 
 ## Limits
 
-M2-006 does not establish physical iPhone/iPad support, Apple TLS or trust
-support, Android or HarmonyOS support, or any release/performance claim. It
-does not run the one-hour SSE profile or the 86,400-second soak.
+M2-006 does not establish physical iPhone/iPad support, Apple TLS or trust support, Android or HarmonyOS support, or any release/performance claim. It does not run the one-hour SSE profile or the 86,400-second soak.

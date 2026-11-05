@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "task_id": "M2-006",
+  "kind": "parent-verified-native-acquisition",
+  "status": "PASS",
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "run_id": 41797950640,
+  "job_id": 126466457453,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41797950640",
+  "artifact_id": 13306343451,
+  "zip_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "8a251046244c78e1910b074a76b21aa879f857a9a2619d3641f89073a26fb2ff"
+  },
+  "members_byte_matched": 7,
+  "log_hashes_matched": 5,
+  "source_files_matched": 69,
+  "selected_cases_passed": 8,
+  "filtered_skipped": 26,
+  "sdk": {
+    "archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "de88d6ba2185c94979e0ab2fe8ac1d81535dfdff3fcb51fbba71e4b99d851f97"
+    },
+    "archive_name": "cangjie-sdk-mac-aarch64-1.2.0.tar.gz",
+    "channel": "STS",
+    "cjc": {
+      "relative_path": "bin/cjc",
+      "target": "aarch64-apple-darwin",
+      "version": "1.2.0",
+      "version_output": "Cangjie Compiler: 1.2.0 (cjnative)\nTarget: aarch64-apple-darwin"
+    },
+    "cjpm": {
+      "relative_path": "tools/bin/cjpm",
+      "version": "1.2.0",
+      "version_output": "Cangjie Project Manager: 1.2.0"
+    },
+    "matched_archive_files": 283,
+    "platform": {
+      "machine": "arm64",
+      "native_target": "aarch64-apple-darwin",
+      "system": "Darwin"
+    },
+    "version": "1.2.0"
+  },
+  "full_task_status": "BLOCKED",
+  "mobile": "NOT_RUN",
+  "report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c"
+  },
+  "validation_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "92467df1f32edc16655744b581649532af5ad0a701e322369394ca1da76e3138"
+  },
+  "scope": "Current desktop ARM64 resolver qualification only; full Apple/mobile task remains blocked",
+  "zip_size_bytes": 12125,
+  "excluded_inherited_commentary": [
+    {
+      "path": "acquisition.json",
+      "reason": "Inherited prior-source acquisition commentary; retained in original ZIP, not current native acceptance.",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2108a223317d7da76d23c32c33d69389bb7b59393aecf4223cb082e4bdad03de"
+      }
+    }
+  ],
+  "collector_transport_recovery": "Original workflow monitor EOF recovered without redispatch"
+}

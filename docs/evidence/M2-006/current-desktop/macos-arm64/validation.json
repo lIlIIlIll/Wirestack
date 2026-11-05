@@ -1,0 +1,12 @@
+{
+  "expected_mode": "macos",
+  "expected_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "failures": [],
+  "report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "4ad8dc9ccfa2edc56b080cf99e00818dc0d9e4138b76942d16dca01659ea4f4c"
+  },
+  "schema_version": 2,
+  "status": "PASS",
+  "task_id": "M2-006"
+}
