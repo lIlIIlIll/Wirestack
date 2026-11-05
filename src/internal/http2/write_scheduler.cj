@@ -200,6 +200,12 @@ public class Http2WriteScheduler {
     public prop state: Http2WriteSchedulerState { get() { synchronized(mutex) { schedulerState } } }
     public prop pendingWrites: Int64 { get() { synchronized(mutex) { queuedCount } } }
     public prop pendingBytes: UInt64 { get() { synchronized(mutex) { queuedBytes } } }
+    public prop pendingQueueReservations: Int64 {
+        get() { synchronized(mutex) { reservedQueueCount } }
+    }
+    public prop pendingQueueReservationBytes: UInt64 {
+        get() { synchronized(mutex) { reservedQueueBytes } }
+    }
     public prop maximumPendingWrites: Int64 { get() { synchronized(mutex) { maximumQueuedCount } } }
     public prop maximumPendingBytes: UInt64 { get() { synchronized(mutex) { maximumQueuedBytes } } }
     public prop isWriterRunning: Bool { get() { synchronized(mutex) { writerRunning } } }
@@ -255,17 +261,56 @@ public class Http2WriteScheduler {
             }
         } else { None<internal.HttpResourceLease> }
     }
+    private func tryReserveDataBuffer(
+        bytes: UInt64,
+        streamId: Int64
+    ): ?internal.HttpResourceLease {
+        let budget = resourceBudget.getOrThrow()
+        let owner = streamBufferOwner(streamId)
+        budget.tryAcquireManagedBuffer(owner, bytes, false)
+    }
 
     private func waitForQueuedBuffer(
-        bytes: UInt64, control: Bool, context: OperationContext
+        bytes: UInt64,
+        control: Bool,
+        streamId: Int64,
+        context: OperationContext
     ): ?internal.HttpResourceLease {
         if (let Some(budget) <- resourceBudget) {
-            Some(budget.acquireManagedBuffer(
-                resourceOwner.getOrThrow(), bytes, control, context
-            ))
+            let owner = if (control) { resourceOwner.getOrThrow() } else { streamBufferOwner(streamId) }
+            Some(budget.acquireManagedBuffer(owner, bytes, control, context))
         } else { None<internal.HttpResourceLease> }
     }
 
+    private func waitForStreamBuffer(
+        flow: Http2FlowController,
+        streamId: Http2StreamId,
+        maximumBytes: UInt64,
+        context: OperationContext
+    ): (internal.HttpResourceLease, UInt64) {
+        let terminationToken = flow.streamTerminationToken(streamId)
+        let linkedCancellation = CancellationSource()
+        let callerRegistration = context.cancellation.register {
+            => let _ = linkedCancellation.cancel()
+        }
+        try {
+            let streamRegistration = terminationToken.register {
+                => let _ = linkedCancellation.cancel()
+            }
+            try {
+                resourceBudget.getOrThrow().acquireManagedDataBufferUpTo(
+                    streamBufferOwner(Int64(streamId.value)),
+                    maximumBytes,
+                    10u64,
+                    context.withCancellation(linkedCancellation.token)
+                )
+            } finally {
+                streamRegistration.unregister()
+            }
+        } finally {
+            callerRegistration.unregister()
+        }
+    }
     private func retainBufferLease(
         lease: ?internal.HttpResourceLease
     ): ?internal.HttpResourceLease {
@@ -302,6 +347,7 @@ public class Http2WriteScheduler {
             throw Http2WriteQueueFullException("HTTP/2 pending write limit reached")
         }
     }
+
 
     private func reserveQueueCapacityWaiting(
         count: Int64,
@@ -395,22 +441,130 @@ public class Http2WriteScheduler {
     }
 
     /**
-     * Couples one DATA frame to its reserved flow permit. The single writer
-     * consumes credit immediately before the first transport byte, closing the
-     * enqueue/beginSend race for concurrent streams.
+     * Acquires a feasible DATA-frame buffer lease before trying flow credit.
+     * The wait holds no flow permit and recomputes the frame size after a budget grant.
      */
-    public func enqueueReservedData(
-        frame: Http2Frame,
-        permit: Http2SendPermit
-    ): Http2WriteTicket {
-        if (!isDataFrame(frame.header.frameType) ||
-            frame.header.streamId.value != permit.streamId.value ||
-            Int64(frame.header.length) != permit.amount) {
-            throw IllegalArgumentException("HTTP/2 DATA frame does not match its flow permit")
+    public func enqueueDataWaiting(
+        flow: Http2FlowController,
+        streamId: Http2StreamId,
+        source: ByteSpan,
+        context: OperationContext
+    ): (Http2WriteTicket, Int64) {
+        if (!streamId.isStream()) {
+            throw IllegalArgumentException("HTTP/2 DATA requires a non-zero stream id")
         }
-        try { enqueueOwned(frame, Some(permit)) }
-        catch (error: Exception) { let _ = permit.cancel(); throw error }
+        if (source.isEmpty()) {
+            throw IllegalArgumentException("HTTP/2 DATA source cannot be empty")
+        }
+        let maximumDataPayload = flow.maximumOutboundDataPayload
+        var requested = if (source.length < maximumDataPayload) { source.length } else { maximumDataPayload }
+        if (resourceBudget.isNone()) {
+            let permit = flow.reserveSend(streamId, requested, context: context)
+            return enqueueDataWithPermit(streamId, source, permit, None<internal.HttpResourceLease>, context)
+        }
+        while (requested > 0) {
+            checkWriterContext(context)
+            let availableBeforeBuffer = flow.availableSendCredit(streamId, requested)
+            if (availableBeforeBuffer > 0) {
+                if (availableBeforeBuffer < requested) {
+                    requested = availableBeforeBuffer
+                }
+                let (bufferLease, bufferBytes) = waitForStreamBuffer(
+                    flow, streamId, UInt64(requested) + 9u64, context
+                )
+                var leaseTransferred = false
+                try {
+                    let leasedPayload = Int64(bufferBytes - 9u64)
+                    if (leasedPayload < requested) {
+                        requested = leasedPayload
+                        continue
+                    }
+                    let availableAfterBuffer = flow.availableSendCredit(streamId, requested)
+                    if (availableAfterBuffer > 0 && availableAfterBuffer < requested) {
+                        requested = availableAfterBuffer
+                        continue
+                    }
+                    if (let Some(permit) <- flow.tryReserveSend(streamId, requested)) {
+                        if (permit.amount < requested) {
+                            requested = permit.amount
+                            let _ = permit.cancel()
+                            continue
+                        }
+                        if (context.eventSink.isSome()) { permit.observationContext = Some(context) }
+                        leaseTransferred = true
+                        return enqueueDataWithPermit(
+                            streamId, source, permit, Some(bufferLease), context
+                        )
+                    }
+                } finally {
+                    if (!leaseTransferred) { releaseBufferLease(Some(bufferLease)) }
+                }
+            }
+
+            let permit = flow.reserveSend(streamId, requested, context: context)
+            if (permit.amount < requested) {
+                requested = permit.amount
+                let _ = permit.cancel()
+                continue
+            }
+            let maybeBufferLease = try {
+                tryReserveDataBuffer(UInt64(requested) + 9u64, Int64(streamId.value))
+            } catch (error: Exception) {
+                let _ = permit.cancel()
+                throw error
+            }
+            match (maybeBufferLease) {
+                case Some(lease) =>
+                    return enqueueDataWithPermit(streamId, source, permit, Some(lease), context)
+                case None => let _ = permit.cancel()
+            }
+        }
+        throw IllegalStateException("unreachable HTTP/2 DATA admission state")
     }
+
+    private func enqueueDataWithPermit(
+        streamId: Http2StreamId,
+        source: ByteSpan,
+        permit: Http2SendPermit,
+        bufferLease: ?internal.HttpResourceLease,
+        context: OperationContext
+    ): (Http2WriteTicket, Int64) {
+        let amount = permit.amount
+        let size = UInt64(amount) + 9u64
+        var queueReserved = false
+        var admissionTransferred = false
+        try {
+            checkWriterContext(context)
+            let _ = reserveQueueCapacityImmediately(1, size, false)
+            queueReserved = true
+            let payload = Array<Byte>(amount, repeat: 0u8)
+            for (index in 0..amount) {
+                payload[index] = source.bytes[source.offset + index]
+            }
+            let frame = Http2Frame(
+                Http2FrameHeader(
+                    UInt32(amount), Http2FrameType.Data, Http2Flags(), streamId, limits: limits
+                ),
+                payload
+            )
+            admissionTransferred = true
+            let ticket = enqueueOwned(
+                frame,
+                Some(permit),
+                reservedBufferLease: bufferLease,
+                queueCapacityReserved: true
+            )
+            (ticket, amount)
+        } catch (error: Exception) {
+            if (!admissionTransferred) {
+                if (queueReserved) { releaseQueueCapacity(1, size, false) }
+                releaseBufferLease(bufferLease)
+            }
+            let _ = permit.cancel()
+            throw error
+        }
+    }
+    
     /**
      * Atomically admits one HPACK-bearing control sequence. Admission is
      * irrevocable because the encoder table has already advanced; the writer
@@ -501,7 +655,7 @@ public class Http2WriteScheduler {
         var bufferLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         var queueReserved = false
         try {
-            bufferLease = waitForQueuedBuffer(totalBytes, true, context)
+            bufferLease = waitForQueuedBuffer(totalBytes, true, 0, context)
             reserveQueueCapacityWaiting(frames.size, totalBytes, context)
             queueReserved = true
             let encoded = ArrayList<Array<Byte>>()
@@ -539,20 +693,26 @@ public class Http2WriteScheduler {
 
     private func enqueueOwned(
         frame: Http2Frame,
-        permit: ?Http2SendPermit
+        permit: ?Http2SendPermit,
+        reservedBufferLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>,
+        queueCapacityReserved!: Bool = false
     ): Http2WriteTicket {
         let size = UInt64(frame.header.length) + 9u64
         let cleanup = isCleanupFrame(frame)
         let control = !isDataFrame(frame.header.frameType) || cleanup
-        let bufferLease = reserveQueuedBuffer(
-            size, control, Int64(frame.header.streamId.value), cleanup: cleanup
-        )
+        let bufferLease = if (reservedBufferLease.isSome()) {
+            reservedBufferLease
+        } else {
+            reserveQueuedBuffer(size, control, Int64(frame.header.streamId.value), cleanup: cleanup)
+        }
         var cleanupSlot = false
-        var queueReserved = false
+        var queueReserved = queueCapacityReserved
         var transferred = false
         try {
-            cleanupSlot = reserveQueueCapacityImmediately(1, size, cleanup)
-            queueReserved = true
+            if (!queueCapacityReserved) {
+                cleanupSlot = reserveQueueCapacityImmediately(1, size, cleanup)
+                queueReserved = true
+            }
             let bytes = serializeHttp2Frame(frame)
             let ticket = synchronized(mutex) {
                 if (!isSchedulerOpen(schedulerState)) {

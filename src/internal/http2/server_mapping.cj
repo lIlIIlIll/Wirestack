@@ -421,12 +421,6 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         maxSegments = Int64(http2Limits.maxPendingWrites)
     }
 
-    func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
-        offerView(
-            data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>
-        )
-    }
-
     func offerView(
         data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,
         endStream: Bool, receivedReservation: ?Http2ReceivedBufferReservation
@@ -680,11 +674,10 @@ public enum Http2ServerBodyEventKind {
     | Trailers
 }
 
-/** One reserved DATA frame or one terminal response-body event. */
+/** One bounded DATA source span or one terminal response-body event. */
 public class Http2ServerBodyEvent {
     public let kind: Http2ServerBodyEventKind
-    public let frame: ?Http2Frame
-    private let permit: ?Http2SendPermit
+    public let source: ?ByteSpan
     private let owner: ?Http2ServerResponseBody
     private let ownedTrailerFields: Array<HpackFieldEncoding>
 
@@ -692,50 +685,24 @@ public class Http2ServerBodyEvent {
 
     internal init(
         kind: Http2ServerBodyEventKind,
-        frame!: ?Http2Frame = None<Http2Frame>,
-        permit!: ?Http2SendPermit = None<Http2SendPermit>,
+        source!: ?ByteSpan = None<ByteSpan>,
         owner!: ?Http2ServerResponseBody = None<Http2ServerResponseBody>,
         trailerFields!: Array<HpackFieldEncoding> = Array<HpackFieldEncoding>()
     ) {
         this.kind = kind
-        this.frame = frame
-        this.permit = permit
+        this.source = source
         this.owner = owner
         ownedTrailerFields = trailerFields.clone()
     }
 
-    /** Consumes reserved flow credit immediately before the DATA write path. */
-    public func beginData(context!: OperationContext = OperationContext.background()): Bool {
-        match (permit) {
-            case Some(value) =>
-                try { value.beginSend(context: context) }
-                finally { if (let Some(body) <- owner) { body.completePermit(value) } }
-            case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA permit")
-        }
-    }
-
-    /** Transfers the reserved permit to the single writer before any flow credit is consumed. */
-    internal func enqueueData(writer: Http2WriteScheduler): Http2WriteTicket {
-        let dataFrame = match (frame) {
-            case Some(value) => value
-            case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA frame")
-        }
-        let dataPermit = match (permit) {
-            case Some(value) => value
-            case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA permit")
-        }
-        try { writer.enqueueReservedData(dataFrame, dataPermit) }
-        finally { if (let Some(body) <- owner) { body.completePermit(dataPermit) } }
-    }
-
-    public func cancelData(): Bool {
-        match (permit) {
-            case Some(value) =>
-                let result = value.cancel()
-                if (let Some(body) <- owner) { body.completePermit(value) }
-                result
-            case None => false
-        }
+    /** Admits the retained source only after buffer and flow resources are ready. */
+    internal func enqueueData(
+        writer: Http2WriteScheduler,
+        context: OperationContext
+    ): Http2WriteTicket {
+        let dataSource = source.getOrThrow()
+        let body = owner.getOrThrow()
+        body.enqueueData(writer, dataSource, context)
     }
 }
 
@@ -795,7 +762,7 @@ public class Http2ServerResponsePlan <: Resource {
     public func isClosed(): Bool { response.isClosed() }
 }
 
-/** One-frame-prefetch response source; memory remains bounded while flow credit stalls. */
+/** One-frame-prefetch response source; staging remains bounded during admission waits. */
 public class Http2ServerResponseBody <: Resource {
     private let streamId: Http2StreamId
     private let response: HttpResponse
@@ -810,7 +777,7 @@ public class Http2ServerResponseBody <: Resource {
     private var eof = false
     private var terminalClaimed = false
     private var closed = false
-    private var outstanding: ?Http2SendPermit = None<Http2SendPermit>
+    private var outstandingData = false
 
     internal init(
         streamId: Http2StreamId,
@@ -830,28 +797,18 @@ public class Http2ServerResponseBody <: Resource {
         this.expectedContentLength = expectedContentLength
     }
 
-    public func next(
-        context!: OperationContext = OperationContext.background()
-    ): Http2ServerBodyEvent {
+    public func next(): Http2ServerBodyEvent {
         requireServerResponseBodyOpen()
         if (terminalClaimed) { throw IllegalStateException("HTTP/2 response body already produced END_STREAM") }
-        if (outstanding.isSome()) { throw IllegalStateException("HTTP/2 response DATA permit is still outstanding") }
+        if (outstandingData) { throw IllegalStateException("HTTP/2 response DATA source is still outstanding") }
         if (stagingOffset == staging.size && !eof) { fillStaging() }
         if (stagingOffset < staging.size) {
             let requested = staging.size - stagingOffset
-            let permit = flow.reserveSend(streamId, requested, context: context)
-            let count = permit.amount
-            let payload = Array<Byte>(count, repeat: 0)
-            for (index in 0..count) { payload[index] = staging[stagingOffset + index] }
-            stagingOffset += count
-            if (stagingOffset == staging.size) { staging = Array<Byte>(); stagingOffset = 0 }
-            outstanding = Some(permit)
-            let frame = Http2Frame(
-                Http2FrameHeader(UInt32(count), Http2FrameType.Data, Http2Flags(), streamId, limits: http2Limits),
-                payload
-            )
+            outstandingData = true
             return Http2ServerBodyEvent(
-                Http2ServerBodyEventKind.Data, frame: Some(frame), permit: Some(permit), owner: Some(this)
+                Http2ServerBodyEventKind.Data,
+                source: Some(ByteSpan(staging, offset: stagingOffset, length: requested)),
+                owner: Some(this)
             )
         }
         terminalClaimed = true
@@ -861,10 +818,40 @@ public class Http2ServerResponseBody <: Resource {
         else { Http2ServerBodyEvent(Http2ServerBodyEventKind.Trailers, trailerFields: trailers) }
     }
 
+    internal func enqueueData(
+        writer: Http2WriteScheduler,
+        source: ByteSpan,
+        context: OperationContext
+    ): Http2WriteTicket {
+        requireServerResponseBodyOpen()
+        if (!outstandingData) {
+            throw IllegalStateException("HTTP/2 response DATA source is not outstanding")
+        }
+        try {
+            let (ticket, amount) = writer.enqueueDataWaiting(flow, streamId, source, context)
+            if (amount <= 0 || amount > staging.size - stagingOffset) {
+                let _ = ticket.cancel()
+                throw IllegalStateException("HTTP/2 response DATA admission exceeded its staged source")
+            }
+            stagingOffset += amount
+            if (stagingOffset == staging.size) {
+                staging = Array<Byte>()
+                stagingOffset = 0
+            }
+            outstandingData = false
+            ticket
+        } catch (error: Exception) {
+            outstandingData = false
+            throw error
+        }
+    }
+
+
     public func close(): Unit {
         if (!closed) {
-            if (let Some(permit) <- outstanding) { let _ = permit.cancel() }
-            outstanding = None<Http2SendPermit>
+            outstandingData = false
+            staging = Array<Byte>()
+            stagingOffset = 0
             closed = true
             response.close()
         }
@@ -899,11 +886,6 @@ public class Http2ServerResponseBody <: Resource {
         if (closed) { throw IllegalStateException("HTTP/2 response body is closed") }
     }
 
-    internal func completePermit(permit: Http2SendPermit): Unit {
-        if (let Some(current) <- outstanding) {
-            if (current.id == permit.id) { outstanding = None<Http2SendPermit> }
-        }
-    }
 
     private func serverLocalBodyError(message: String): Nothing {
         try { close() } catch (_: Exception) {}

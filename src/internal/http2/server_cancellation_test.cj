@@ -133,7 +133,7 @@ class Http2ServerCancellationTest {
             let handler = HeldCancellationHandler()
             let parent = CancellationSource()
             let clientCancellation = CancellationSource()
-            let server = Http2ServerConnection(serverTransport, handler,
+            let server = Http2ServerConnection(serverTransport, handler, "http",
                 resourceBudget: Some(budget), resourceOwner: Some(owner))
             let serving = spawn { server.serve(context: OperationContext(cancellation: parent.token)) }
             let client = Http2ClientConnection.connect(clientTransport)
@@ -187,7 +187,7 @@ class Http2ServerCancellationTest {
         let owner = internal.HttpResourceOwnerKey("https://example.test:443", "direct")
         let budget = cancellationTestBudget()
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 65536)
-        let server = Http2ServerConnection(serverTransport, OrdinaryCancellationHandler(),
+        let server = Http2ServerConnection(serverTransport, OrdinaryCancellationHandler(), "http",
             resourceBudget: Some(budget), resourceOwner: Some(owner))
         let serving = spawn { server.serve() }
         let client = Http2ClientConnection.connect(clientTransport)
@@ -202,6 +202,57 @@ class Http2ServerCancellationTest {
             try { serving.get(5 * Duration.second) } catch (_: Exception) {}
         }
         @Expect(budget.snapshot().completedCancellations, 0)
+    }
+    @TestCase
+    func classicConnectResourceOwnerUsesTheTransportScheme(): Unit {
+        for (scheme in ["http", "https"]) {
+            let budget = cancellationTestBudget()
+            let connectionOwner = internal.HttpResourceOwnerKey(
+                "https://connection-owner.test:443", "direct"
+            )
+            let requestOwnerFactory: (String, String) -> internal.HttpResourceOwnerKey = {
+                requestScheme, authority =>
+                    internal.HttpResourceOwnerKey("${requestScheme}://${authority}", "direct")
+            }
+            let duplex = HeldDuplexHandler()
+            let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 65536)
+            let server = Http2ServerConnection(
+                serverTransport, ClassicConnectOwnerHandler(duplex), scheme,
+                resourceBudget: Some(budget), resourceOwner: Some(connectionOwner),
+                requestOwnerFactory: Some(requestOwnerFactory)
+            )
+            let serving = spawn { server.serve() }
+            let client = Http2ClientConnection.connect(clientTransport)
+            try {
+                match (client.connectStream(HttpRequest(
+                    HttpMethod("CONNECT"),
+                    HttpUrl.parse("${scheme}://example.test:8443/")
+                ))) {
+                    case Http2ConnectResult.Connected(stream) =>
+                        try {
+                            @Expect(stream.status, 200)
+                            duplex.awaitEntered()
+                            var foundRequestOwner = false
+                            for (owner in budget.snapshot().owners) {
+                                if (owner.origin == "${scheme}://example.test:8443" &&
+                                    owner.route == "direct" && owner.requests == 1 && owner.streams == 1) {
+                                    foundRequestOwner = true
+                                }
+                            }
+                            @Expect(foundRequestOwner)
+                        } finally {
+                            stream.close()
+                        }
+                    case Http2ConnectResult.Rejected(_) =>
+                        throw Exception("classic CONNECT was rejected")
+                }
+            } finally {
+                duplex.release()
+                client.abort()
+                server.abort()
+                try { serving.get(5 * Duration.second) } catch (_: Exception) {}
+            }
+        }
     }
 }
 
@@ -266,6 +317,41 @@ private class OrdinaryCancellationHandler <: Http2ServerHandler {
         Http2ServerResponse(HttpResponse(204, "No Content", ResponseBody.empty()))
     }
 }
+
+private class ClassicConnectOwnerHandler <: Http2ServerHandler {
+    private let duplex: Http2DuplexHandler
+    init(duplex: Http2DuplexHandler) { this.duplex = duplex }
+    public func handle(_: Http2ServerRequest, _: OperationContext): Http2ServerResponse {
+        Http2ServerResponse(
+            HttpResponse(200, "OK", ResponseBody.empty()), duplexHandler: Some(duplex)
+        )
+    }
+}
+
+private class HeldDuplexHandler <: Http2DuplexHandler {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var entered = false
+    private var released = false
+    public func serve(_: DuplexTransport, _: OperationContext): Unit {
+        synchronized(mutex) {
+            entered = true
+            changed.notifyAll()
+            while (!released) { changed.wait() }
+        }
+    }
+    func awaitEntered(): Unit {
+        let limit = Deadline.after(5 * Duration.second)
+        synchronized(mutex) {
+            while (!entered) {
+                if (limit.isExpired()) { throw Exception("duplex handler did not start") }
+                changed.wait(timeout: limit.remaining())
+            }
+        }
+    }
+    func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
+}
+
 
 private class DiscardingServerControl <: Http2ServerControlSink {
     public func submit(frames: Array<Http2Frame>): Unit { let _ = frames }

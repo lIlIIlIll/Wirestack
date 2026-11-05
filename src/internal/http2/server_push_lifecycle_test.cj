@@ -6,6 +6,7 @@ import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 private const SERVER_PUSH_TEST_BYTES: Int64 = 70000
 
@@ -244,6 +245,7 @@ class Http2ServerPushLifecycleTest {
             fixture.close()
         }
     }
+
 
     @TestCase
     func duplexHandlerReturnAbortsBothStreamDirections(): Unit {
@@ -590,17 +592,29 @@ private class LifecycleSignal {
     func isRaised(): Bool { synchronized(mutex) { raised } }
 }
 
+
 private class LiveHttp2Server <: Resource {
     let server: Http2ServerConnection
     let client: Http2ClientConnection
     private let serving: Future<Unit>
 
-    init(handler: Http2ServerHandler, serverLimits: Http2Limits, clientPushLimit: Int64) {
+    init(
+        handler: Http2ServerHandler,
+        serverLimits: Http2Limits,
+        clientPushLimit: Int64,
+        transportScheme!: String = "http",
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
+        requestOwnerFactory!: Option<(String, String) -> internal.HttpResourceOwnerKey> =
+            None<(String, String) -> internal.HttpResourceOwnerKey>
+    ) {
         let (clientTransport, serverTransport) = MemoryTransport.pair(
             capacity: 64 * 1024, maxChunk: 4096
         )
         let createdServer = Http2ServerConnection(
-            serverTransport, handler, http2Limits: serverLimits
+            serverTransport, handler, transportScheme, http2Limits: serverLimits,
+            resourceBudget: resourceBudget, resourceOwner: resourceOwner,
+            requestOwnerFactory: requestOwnerFactory
         )
         server = createdServer
         serving = spawn { createdServer.serve() }

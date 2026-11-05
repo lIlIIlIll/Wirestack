@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "execution_metadata_revision": "74f2690a75bc345f81cb9f0bbc06ea62c0be4608",
+  "status": "BLOCKED",
+  "platform": "linux-x86_64-glibc",
+  "scope": "Actual local current-code diagnostic coverage only; no branch, mutation, universal source/ABI, or selected-task acceptance claim.",
+  "acceptance_scenarios": [
+    {
+      "id": "retained-cross-origin-discard-turn",
+      "paths": [
+        "P101",
+        "P102"
+      ],
+      "tests": [
+        "T101"
+      ],
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "executed_cases": [
+        "discardedConnectionCleanupPreservesCrossOriginAdmissionTurn"
+      ],
+      "criterion": "Original waiter ownership persists during off-lock discard; same-key refill cannot steal the reserved turn."
+    },
+    {
+      "id": "cancelled-discard-waiter-cleanup",
+      "paths": [
+        "P101",
+        "P103",
+        "P102"
+      ],
+      "tests": [
+        "T102"
+      ],
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "executed_cases": [
+        "cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn"
+      ],
+      "criterion": "Cancelled waiter is removed without stealing the next admission turn."
+    },
+    {
+      "id": "closed-ledger-precedence",
+      "paths": [
+        "P104"
+      ],
+      "tests": [
+        "T103"
+      ],
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "executed_cases": [
+        "closedAdmissionWinsOverCancelledContext"
+      ],
+      "criterion": "Closed wins over cancelled context for incomplete admission across all five resource kinds; structured error and counts are asserted."
+    },
+    {
+      "id": "open-ledger-context-semantics",
+      "paths": [
+        "P105"
+      ],
+      "tests": [
+        "T104"
+      ],
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "executed_cases": [
+        "openAdmissionPreservesCancelledContext"
+      ],
+      "criterion": "Open admission preserves cancellation behavior; existing deadline behavior is not replaced by Closed."
+    },
+    {
+      "id": "client-close-stalled-connector",
+      "paths": [
+        "P106",
+        "P107"
+      ],
+      "tests": [
+        "T105"
+      ],
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "executed_cases": [
+        "closingClientWakesStalledConnectorConnectionAdmission"
+      ],
+      "criterion": "Observed entered connector and aggregate waiter are closed; both workers join and operation ownership returns to zero."
+    },
+    {
+      "id": "q4-buffer-before-flow-permit",
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "executed_cases": [
+        "blockedOutboundDataBufferWaitDoesNotHoldFlowPermit",
+        "blockedFlowPermitWaitDoesNotRetainManagedBufferLease",
+        "cancelledOutboundDataBufferWaitReleasesAllAdmissionState",
+        "deadlineOutboundDataBufferWaitReleasesAllAdmissionState",
+        "fullWriteQueueReleasesOutboundDataPermitAndBufferLease",
+        "shrunkFlowCreditReleasesOversizedLeaseAndRetriesExactDataSize",
+        "dataSourceIsSlicedBeforeWaitingForOwnerBufferLease",
+        "zeroFlowCreditDoesNotHoldADataBufferWhileWaitingForPermit",
+        "closingStreamCancelsItsPendingDataBufferWaiter",
+        "closingFlowControllerCancelsPendingDataBufferWaiter",
+        "partialFlowAdmissionLeavesUnsentServerBytesStaged",
+        "dataLeaseIsSizedByCurrentFlowCreditBeforeOwnerWait",
+        "pendingDataBufferAdmissionRechecksShrunkFlowCredit",
+        "impossibleDataBufferMinimumDoesNotRegisterWaiter",
+        "q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall"
+      ],
+      "criterion": "Buffer lease precedes the flow-control permit, with exact-size recheck, cancellation and terminal cleanup."
+    },
+    {
+      "id": "resource-limited-regression",
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "profiles": {
+        "resource-profile-nofile-64": {
+          "total": 219,
+          "passed": 219,
+          "skipped": 0,
+          "errors": 0,
+          "failed": 0
+        },
+        "resource-profile-data-1g": {
+          "total": 219,
+          "passed": 219,
+          "skipped": 0,
+          "errors": 0,
+          "failed": 0
+        },
+        "resource-profile-as-4g": {
+          "total": 219,
+          "passed": 219,
+          "skipped": 0,
+          "errors": 0,
+          "failed": 0
+        },
+        "resource-profile-single-cpu": {
+          "total": 219,
+          "passed": 219,
+          "skipped": 0,
+          "errors": 0,
+          "failed": 0
+        }
+      },
+      "cpu_affinity": [
+        0
+      ],
+      "criterion": "All four exact manifest resource profiles run, with no heap or processor-count substitute."
+    },
+    {
+      "id": "current-toolchain-build-test-docs",
+      "status": "PASS_LOCAL_DIAGNOSTIC",
+      "report": "docs/evidence/M10-002/stack-200-review/current-source-acceptance.json"
+    },
+    {
+      "id": "installed-default-runtime-resource-restoration",
+      "status": "FAIL_OPEN",
+      "report": "docs/evidence/M10-002/stack-200-review/installed-resource-smoke.json",
+      "criterion": "Default-runtime strict FD/task restoration remains required; 14 -> 15 tasks does not satisfy it."
+    },
+    {
+      "id": "dependency-qualified-task-acceptance",
+      "status": "BLOCKED",
+      "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json"
+    }
+  ],
+  "deterministic_red_green_proof": "docs/evidence/M10-002/stack-200-review/closure-regressions/proof.json",
+  "complete_current_outputs": "docs/evidence/M10-002/stack-200-review/current-local-diagnostics",
+  "historical_matrix": "docs/evidence/M10-002/stack-200-review/historical-scenario-matrix-e7c4bba5.json",
+  "evidence_policy": "Reports remain BLOCKED and cannot enter a PASS source seal. Every PASS_LOCAL_DIAGNOSTIC case above appears as PASSED in the retained full current native output. Historical isolated replays do not replace complete acceptance."
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "execution_metadata_revision": "74f2690a75bc345f81cb9f0bbc06ea62c0be4608",
+  "status": "BLOCKED",
+  "acceptance_status": "BLOCKED",
+  "scope": "Current-code native/build/docs/resource diagnostics, not dependency-qualified selected-task acceptance. Q4 buffer-before-flow ordering remains unchanged.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.1.3 official qualified STS",
+    "cjpm": "1.1.3",
+    "cjdoc": "0.7.2"
+  },
+  "current_source_acceptance": "docs/evidence/M10-002/stack-200-review/current-source-acceptance.json",
+  "observed_local_commands": {
+    "count": 11,
+    "passed": 11,
+    "failed": 0,
+    "timed_out": 0,
+    "full_native": {
+      "total": 1118,
+      "passed": 1090,
+      "skipped": 28,
+      "errors": 0,
+      "failed": 0
+    },
+    "resource_profiles": {
+      "resource-profile-nofile-64": {
+        "total": 219,
+        "passed": 219,
+        "skipped": 0,
+        "errors": 0,
+        "failed": 0
+      },
+      "resource-profile-data-1g": {
+        "total": 219,
+        "passed": 219,
+        "skipped": 0,
+        "errors": 0,
+        "failed": 0
+      },
+      "resource-profile-as-4g": {
+        "total": 219,
+        "passed": 219,
+        "skipped": 0,
+        "errors": 0,
+        "failed": 0
+      },
+      "resource-profile-single-cpu": {
+        "total": 219,
+        "passed": 219,
+        "skipped": 0,
+        "errors": 0,
+        "failed": 0
+      }
+    },
+    "documentation": {
+      "commands": 40,
+      "layers": 7,
+      "symbols_documented": 1873,
+      "symbols_total": 1873,
+      "parameters_documented": 950,
+      "parameters_total": 950,
+      "heap": "1GB only for the manifest documentation command"
+    },
+    "canonical_duration_ms": 487302.7
+  },
+  "selected_task": {
+    "status": "INVALID",
+    "exit_code": 2,
+    "commands": [],
+    "code": "DEPENDENCY_INCOMPLETE",
+    "detail": "M10-002 dependency is not COMPLETE: M9-001",
+    "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json"
+  },
+  "blockers": [
+    {
+      "id": "default-runtime-task-restoration",
+      "status": "OPEN",
+      "report": "docs/evidence/M10-002/stack-200-review/installed-resource-smoke.json",
+      "result": "Original default profile FD 10 -> 10, tasks 14 -> 15; strict FAIL. Passing replay and processor-count control do not close the failure."
+    },
+    {
+      "id": "prerequisite-and-current-metadata",
+      "status": "BLOCKED",
+      "result": "P1-015 and M9-001 selected acceptance are incomplete. Matching Windows S5 metadata qualification and publication are unavailable during observed GitHub incident smtdswd1h2w4; no older receipt revision is edited."
+    }
+  ],
+  "historical_reports": [
+    "docs/evidence/M10-002/stack-200-review/historical-verification-e7c4bba5.json",
+    "docs/evidence/M10-002/stack-200-review/historical-current-source-acceptance-e7c4bba5.json"
+  ],
+  "decision": {
+    "task_status": "BLOCKED",
+    "pr_216": "Remain OPEN/DRAFT; do not mark ready or merge.",
+    "issue_174": "Remains open and untouched.",
+    "m10_003_issue_175": "Remains open, blocked and not started.",
+    "release": "NOT_QUALIFIED"
+  }
+}

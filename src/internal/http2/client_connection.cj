@@ -598,18 +598,12 @@ public class Http2ClientConnection <: Resource {
                 if (count == 0) { break }
                 var offset: Int64 = 0
                 while (offset < count) {
-                    let permit = flow.reserveSend(exchange.streamId, count - offset, context: context)
-                    let payload = Array<Byte>(permit.amount, repeat: 0u8)
-                    for (index in 0..permit.amount) { payload[index] = staging[offset + index] }
-                    offset += permit.amount
-                    let frame = Http2Frame(
-                        Http2FrameHeader(
-                            UInt32(payload.size), Http2FrameType.Data, Http2Flags(),
-                            exchange.streamId, limits: http2Limits
-                        ),
-                        payload
+                    let (ticket, written) = writer.enqueueDataWaiting(
+                        flow, exchange.streamId,
+                        ByteSpan(staging, offset: offset, length: count - offset), context
                     )
-                    waitClientWrite(writer.enqueueReservedData(frame, permit), context)
+                    offset += written
+                    waitClientWrite(ticket, context)
                     health.observeOutboundActivity()
                 }
             }
@@ -880,8 +874,9 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         let decoded = decodeClientData(frame, streamId)
         let endStream = frame.header.flags.isEndStream()
         sequence.acceptData(decoded.length, endStream)
+        // Keep body EOF behind the stream-registry transition.
         channel.offerView(
-            decoded.data, decoded.offset, decoded.length, Int64(frame.header.length), endStream,
+            decoded.data, decoded.offset, decoded.length, Int64(frame.header.length), false,
             frame.takeReceivedBufferReservation()
         )
         if (endStream) {
@@ -1125,10 +1120,6 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     }
 
     func setExpectedLength(value: ?Int64): Unit { synchronized(mutex) { expectedLength = value } }
-
-    func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
-        offerView(data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>)
-    }
 
     func offerView(
         data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,

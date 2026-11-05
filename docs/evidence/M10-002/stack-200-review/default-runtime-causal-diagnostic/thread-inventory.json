@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "status": "DIAGNOSTIC_ONLY",
+  "native_thread_ids": "Process-local tokens preserve identity within this diagnostic; operating-system PID/TID values remain private.",
+  "samples": [
+    {
+      "marker": "baseline",
+      "fds": 10,
+      "tasks": 16,
+      "native_executable_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "4ffd33d7acf0c8a7e5a540eaa7112b0bd1c4c5c918030101e870ae76461cf122"
+      },
+      "debugger_process_excluded_from_sampling": true,
+      "threads": [
+        {
+          "thread": "T00",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "MAIN_THREAD"
+        },
+        {
+          "thread": "T01",
+          "name": "gc-pool-t1",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T02",
+          "name": "gc-main-thread",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T03",
+          "name": "gc-helper",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T04",
+          "name": "schmon",
+          "wait_channel": "do_epoll_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T05",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T06",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T11",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "NOT_CAPTURED"
+        },
+        {
+          "thread": "T07",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T08",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T13",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "NOT_CAPTURED"
+        },
+        {
+          "thread": "T09",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T10",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T12",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T34",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T35",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        }
+      ]
+    },
+    {
+      "marker": "after_load",
+      "fds": 10,
+      "tasks": 16,
+      "native_executable_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "4ffd33d7acf0c8a7e5a540eaa7112b0bd1c4c5c918030101e870ae76461cf122"
+      },
+      "debugger_process_excluded_from_sampling": true,
+      "threads": [
+        {
+          "thread": "T00",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "MAIN_THREAD"
+        },
+        {
+          "thread": "T01",
+          "name": "gc-pool-t1",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T02",
+          "name": "gc-main-thread",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T03",
+          "name": "gc-helper",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T04",
+          "name": "schmon",
+          "wait_channel": "do_epoll_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T05",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T06",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T11",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "NOT_CAPTURED"
+        },
+        {
+          "thread": "T07",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T08",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T13",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "NOT_CAPTURED"
+        },
+        {
+          "thread": "T09",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T10",
+          "name": "main",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T12",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T34",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        },
+        {
+          "thread": "T35",
+          "name": "schd-worker",
+          "wait_channel": "futex_do_wait",
+          "creation_stack_status": "CAPTURED"
+        }
+      ]
+    }
+  ],
+  "added_threads": [],
+  "removed_threads": [],
+  "original_failure_closed": false
+}

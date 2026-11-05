@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "status": "DIAGNOSTIC_ONLY",
+  "attempts": [
+    {
+      "method": "broad-strace-stack-tracer",
+      "outer_exit_code": 139,
+      "native_consumer_exit_code": 0,
+      "native_resource_tasks": [
+        15,
+        15
+      ],
+      "requested_creation_trace_complete": false,
+      "accepted_for_original_closure": false
+    },
+    {
+      "method": "consumer-only-daemon-strace-stack-tracer",
+      "outer_exit_code": 0,
+      "native_consumer_exit_code": 0,
+      "native_resource_tasks": [
+        15,
+        15
+      ],
+      "main_trace_lines": 2,
+      "requested_creation_trace_complete": false,
+      "accepted_for_original_closure": false
+    },
+    {
+      "method": "initial-parent-gdb-clone-catchpoints",
+      "outer_runner_exit_code": 1,
+      "debugger_sentinel_exit_code": 125,
+      "native_resource_markers": 0,
+      "captured_startup_clone_returns": 5,
+      "reason": "Debugger orchestration returned before an inferior exit; no native-workload failure inferred.",
+      "accepted_for_original_closure": false
+    },
+    {
+      "method": "corrected-parent-gdb-clone-catchpoints",
+      "outer_runner_exit_code": 0,
+      "native_inferior_exit_code": 0,
+      "native_resource_tasks": [
+        16,
+        16
+      ],
+      "native_resource_fds": [
+        10,
+        10
+      ],
+      "original_consumer_checks_passed": 13,
+      "captured_positive_clone_returns": 33,
+      "sampled_non_main_creator_coverage": {
+        "captured": 13,
+        "total": 15,
+        "missing": 2
+      },
+      "accepted_for_original_closure": false
+    }
+  ],
+  "boundaries": [
+    "All attempts retain default cjProcessorNum/cjHeapSize, original consumer source, native argv, warmup, scenario counts, timeouts and FD/task predicate.",
+    "Intrusive debugger timing is not acceptance or performance evidence.",
+    "No retry was accepted as closure; incomplete instrumentation remains explicitly incomplete."
+  ]
+}

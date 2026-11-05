@@ -10,6 +10,16 @@ import wirestack.internal.transport.*
 @Test
 class HttpResourceBudgetTest {
     @TestCase
+    func closedAdmissionWinsOverCancelledContext(): Unit {
+        expectCancelledAdmissionPrecedence(true)
+    }
+
+    @TestCase
+    func openAdmissionPreservesCancelledContext(): Unit {
+        expectCancelledAdmissionPrecedence(false)
+    }
+
+    @TestCase
     func routeOriginAndInstanceCapsCoverConnectionsRequestsAndStreams(): Unit {
         let budget = ledgerTestBudget(3, 1, 2, 2, 1, 2, 2, 1, 2, 64u64, 8u64, 8)
         let alphaDirect = HttpResourceOwnerKey("https://alpha.example:443", "direct")
@@ -108,6 +118,37 @@ class HttpResourceBudgetTest {
         budget.releaseReceivedBuffer(otherOrigin, 4u64)
         @Expect(budget.snapshot().managedBufferBytes, 0u64)
         @Expect(budget.snapshot().owners.size, 0)
+    }
+
+    @TestCase
+    func impossibleDataBufferMinimumDoesNotRegisterWaiter(): Unit {
+        let owner = HttpResourceOwnerKey("https://bounded.example:443", "direct")
+        let routeLimited = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65545u64, 0u64, 2,
+            maximumManagedBufferBytesPerRoute: 9u64,
+            maximumManagedBufferBytesPerOrigin: 10u64
+        ))
+        expectImpossibleDataBufferMinimum(routeLimited, owner)
+
+        let originLimited = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65545u64, 0u64, 2,
+            maximumManagedBufferBytesPerRoute: 10u64,
+            maximumManagedBufferBytesPerOrigin: 9u64
+        ))
+        expectImpossibleDataBufferMinimum(originLimited, owner)
+
+        let exactLimit = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65545u64, 0u64, 2,
+            maximumManagedBufferBytesPerRoute: 10u64,
+            maximumManagedBufferBytesPerOrigin: 10u64
+        ))
+        let (lease, bytes) = exactLimit.acquireManagedDataBufferUpTo(
+            owner, 10u64, 10u64, OperationContext.background()
+        )
+        @Expect(bytes, 10u64)
+        @Expect(exactLimit.snapshot().highWaterAdmissionWaiters, 0)
+        lease.close()
+        @Expect(exactLimit.snapshot().managedBufferBytes, 0u64)
     }
 
     @TestCase
@@ -522,6 +563,38 @@ private func waitForBudgetWaiters(
     false
 }
 
+private func expectImpossibleDataBufferMinimum(
+    budget: HttpResourceBudget,
+    owner: HttpResourceOwnerKey
+): Unit {
+    let rejectedBefore = budget.snapshot().rejectedOperations
+    var resourceRejected = false
+    var timedOut = false
+    try {
+        let (lease, _) = budget.acquireManagedDataBufferUpTo(
+            owner,
+            10u64,
+            10u64,
+            OperationContext(deadline: Some(Deadline.after(50 * Duration.millisecond)))
+        )
+        lease.close()
+    } catch (error: NetworkException) {
+        match (error.code) {
+            case NetworkErrorCode.ResourceExhausted => resourceRejected = true
+            case NetworkErrorCode.TimedOut => timedOut = true
+            case _ => ()
+        }
+    }
+    @Expect(resourceRejected)
+    @Expect(!timedOut)
+    let after = budget.snapshot()
+    @Expect(after.admissionWaiters, 0)
+    @Expect(after.highWaterAdmissionWaiters, 0)
+    @Expect(after.rejectedOperations, rejectedBefore + 1)
+    @Expect(after.managedBufferBytes, 0u64)
+    @Expect(after.owners.size, 0)
+}
+
 private func expectResourceWaiterExhaustion(action: () -> Unit): Unit {
     var exhausted = false
     try { action() } catch (error: NetworkException) {
@@ -531,4 +604,51 @@ private func expectResourceWaiterExhaustion(action: () -> Unit): Unit {
         }
     }
     @Expect(exhausted)
+}
+
+private func expectCancelledAdmissionPrecedence(closed: Bool): Unit {
+    let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 2)
+    let owner = HttpResourceOwnerKey("https://precedence.example:443", "direct")
+    let cancellation = CancellationSource()
+    let _ = cancellation.cancel()
+    let context = OperationContext(cancellation: cancellation.token)
+    if (closed) { budget.closeAdmission(); budget.closeAdmission() }
+    // Include the impossible-minimum path as well as ordinary variable DATA admission.
+    for (kind in 0..6) {
+        var rejected = false
+        try {
+            match (kind) {
+                case 0 => budget.acquireConnection(owner, context).close()
+                case 1 => budget.acquireRequest(owner, context).close()
+                case 2 => budget.acquireStream(owner, context).close()
+                case 3 => budget.acquireManagedBuffer(owner, 1u64, false, context).close()
+                case _ =>
+                    let minimum = if (kind == 4) { 1u64 } else { 65553u64 }
+                    let (lease, _) = budget.acquireManagedDataBufferUpTo(owner, minimum, minimum, context)
+                    lease.close()
+            }
+        } catch (error: NetworkException) {
+            rejected = true
+            @Expect(match (error.phase) { case NetworkPhase.PoolAcquire => true; case _ => false })
+            @Expect(match (error.retryability) { case Retryability.Never => true; case _ => false })
+            if (closed) {
+                @Expect(match (error.category) { case NetworkErrorCategory.Closed => true; case _ => false })
+                @Expect(match (error.code) { case NetworkErrorCode.Closed => true; case _ => false })
+            } else {
+                @Expect(match (error.category) { case NetworkErrorCategory.Cancelled => true; case _ => false })
+                @Expect(match (error.code) { case NetworkErrorCode.Cancelled => true; case _ => false })
+            }
+        }
+        @Expect(rejected)
+        let snapshot = budget.snapshot()
+        @Expect(snapshot.owners.size, 0)
+        @Expect(snapshot.admissionWaiters, 0)
+        @Expect(snapshot.highWaterAdmissionWaiters, 0)
+        @Expect(snapshot.activeConnections, 0)
+        @Expect(snapshot.reservedConnections, 0)
+        @Expect(snapshot.activeRequests, 0)
+        @Expect(snapshot.activeStreams, 0)
+        @Expect(snapshot.reservedStreams, 0)
+        @Expect(snapshot.managedBufferBytes, 0u64)
+    }
 }

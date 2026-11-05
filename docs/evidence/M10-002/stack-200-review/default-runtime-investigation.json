@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "kind": "default-runtime-native-task-investigation",
+  "status": "BLOCKED",
+  "tested_source_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+  "acceptance": {
+    "profile": "default runtime",
+    "cjProcessorNum": "UNSET",
+    "predicate": "after_load.fds == baseline.fds and after_load.tasks == baseline.tasks",
+    "unchanged": true,
+    "consumer_report": "installed-resource-smoke.json",
+    "exit_code": 1,
+    "behavioral_checks_passed": 12,
+    "required_checks": 13,
+    "baseline": {
+      "fds": 10,
+      "tasks": 14
+    },
+    "after_load": {
+      "fds": 10,
+      "tasks": 15
+    },
+    "error": "native FD/task ownership did not stabilize after warmup/load"
+  },
+  "diagnostics_only": {
+    "default_consumer_thread_inventory": {
+      "report": "installed-resource-thread-diagnostic.json",
+      "exit_code": 0,
+      "fds": [
+        10,
+        10
+      ],
+      "tasks": [
+        16,
+        16
+      ],
+      "accepted_as_closure": false
+    },
+    "fixed_processor_control": {
+      "report": "installed-resource-fixed-concurrency-diagnostic.json",
+      "cjProcessorNum": 2,
+      "exit_code": 0,
+      "fds": [
+        10,
+        10
+      ],
+      "tasks": [
+        12,
+        12
+      ],
+      "accepted_as_closure": false,
+      "decision": "User retained the default-runtime acceptance profile"
+    },
+    "sdk_only_reduction": {
+      "sdk": "qualified installed STS 1.1.3",
+      "wirestack_imported": false,
+      "cjProcessorNum": "UNSET",
+      "bounded_work": "four spawned public libc usleep(250000) calls; each future joined within five seconds",
+      "idle_seconds": 6,
+      "compile_exit_code": 0,
+      "compile_warning": "unused import std.time.*",
+      "execution_exit_code": 0,
+      "samples": [
+        {
+          "marker": "baseline",
+          "fds": 3,
+          "tasks": 6,
+          "threads_by_name": {
+            "gc-helper": 1,
+            "gc-main-thread": 1,
+            "gc-pool-t1": 1,
+            "main": 1,
+            "schd-worker": 1,
+            "schmon": 1
+          }
+        },
+        {
+          "marker": "after_join",
+          "fds": 3,
+          "tasks": 9,
+          "threads_by_name": {
+            "gc-helper": 1,
+            "gc-main-thread": 1,
+            "gc-pool-t1": 1,
+            "main": 1,
+            "schd-worker": 4,
+            "schmon": 1
+          }
+        },
+        {
+          "marker": "after_idle",
+          "fds": 3,
+          "tasks": 9,
+          "threads_by_name": {
+            "gc-helper": 1,
+            "gc-main-thread": 1,
+            "gc-pool-t1": 1,
+            "main": 1,
+            "schd-worker": 4,
+            "schmon": 1
+          }
+        }
+      ],
+      "same_thread_identities_after_join_and_idle": true,
+      "source": "default-runtime-worker-repro.cj.txt",
+      "source_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8fb1a19df0955a3a3e25334e75e6d945c934a04c6bce455b55c5198998b785ff"
+      },
+      "accepted_as_closure": false
+    },
+    "native_creator_attribution": {
+      "report": "default-runtime-causal-diagnostic/report.json",
+      "tested_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+      "status": "DIAGNOSTIC_ONLY",
+      "runner_exit_code": 0,
+      "native_inferior_exit_code": 0,
+      "fds": [10, 10],
+      "tasks": [16, 16],
+      "added_thread_identities": 0,
+      "removed_thread_identities": 0,
+      "captured_clone_returns": 33,
+      "captured_during_marker_interval": 0,
+      "sampled_non_main_creator_stacks": 13,
+      "sampled_non_main_threads": 15,
+      "missing_creator_stacks": 2,
+      "resolver_threads": "Five sampled unrenamed non-main threads have wirestack_resolver_pool_create creator frames; source defines four default workers and one reaper. They are not automatically SDK threads.",
+      "accepted_as_closure": false
+    }
+  },
+  "conclusion": "The SDK-only reduction proves that scheduler workers can remain parked after joined work, but it does not attribute the original extra TID. A later current-code debugger diagnostic completed with FD 10 -> 10 and unchanged 16-thread identity sets; 13 of 15 sampled non-main creator stacks were captured, with two scheduler-worker creator records missing. Five captured unrenamed threads belong to the Wirestack resolver pool's four workers and reaper, so thread names alone cannot classify every thread as SDK-owned. The original failed run retained no per-thread identities. No evidence-supported production correction or original-run attribution is established. No profile, warmup, filter, threshold, SDK or runtime change was made. Original installed-consumer acceptance remains failed and M10-002 remains BLOCKED.",
+  "release": "NOT_QUALIFIED"
+}

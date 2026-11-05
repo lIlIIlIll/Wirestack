@@ -210,19 +210,19 @@ public class Http2ConnectionReader {
         if (!machine.peerPrefaceComplete) {
             offset = machine.acceptClientPreface(bytes)
         }
-        if (offset == bytes.size) { return }
-        let remainder = Array<Byte>(bytes.size - offset, repeat: 0u8)
-        for (index in 0..remainder.size) { remainder[index] = bytes[offset + index] }
-        let frames = parser.feed(remainder)
-        try {
-            for (frame in frames) {
-                let result = machine.receive(frame)
-                handler.handle(frame, result)
-                frame.releaseUnclaimedReceivedBufferReservation()
+        while (offset < bytes.size) {
+            let (nextOffset, parsedFrame) = parser.feedNext(bytes, offset)
+            offset = nextOffset
+            match (parsedFrame) {
+                case Some(frame) =>
+                    try {
+                        let result = machine.receive(frame)
+                        handler.handle(frame, result)
+                    } finally {
+                        frame.releaseUnclaimedReceivedBufferReservation()
+                    }
+                case None => return
             }
-        } catch (error: Exception) {
-            for (frame in frames) { frame.releaseUnclaimedReceivedBufferReservation() }
-            throw error
         }
     }
 }
