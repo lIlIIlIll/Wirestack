@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "task_id": "M2-004",
+  "kind": "current-source-windows-native-acquisition",
+  "status": "PASS",
+  "revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "run_id": 41797937351,
+  "job_id": 126466416305,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41797937351",
+  "artifact_id": 13306283731,
+  "zip_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "9c0b1d17cc9d74924bf65e4e2626cf6d0c2bf9646c9d5a8a9a7df09bac2255de"
+  },
+  "zip_size_bytes": 10512,
+  "report_text_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "031474edb8a2118cf9852f13d52b012e568a19875d1917b560837c1ce31aaf51"
+  },
+  "uploaded_report_artifact_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "3509f83ca6269a2028dec513f49b04a03405b1f3a6de3a8b4c9601b64cf337f4"
+  },
+  "validation_text_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "1cb05edbbb991235f40906cb240817f512c26edbdeae5a19cfaeea6c0b862124"
+  },
+  "uploaded_validation_artifact_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "2ca758fa9717fe9c10820efc386e73d6d614ac6a5ea7a35cd3ef96ce8c548b01"
+  },
+  "members_byte_matched": 8,
+  "log_hashes_matched": 6,
+  "source_files_matched": 66,
+  "selected_cases_passed": 6,
+  "filtered_skipped": 28,
+  "unchanged_latency_contract": "Cancellation and 20 ms deadline retain both < 50 ms assertions",
+  "sdk": {
+    "archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7bd5088ad56fb03c1214e73ea076de5ac08580cc419a8cbd46a524ee1ca250bf"
+    },
+    "archive_name": "cangjie-sdk-windows-x64-1.2.0.zip",
+    "channel": "STS",
+    "cjc": {
+      "relative_path": "bin/cjc.exe",
+      "target": "x86_64-w64-mingw32",
+      "version": "1.2.0",
+      "version_output": "Cangjie Compiler: 1.2.0 (cjnative)\nTarget: x86_64-w64-mingw32"
+    },
+    "cjpm": {
+      "relative_path": "tools/bin/cjpm.exe",
+      "version": "1.2.0",
+      "version_output": "Cangjie Project Manager: 1.2.0"
+    },
+    "matched_archive_files": 310,
+    "platform": {
+      "machine": "AMD64",
+      "native_target": "x86_64-w64-mingw32",
+      "system": "Windows"
+    },
+    "version": "1.2.0"
+  },
+  "scope": "Current native Windows x86_64 resolver qualification only; no TLS, other-platform or release qualification"
+}
