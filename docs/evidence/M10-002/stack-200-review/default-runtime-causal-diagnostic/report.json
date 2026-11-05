@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "kind": "native-thread-creator-attribution-diagnostic",
+  "status": "DIAGNOSTIC_ONLY",
+  "tested_code_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "qualified_metadata_source": "756162212073523a61cb6e23330eb07ceef0685d",
+  "prior_published_evidence_head": "e9595f3c6856a8bfb453b3e14da4431a0f27334b",
+  "sdk": {
+    "channel": "STS",
+    "version": "1.1.3",
+    "installed_archive_files_reverified": 497
+  },
+  "inputs_reverified": {
+    "production": 193,
+    "execution": 755,
+    "baseline_verifier_exit_code": 0
+  },
+  "native_consumer": {
+    "source": "examples/linux/m10_005/observability.cj",
+    "source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0c0ee0ff8d5f9b133a18ffbd28f4396ded1ce504558c5e9a913a9f371d741d05"
+    },
+    "binary_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4ffd33d7acf0c8a7e5a540eaa7112b0bd1c4c5c918030101e870ae76461cf122"
+    },
+    "runner_exit_code": 0,
+    "inferior_exit_code": 0,
+    "behavior_and_resource_checks_passed": 13
+  },
+  "profile": {
+    "cjProcessorNum": "UNSET",
+    "cjHeapSize": "UNSET",
+    "warmup": "UNCHANGED",
+    "workload": "UNCHANGED",
+    "timeouts": "UNCHANGED",
+    "strict_fd_task_predicate": "UNCHANGED",
+    "debugger_process_is_not_the_sampled_process": true
+  },
+  "observed_fds": [
+    10,
+    10
+  ],
+  "observed_tasks": [
+    16,
+    16
+  ],
+  "added_thread_identities": 0,
+  "removed_thread_identities": 0,
+  "role_counts": {
+    "main": 6,
+    "gc-pool-t1": 1,
+    "gc-main-thread": 1,
+    "gc-helper": 1,
+    "schmon": 1,
+    "schd-worker": 6
+  },
+  "creator_evidence": {
+    "captured_positive_clone_returns": 33,
+    "captured_during_load_marker_interval": 0,
+    "sampled_non_main_threads": 15,
+    "sampled_creator_stacks": 13,
+    "missing_creator_stacks": 2,
+    "missing_creator_names": [
+      "schd-worker",
+      "schd-worker"
+    ]
+  },
+  "resolver_thread_interpretation": {
+    "observed_creator": "wirestack_resolver_pool_create",
+    "unrenamed_non_main_threads": 5,
+    "source_worker_default": 4,
+    "source_reaper_threads": 1,
+    "source_locations": [
+      "native/resolver/linux/wirestack_resolver.c:364-398",
+      "src/internal/resolver/bounded_backend.cj:114",
+      "src/internal/resolver/system_resolver.cj:17"
+    ],
+    "boundary": "These captured threads are Wirestack resolver-pool workers/reaper, not automatically SDK-owned. They were present at both markers; this does not establish shutdown or original-run attribution."
+  },
+  "original_failure": {
+    "status": "OPEN",
+    "tested_source_revision": "6c5eb96e8552975dbc17651f1e86ca947e78b0ac",
+    "fds": [
+      10,
+      10
+    ],
+    "tasks": [
+      14,
+      15
+    ],
+    "report": "../installed-resource-smoke.json",
+    "thread_identity_inventory": "NOT_RETAINED",
+    "closed_by_this_diagnostic": false
+  },
+  "decision": "No evidence-supported production correction is established. Current passing diagnostic and partial creator coverage cannot identify the original extra TID. Preserve the strict default profile and BLOCKED status; do not classify the original thread as SDK or resolver-owned by inference.",
+  "outputs": {
+    "thread-inventory.json": {
+      "path": "docs/evidence/M10-002/stack-200-review/default-runtime-causal-diagnostic/thread-inventory.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e5c502a51a93e469222bb2814a48f550e5e9ad986d3979041474cb2382cce282"
+      }
+    },
+    "creator-stacks.json": {
+      "path": "docs/evidence/M10-002/stack-200-review/default-runtime-causal-diagnostic/creator-stacks.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "75c8049a972786e55d24de5bf4c9ed9b517c97ff5193ac1192007e60579456f2"
+      }
+    },
+    "instrumentation-attempts.json": {
+      "path": "docs/evidence/M10-002/stack-200-review/default-runtime-causal-diagnostic/instrumentation-attempts.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a1cc16a2274bbcc93bc80c5c5b92da3c9186cb8f5148d0bdbda48779ab991a7e"
+      }
+    },
+    "consumer-run.stdout.txt": {
+      "path": "docs/evidence/M10-002/stack-200-review/default-runtime-causal-diagnostic/consumer-run.stdout.txt",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1e3fa89e4d5779279a551575782396fdb7df2004ef001d4c2058c97a5d88991d"
+      }
+    },
+    "consumer-run.stderr.txt": {
+      "path": "docs/evidence/M10-002/stack-200-review/default-runtime-causal-diagnostic/consumer-run.stderr.txt",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bfc3450e3f7760c2c88fff155bb932752381bd7ea19f94170c89f0403cbc042f"
+      }
+    }
+  },
+  "release": "NOT_QUALIFIED"
+}

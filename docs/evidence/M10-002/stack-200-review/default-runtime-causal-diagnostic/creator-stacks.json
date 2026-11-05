@@ -1,0 +1,2548 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "status": "DIAGNOSTIC_ONLY",
+  "captured_positive_clone_returns": 33,
+  "captured_during_marker_interval": 0,
+  "sampled_non_main_thread_count": 15,
+  "sampled_threads_with_creator_stack": 13,
+  "sampled_threads_missing_creator_stack": [
+    "T11",
+    "T13"
+  ],
+  "missing_stack_thread_names": [
+    "schd-worker",
+    "schd-worker"
+  ],
+  "events": [
+    {
+      "sequence": 1,
+      "creator_thread": "T00",
+      "created_thread": "T01",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "MapleRuntime::GCPoolThread::GCPoolThread(MapleRuntime::GCThreadPool*, char const*, unsigned long, unsigned long) ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "MapleRuntime::GCThreadPool::GCThreadPool(char const*, int, int) ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "MapleRuntime::CollectorResources::StartGCThreads() ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "MapleRuntime::CollectorResources::Init() ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "MapleRuntime::CangjieRuntime::Init() ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "MapleRuntime::CangjieRuntime::CreateAndInit(RuntimeParam const&) ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "MRT_CjRuntimeInit ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "main ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 2,
+      "creator_thread": "T00",
+      "created_thread": "T02",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "MapleRuntime::CollectorResources::Init() ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "MapleRuntime::CangjieRuntime::Init() ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "MapleRuntime::CangjieRuntime::CreateAndInit(RuntimeParam const&) ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "MRT_CjRuntimeInit ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "main ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 3,
+      "creator_thread": "T00",
+      "created_thread": "T03",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "MapleRuntime::FinalizerProcessor::Start() ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "MapleRuntime::CollectorResources::Init() ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "MapleRuntime::CangjieRuntime::Init() ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "MapleRuntime::CangjieRuntime::CreateAndInit(RuntimeParam const&) ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "MRT_CjRuntimeInit ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "main ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 4,
+      "creator_thread": "T00",
+      "created_thread": "T04",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "CJ_SchmonStart ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_ScheduleStart ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "MRT_CjRuntimeStart ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "main ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 5,
+      "creator_thread": "T00",
+      "created_thread": "T05",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "CJ_ThreadOsNew ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_ThreadCreate ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "CJ_ThreadAllocBindProcessor ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "CJ_CJThreadNew ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "MCC_NewCJThread ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 6,
+      "creator_thread": "T00",
+      "created_thread": "T06",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 7,
+      "creator_thread": "T00",
+      "created_thread": "T07",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 8,
+      "creator_thread": "T00",
+      "created_thread": "T08",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 9,
+      "creator_thread": "T00",
+      "created_thread": "T09",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 10,
+      "creator_thread": "T00",
+      "created_thread": "T10",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 11,
+      "creator_thread": "T11",
+      "created_thread": "T12",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "CJ_ThreadOsNew ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_ThreadCreate ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "CJ_ThreadAllocBindProcessor ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "CJ_ProcessorCJThreadGet ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "CJ_ProcessorSchedule ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "CJ_CJThreadMpark ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 12,
+      "creator_thread": "T13",
+      "created_thread": "T14",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 13,
+      "creator_thread": "T13",
+      "created_thread": "T15",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 14,
+      "creator_thread": "T13",
+      "created_thread": "T16",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 15,
+      "creator_thread": "T13",
+      "created_thread": "T17",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 16,
+      "creator_thread": "T13",
+      "created_thread": "T18",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 17,
+      "creator_thread": "T11",
+      "created_thread": "T19",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 18,
+      "creator_thread": "T11",
+      "created_thread": "T20",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 19,
+      "creator_thread": "T11",
+      "created_thread": "T21",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 20,
+      "creator_thread": "T11",
+      "created_thread": "T22",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 21,
+      "creator_thread": "T11",
+      "created_thread": "T23",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 22,
+      "creator_thread": "T00",
+      "created_thread": "T24",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 23,
+      "creator_thread": "T00",
+      "created_thread": "T25",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 24,
+      "creator_thread": "T00",
+      "created_thread": "T26",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 25,
+      "creator_thread": "T00",
+      "created_thread": "T27",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 26,
+      "creator_thread": "T00",
+      "created_thread": "T28",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 27,
+      "creator_thread": "T12",
+      "created_thread": "T29",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 28,
+      "creator_thread": "T12",
+      "created_thread": "T30",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 29,
+      "creator_thread": "T12",
+      "created_thread": "T31",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 30,
+      "creator_thread": "T12",
+      "created_thread": "T32",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 31,
+      "creator_thread": "T12",
+      "created_thread": "T33",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "wirestack_resolver_pool_create ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_MCC_C2NStub ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "_CN27wirestack.internal.resolver28BoundedSystemResolverBackend6<init>Hll ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "_CN27wirestack.internal.resolver14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "_CN14wirestack.http14SystemResolver6<init>Hll ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "_CN14wirestack.http17HttpClientBuilder5buildHv ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "_CN29wirestack_m10_005_observation11diagnosticsHRNat6StringEY2_CN14wirestack.http10HttpClientECNY6_19HttpClientTlsConfigEtt ()"
+        },
+        {
+          "frame": 12,
+          "symbol": "_CN29wirestack_m10_005_observation6<main>HRNat5ArrayIRNat6StringEE ()"
+        },
+        {
+          "frame": 13,
+          "symbol": "user[main] ()"
+        },
+        {
+          "frame": 14,
+          "symbol": "cj_entry$ ()"
+        },
+        {
+          "frame": 15,
+          "symbol": "ExecuteCangjieStub ()"
+        },
+        {
+          "frame": 16,
+          "symbol": "StartMainTask ()"
+        },
+        {
+          "frame": 17,
+          "symbol": "CJ_CJThreadEntry ()"
+        },
+        {
+          "frame": 18,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 32,
+      "creator_thread": "T11",
+      "created_thread": "T34",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "CJ_ThreadOsNew ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_ThreadCreate ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "CJ_ThreadAllocBindProcessor ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "CJ_ProcessorCJThreadGet ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "CJ_ProcessorSchedule ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "CJ_CJThreadMpark ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    },
+    {
+      "sequence": 33,
+      "creator_thread": "T00",
+      "created_thread": "T35",
+      "frames": [
+        {
+          "frame": 0,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 1,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 2,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 3,
+          "symbol": "?? ()"
+        },
+        {
+          "frame": 4,
+          "symbol": "pthread_create ()"
+        },
+        {
+          "frame": 5,
+          "symbol": "CJ_ThreadOsNew ()"
+        },
+        {
+          "frame": 6,
+          "symbol": "CJ_ThreadCreate ()"
+        },
+        {
+          "frame": 7,
+          "symbol": "CJ_ThreadAllocBindProcessor ()"
+        },
+        {
+          "frame": 8,
+          "symbol": "CJ_ProcessorCJThreadGet ()"
+        },
+        {
+          "frame": 9,
+          "symbol": "CJ_ProcessorSchedule ()"
+        },
+        {
+          "frame": 10,
+          "symbol": "CJ_CJThreadMpark ()"
+        },
+        {
+          "frame": 11,
+          "symbol": "?? ()"
+        }
+      ],
+      "phase": "before_baseline"
+    }
+  ],
+  "boundary": "Actual observed creator symbols only. Missing records are not inferred; no original failed-run thread identity is reconstructed."
+}
