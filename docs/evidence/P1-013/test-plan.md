@@ -11,6 +11,14 @@ validation enabled by default and must reject the same frozen evidence.
 The task does not rebuild a release artifact or refresh soak, fuzz, performance,
 security-review, SBOM, signature or candidate-release evidence.
 
+The approved documentation maintenance also runs the independent public-package
+and combined views with at most three concurrent native commands. Every strict
+check, JSON generation and renderer remains required. Publishing still waits
+for every view; heap, cache, coverage and timeout limits are unchanged.
+The combined view starts first and performs its own HTML rendering while other
+views may still be pending. HTML remains inside the same three-worker bound;
+publication still requires every view and requested format to pass.
+
 ## Control-flow paths
 
 | Path ID | Condition | Expected terminal |
@@ -25,6 +33,9 @@ security-review, SBOM, signature or candidate-release evidence.
 | P008 | An unknown operating system is requested | Native dependency selection returns stable unsupported-platform failure |
 | P009 | `scripts/check` runs in a development workspace with stale point-in-time release evidence | Current code, structural contracts and fault injection pass without refreshing release evidence |
 | P010 | A long or release qualification is considered during P1-013 | It is not run and cannot be recorded as PASS |
+| P011 | Independent public documentation views are ready | At most three native commands overlap; all required view results are joined before publication |
+| P012 | A required view fails after a sibling has staged valid artifacts | The report fails and previously published artifacts remain unchanged |
+| P013 | Combined HTML is ready while an unrelated public view is still pending | HTML progresses within its own bounded worker without waiting at a global view barrier |
 
 ## Semantics and scenario matrix
 
@@ -35,6 +46,9 @@ security-review, SBOM, signature or candidate-release evidence.
 | S003 | Frozen cross-report M7-031 document set plus current changed tree | P005,P006 | Unit logic runs from the frozen set; production generation rejects drift | Artifact identity and security fault injection still execute | regression,security |
 | S004 | Linux, Windows, Darwin and unknown platform selection | P007,P008 | Implemented adapters are selected exactly; unknown platform fails | Darwin maps only to resolver, with no fallback | platform,boundary |
 | S005 | Full repository development check | P009,P010 | All short code and test gates pass; no long release gate starts | Zero failed/error tests and no evidence refresh | integration,safety |
+| S006 | Seven public-package views and the combined view from the same source inventory | P009,P011 | Bounded overlap without skipping checks or changing receipt order | Three-command maximum, all 40/41 native commands retained, same validated outputs | concurrency,integration |
+| S007 | A successful sibling has staged artifacts when a required combined check fails | P012 | Failure cannot publish partial or mixed-view output | Existing published bytes unchanged; no new sibling artifacts promoted; workers joined | concurrency,safety |
+| S008 | Combined serialized artifacts are ready while another view waits for HTML progress | P011,P013 | HTML rendering progresses without waiting for the unrelated view | No deadlock at the view-join barrier; same three-view bound and publication barrier | concurrency,regression |
 
 ## Test-plan matrix
 
@@ -47,6 +61,9 @@ security-review, SBOM, signature or candidate-release evidence.
 | T005 | S004 | P007,P008 | Native dependency plan inputs | Exact adapter plan or stable failure | Darwin never triggers Linux TLS and unknown never falls back | unit,platform |
 | T006 | S001,S002,S003 | P001,P002,P003,P004,P005,P006 | Public validator signatures and CLI defaults | Strict by default | Only explicit unit-test call sites disable currentness | architecture,safety |
 | T007 | S005 | P009,P010 | `scripts/check` | PASS | No long gate or release evidence rewrite occurs | integration |
+| T008 | S006 | P009,P011 | Gated native-check boundary plus unchanged real documentation gates | Bounded overlap and full strict acceptance | `test_public_views_overlap_without_exceeding_three_native_commands`; actual canonical and HTML receipts, not assumed speedup | unit,integration |
+| T009 | S007 | P012 | Required check failure after successful sibling staging | FAIL without publication | `test_failed_view_cannot_publish_successful_sibling_artifacts` retains previous artifact bytes | unit,fault-injection |
+| T010 | S008 | P011,P013 | An unrelated view cannot finish before combined HTML starts | PASS without waiting for the unrelated view | `test_html_rendering_can_progress_while_an_unrelated_view_is_pending`; native 900-second receipt remains required | unit,integration |
 
 ## Evidence boundary
 

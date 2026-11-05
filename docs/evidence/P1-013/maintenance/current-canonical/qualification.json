@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-013",
+  "kind": "current-native-canonical-task",
+  "status": "PASS",
+  "tested_source_revision": "1631837216989f7eac6986b24b0b9a2c61d0bd20",
+  "metadata_source_revision": "a4cb2dbdad7c5240e270e80b14e041081857ce71",
+  "sdk": "official qualified STS 1.1.3",
+  "command": [
+    "scripts/check-task",
+    "P1-013",
+    "--json",
+    "--output",
+    "docs/evidence/P1-013/task-check.json"
+  ],
+  "commands": [
+    {
+      "id": "test-plan-matrix",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 113.93
+    },
+    {
+      "id": "development-release-gate-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 2165.693
+    },
+    {
+      "id": "canonical-repository-check",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 746197.41
+    }
+  ],
+  "native_cases": {
+    "total": 1118,
+    "passed": 1090,
+    "skipped": 28,
+    "error": 0,
+    "failed": 0
+  },
+  "documentation": {
+    "commands": 40,
+    "passed": 40,
+    "layers": 7,
+    "coverage": {
+      "parameters": {
+        "documented": 950,
+        "percent": 100,
+        "total": 950
+      },
+      "symbols": {
+        "documented": 1873,
+        "percent": 100,
+        "total": 1873
+      }
+    }
+  },
+  "constraints": {
+    "canonical_timeout_seconds": 1800,
+    "max_concurrent_views": 3,
+    "heap_override_introduced": false,
+    "cache_entry_bound": 65536
+  },
+  "files": [
+    {
+      "original_path": "docs/evidence/P1-013/task-check.json",
+      "public_path": "docs/evidence/P1-013/task-check.json",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "24816faf5d282c801a5ab88e317c9ac15a5b3398b11079a060045b7433d37e98"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ac2661ea4b0ae25984d247e36c34fe04a55e4349c8e920d6ddc7ef69163c8665"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/check-docs.json",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/docs-report.json",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bdaf9724979e0ea5b20e73a3d7aa4f4a122c6ff70278a3e3ffdfc82ccddb9572"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bdaf9724979e0ea5b20e73a3d7aa4f4a122c6ff70278a3e3ffdfc82ccddb9572"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/repository-tooling/P1-013/test-plan-matrix.stdout.log",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/test-plan-matrix.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "56237e84d4e60ef2adae5dd8f89c850115ed612bac8b023381dd970018b9b3ef"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "56237e84d4e60ef2adae5dd8f89c850115ed612bac8b023381dd970018b9b3ef"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/repository-tooling/P1-013/test-plan-matrix.stderr.log",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/test-plan-matrix.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/repository-tooling/P1-013/development-release-gate-tests.stdout.log",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/development-release-gate-tests.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/repository-tooling/P1-013/development-release-gate-tests.stderr.log",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/development-release-gate-tests.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "61fdab37b19fcb5c625a37226b7f376612a6a5effe727f7113aece2217303c55"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "037e843a9f14b737d69c6ab4723696870eadccb97679bcd209b263887ed37516"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/repository-tooling/P1-013/canonical-repository-check.stdout.log",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/canonical-repository-check.stdout.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ba5113ada7e3a88dc2eb7c33dadbbc57e14c5aa674874c16906260bf2547fd36"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ba5113ada7e3a88dc2eb7c33dadbbc57e14c5aa674874c16906260bf2547fd36"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    },
+    {
+      "original_path": "build/repository-tooling/P1-013/canonical-repository-check.stderr.log",
+      "public_path": "docs/evidence/P1-013/maintenance/current-canonical/canonical-repository-check.stderr.txt",
+      "raw_byte_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "34f13df24f7b2d0545349e295621bd31ff12f27078a4b8b71f6fd53e9495e49e"
+      },
+      "public_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a01ceadb7e3d7f5737b90eb35f0e335ef2523c40b4e2fc5613a81582e262757b"
+      },
+      "projection": "Only repository, SDK and task-workspace path prefixes replaced; raw originals retained privately."
+    }
+  ],
+  "boundaries": [
+    "Full canonical acceptance, not release qualification.",
+    "SOAK_ALREADY_RUNNING in canonical stdout is the existing injected unit-test failure, not an actual soak result.",
+    "Old canonical and bounded-HTML timeouts remain failures."
+  ]
+}

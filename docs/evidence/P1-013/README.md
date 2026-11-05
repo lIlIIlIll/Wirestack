@@ -2,7 +2,10 @@
 
 ## Status
 
-COMPLETE
+The current selected task passes all three acceptance commands on qualified
+STS 1.1.3. Its [task receipt](task-check.json), [complete canonical evidence](maintenance/current-canonical/qualification.json)
+and [source seal](evidence.json) are separate from the historical records below.
+This qualifies the development gate, not a release candidate.
 
 ## Scope
 
@@ -15,13 +18,66 @@ digest.
 The task also updates the native dependency regression expectation for the
 implemented Darwin resolver path. Unknown platforms must still fail closed.
 
+The focused development/release regression harness now establishes the same
+`tools` module search path as the candidate CLI before importing it. It can run
+independently of unittest discovery order. Structural fixture validation and
+strict current-source validation retain their separate behavior.
+
+## Current documentation-time maintenance
+
+The first current canonical check reached its unchanged 1,800-second limit.
+Its documentation phase took approximately 1,751 seconds and published PASS
+only after that deadline. Native descendants then continued outside the failed
+invocation; their later 1,090 passed and 28 skipped cases are diagnostic, not a
+canonical PASS. P1-012 separately fixes that process-group lifetime.
+
+One unchanged combined-DocIR `api-surface` render took 81.465 seconds. The
+approved driver change bounds concurrent public-package/combined views at
+three. Each view owns its staging paths and command list. All 40 commands
+(41 with HTML), strict lint, complete DocIR validation, 100% symbol/parameter
+coverage, the 65,536-entry cache bound, default heap profile and existing task
+limits remain unchanged. Receipts retain manifest order and artifacts publish
+only after every worker has joined and every view has passed.
+
+The first three-view native HTML run at source
+`e0cc7f4ea89af6386b078d8f164c40673b425642` still timed out after 900.006
+seconds. Its [retained failure](maintenance/bounded-parallel-first-native-timeout.json)
+records staging timestamps and the post-timeout process check. It is not
+acceptance. The combined view's Markdown artifact appeared at 766.505 seconds;
+HTML output staging appeared at 877.644 seconds.
+
+The scheduling correction starts the combined view first and renders HTML in
+that same bounded worker. Unrelated views no longer delay HTML, but every view
+must still pass before publication. The progress regression failed before this
+correction; all 13 documentation tests passed afterward, including the
+three-worker cap and failed-view publication protection.
+
+The earlier corrected [native HTML run](maintenance/combined-first-native/qualification.json)
+at `59e0fcf458f73ff1a395b378d1e1914685ea379a` passed all 41 commands in
+542.662 seconds, within the unchanged 900-second limit. All seven layer records
+and combined serialized artifacts match the earlier serial output. Coverage
+remains 100% for 1,873 symbols and 950 parameters. Actual browser search and
+navigation to `HttpClient` passed with visual evidence and no browser errors.
+
+That maintenance proof predates the later M9 manifest integration. It is not
+reused as current M9 HTML or release acceptance.
+
+The full canonical task passed again at current source
+`1631837216989f7eac6986b24b0b9a2c61d0bd20`. Its unchanged 1,800-second
+canonical command completed in 746.197 seconds. All 98 focused regressions passed;
+the native suite passed 1,090 cases with 28 explicit skips and no failures or
+errors. Canonical documentation passed all 40 commands with the same complete
+symbol and parameter coverage. Complete stdout/stderr projections replace only
+private path prefixes; the original bytes and projection digests are retained.
+Neither earlier timeout is relabelled as acceptance.
+
 ## Release boundary
 
 This task does not refresh M7-019 through M7-031 evidence and does not claim the
 current source tree is a qualified release candidate. No long-duration gate is
 part of P1-013.
 
-## Verification
+## Historical verification
 
 - The focused P1-013 regression suite passed 69 tests with no failures or
   errors.
@@ -34,7 +90,7 @@ part of P1-013.
   the current tree because their point-in-time release sources or artifact are
   stale. P1-013 does not refresh or promote them.
 
-The current-toolchain requalification used Cangjie
+That historical toolchain requalification used Cangjie
 `1.1.0-alpha.20260829040003`, CJPM `1.1.3` and Linux x86_64 glibc. It ran from
 the exact P1-012 requalification commit
 `f65893573d536aab46d05e8daf606c46c86eab24`.

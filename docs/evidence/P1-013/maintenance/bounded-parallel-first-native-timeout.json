@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-013",
+  "kind": "native-bounded-docs-timeout",
+  "status": "FAIL",
+  "accepted_as_closure": false,
+  "tested_source_revision": "e0cc7f4ea89af6386b078d8f164c40673b425642",
+  "command": {
+    "argv": [
+      "scripts/check-docs",
+      "--html",
+      "--json",
+      "--output",
+      "build/docs-parallel-native.json"
+    ],
+    "duration_ms": 900005.639,
+    "error_code": "TIMEOUT",
+    "exit_code": null,
+    "finished_at_utc": "2026-11-04T04:40:12.871195Z",
+    "id": "bounded-native-html",
+    "started_at_utc": "2026-11-04T04:25:12.865560Z",
+    "status": "FAIL",
+    "stderr_excerpt": "",
+    "stderr_path": "build/docs-parallel-native-smoke/bounded-native-html.stderr.log",
+    "stderr_truncated": false,
+    "stdout_excerpt": "",
+    "stdout_path": "build/docs-parallel-native-smoke/bounded-native-html.stdout.log",
+    "stdout_truncated": false,
+    "timed_out": true
+  },
+  "limits": {
+    "html_seconds": 900,
+    "canonical_seconds": 1800,
+    "max_concurrent_views": 3,
+    "heap_override_introduced": false,
+    "required_native_commands_with_html": 41
+  },
+  "staging_observations": {
+    "kind": "filesystem-mtime-relative-to-command-start-not-command-durations",
+    "views": [
+      {
+        "view": "wirestack",
+        "project_mtime_seconds": 0.652,
+        "docs_mtime_seconds": 71.299,
+        "api_mtime_seconds": 99.787,
+        "coverage_mtime_seconds": 120.066,
+        "markdown_mtime_seconds": 136.984
+      },
+      {
+        "view": "wirestack.http",
+        "project_mtime_seconds": 0.634,
+        "docs_mtime_seconds": 159.835,
+        "api_mtime_seconds": 227.594,
+        "coverage_mtime_seconds": 275.027,
+        "markdown_mtime_seconds": 318.17
+      },
+      {
+        "view": "wirestack.tls",
+        "project_mtime_seconds": 0.644,
+        "docs_mtime_seconds": 87.523,
+        "api_mtime_seconds": 121.008,
+        "coverage_mtime_seconds": 144.006,
+        "markdown_mtime_seconds": 165.663
+      },
+      {
+        "view": "wirestack.net",
+        "project_mtime_seconds": 143.877,
+        "docs_mtime_seconds": 261.468,
+        "api_mtime_seconds": 306.966,
+        "coverage_mtime_seconds": 338.766,
+        "markdown_mtime_seconds": 370.394
+      },
+      {
+        "view": "wirestack.observability",
+        "project_mtime_seconds": 173.584,
+        "docs_mtime_seconds": 251.178,
+        "api_mtime_seconds": 280.103,
+        "coverage_mtime_seconds": 301.971,
+        "markdown_mtime_seconds": 321.083
+      },
+      {
+        "view": "wirestack.sse",
+        "project_mtime_seconds": 328.574,
+        "docs_mtime_seconds": 407.073,
+        "api_mtime_seconds": 435.365,
+        "coverage_mtime_seconds": 462.358,
+        "markdown_mtime_seconds": 483.999
+      },
+      {
+        "view": "wirestack.gzip",
+        "project_mtime_seconds": 329.336,
+        "docs_mtime_seconds": 405.989,
+        "api_mtime_seconds": 434.312,
+        "coverage_mtime_seconds": 460.377,
+        "markdown_mtime_seconds": 482.158
+      },
+      {
+        "view": "combined",
+        "project_mtime_seconds": 379.414,
+        "docs_mtime_seconds": 607.664,
+        "api_mtime_seconds": 673.816,
+        "coverage_mtime_seconds": 721.911,
+        "markdown_mtime_seconds": 766.505,
+        "html_stage_mtime_seconds": 877.644
+      }
+    ],
+    "html_was_not_published": true
+  },
+  "post_timeout_observation": {
+    "kind": "single-proc-cmdline-scan-for-owned-staging-path",
+    "matching_processes": 0,
+    "exact_observation_timestamp_retained": false
+  },
+  "runner_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "1b6624ebf4baf825d422f35e9a56e2da463559c46c650b02f334bf9217401642"
+  },
+  "docs_driver_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "dfe1d351ebbb98dfc024458678fa3a7f4e9be654804130eb61942c6eb0c941c4"
+  },
+  "regression": {
+    "name": "test_html_rendering_can_progress_while_an_unrelated_view_is_pending",
+    "before": {
+      "exit_code": 1,
+      "test_count": 1,
+      "duration_seconds": 3.009,
+      "failure": "HTML waited for an unrelated view"
+    },
+    "after": {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_033_docs",
+        "-v"
+      ],
+      "exit_code": 0,
+      "test_count": 13,
+      "duration_seconds": 0.061
+    },
+    "native_after_fix": "NOT_RUN"
+  },
+  "boundary": "The native timeout remains FAIL. Filesystem timestamps do not replace complete per-command receipts. No canonical, M9, release, platform or performance acceptance is claimed."
+}
