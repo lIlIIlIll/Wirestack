@@ -1,0 +1,4 @@
+M7-021 Linux release qualification: PASS
+artifact=<repo>/dist/m3-031-current-core/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+sha256=99de298d364587cf0f1fa5e7d4832a38d7a1e06413a0020b12119226720922aa
+report=<repo>/dist/m3-031-current-core/qualification.json
